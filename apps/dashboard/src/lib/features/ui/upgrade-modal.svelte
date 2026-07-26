@@ -8,6 +8,7 @@
   import { Button } from '@cio/ui/base/button';
   import { PricingCard } from '@cio/ui/custom/pricing-card';
   import { PricingToggle } from '@cio/ui/custom/pricing-toggle';
+  import { BRAND_ROOT_DOMAIN } from '$lib/utils/constants/branding';
 
   import { PLANS } from '@cio/utils/plans';
   import { profile } from '$lib/utils/store/user';
@@ -82,7 +83,7 @@
   }
 
   function onLearnMore() {
-    window.open('https://libreclassroom.ronzz.org', '_blank');
+    window.open(`https://${BRAND_ROOT_DOMAIN}`, '_blank');
   }
 
   function handleUpgradeSuccess(upgradeSuccessful: boolean) {

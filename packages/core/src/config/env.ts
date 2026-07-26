@@ -46,6 +46,16 @@ const envSchema = z.object({
   UNSPLASH_API_KEY: z.string().optional(),
   /** Dashboard origin for invite/email links (e.g. https://app.yourdomain.com). When set, all email links point here instead of app.classroomio.com. Required for self-hosted. */
   DASHBOARD_ORIGIN: z.string().optional(),
+  /** Branding: product name used in fallback UI strings. Defaults to 'LibreClassroom'. */
+  APP_NAME: z.string().default('LibreClassroom'),
+  /** Branding: support email for footer/sidebar links. Empty = hidden. */
+  SUPPORT_EMAIL: z.string().default(''),
+  /** Branding: docs URL for help links. Empty = hidden. */
+  DOCS_URL: z.string().default(''),
+  /** Branding: root domain for URL generation. Defaults to fork project homepage. */
+  BRAND_ROOT_DOMAIN: z.string().default('libreclassroom.ronzz.org'),
+  /** Branding: tenant subdomain apex. Defaults to fork project homepage. */
+  TENANT_ROOT_DOMAIN: z.string().default('libreclassroom.ronzz.org'),
   /**
    * Shared password for the /admin/queues HTTP Basic Auth prompt. When set, the
    * dashboard mounts in production and challenges with `WWW-Authenticate: Basic`,

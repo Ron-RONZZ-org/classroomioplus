@@ -19,6 +19,7 @@
   // Type-only imports are erased at build time — no static TipTap dependency.
   import type { HTMLContent, TiptapEditor } from '@cio/ui/custom/editor';
   import { cn } from '@cio/ui/tools';
+  import { APP_NAME } from '$lib/utils/constants/branding';
 
   interface Props {
     placeholder?: string | ((node: any) => string);
@@ -44,7 +45,7 @@
     editableStorageKey = 'edra-editable',
     class: className = '',
     editorClass = '',
-    placeholder = 'Welcome to LibreClassroom',
+    placeholder = `Welcome to ${APP_NAME}`,
     onChange,
     onReady,
     onEditorDestroy

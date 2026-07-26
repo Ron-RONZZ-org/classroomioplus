@@ -1,6 +1,7 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
   import { t } from '$lib/utils/functions/translations';
+  import { APP_NAME } from '$lib/utils/constants/branding';
 
   interface Props {
     logo: string | undefined;
@@ -13,14 +14,14 @@
 <div class="logo">
   <a
     href={resolve('/', {})}
-    title={`${$t('navigation.goto')} ${orgName || 'LibreClassroom'} ${$t('navigation.home')}`}
+    title={`${$t('navigation.goto')} ${orgName || APP_NAME} ${$t('navigation.home')}`}
     class="flex items-center gap-2"
     id="logo"
     data-hveid="8"
   >
     <img
       src={logo || '/logo-192.png'}
-      alt={`${orgName || 'LibreClassroom'} logo`}
+      alt={`${orgName || APP_NAME} logo`}
       class="mx-auto inline-block w-9 rounded"
       width="36"
       height="36"
