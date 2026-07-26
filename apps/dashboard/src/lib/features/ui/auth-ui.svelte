@@ -85,9 +85,9 @@
         <Avatar.Root>
           <Avatar.Image
             src={$currentOrg.avatarUrl ? $currentOrg.avatarUrl : '/logo-192.png'}
-            alt={$currentOrg.name ? $currentOrg.name : 'ClassroomIO'}
+            alt={$currentOrg.name ? $currentOrg.name : 'LibreClassroom'}
           />
-          <Avatar.Fallback>{$currentOrg.name ? $currentOrg.name : 'ClassroomIO'}</Avatar.Fallback>
+          <Avatar.Fallback>{$currentOrg.name ? $currentOrg.name : 'LibreClassroom'}</Avatar.Fallback>
         </Avatar.Root>
 
         {#if !showOnlyContent}

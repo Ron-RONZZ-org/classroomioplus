@@ -203,7 +203,7 @@
 </script>
 
 <svelte:head>
-  <title>Courses - ClassroomIO</title>
+  <title>Courses - LibreClassroom</title>
 </svelte:head>
 
 <Page.Root class="w-full">

@@ -31,7 +31,7 @@
     courseSlug = null,
     orgSlug = null,
     poweredByLabel = 'Powered by',
-    poweredByBrand = 'ClassroomIO'
+    poweredByBrand = 'LibreClassroom'
   }: Props = $props();
 
   function handleOpenChange(next: boolean) {

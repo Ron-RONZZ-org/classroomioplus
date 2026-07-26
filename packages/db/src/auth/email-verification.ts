@@ -31,7 +31,7 @@ function stripTriggerParam(url: string): string {
  * Brands verification mail with the org from `resolveVerificationOrg` (callback URL
  * host/?org=, self-hosted first org, then the user's first membership). When no
  * org applies — e.g. dashboard signup before onboarding creates an org — copy
- * and masthead fall back to ClassroomIO defaults.
+ * and masthead fall back to LibreClassroom defaults.
  */
 async function sendOrgAwareVerifyEmail(options: {
   to: string;
@@ -45,7 +45,7 @@ async function sendOrgAwareVerifyEmail(options: {
     userId: options.userId
   });
 
-  const orgName = org?.name?.trim() || 'ClassroomIO';
+  const orgName = org?.name?.trim() || 'LibreClassroom';
   const branding = buildEmailBranding(org ? { name: org.name, avatarUrl: org.avatarUrl, theme: org.theme } : undefined);
 
   await sendEmail('verifyEmail', {

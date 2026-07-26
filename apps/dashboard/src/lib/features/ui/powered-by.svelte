@@ -2,7 +2,7 @@
   import ArrowUpRightIcon from '@lucide/svelte/icons/arrow-up-right';
 
   import { PublicCoursePoweredBy } from '@cio/ui/custom/public-course';
-  import { TENANT_ROOT_DOMAIN } from '@cio/utils/constants/domains';
+  import { BRAND_ROOT_DOMAIN, TENANT_ROOT_DOMAIN } from '@cio/utils/constants/domains';
   import { t } from '$lib/utils/functions/translations';
   import { currentOrg, isFreePlan } from '$lib/utils/store/org';
   import { cn } from '@cio/ui/tools';
@@ -45,7 +45,7 @@
   />
 {:else if $isFreePlan}
   <a
-    href={`https://classroomio.com?utm_source=${$currentOrg.siteName}.${TENANT_ROOT_DOMAIN}`}
+    href={`https://${BRAND_ROOT_DOMAIN}?utm_source=${$currentOrg.siteName}.${TENANT_ROOT_DOMAIN}`}
     target="_blank"
     class={cn('group fixed right-9 bottom-14 z-50 hover:no-underline', className)}
   >
@@ -63,7 +63,7 @@
       />
       <img src="/logo-192.png" alt="logo" class="h-[24px] opacity-100 group-hover:opacity-0" />
       {#if !showOnlyLogo}
-        {$t('course.navItem.landing_page.powered_by')} ClassroomIO
+        {$t('course.navItem.landing_page.powered_by')} LibreClassroom
       {/if}
     </span>
   </a>

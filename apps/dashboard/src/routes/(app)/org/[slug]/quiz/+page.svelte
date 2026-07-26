@@ -7,7 +7,7 @@
 </script>
 
 <svelte:head>
-  <title>Interactive Quizzes - ClassroomIO</title>
+  <title>Interactive Quizzes - LibreClassroom</title>
 </svelte:head>
 
 <section class="mx-auto w-full max-w-6xl">

@@ -82,7 +82,7 @@
   }
 
   function onLearnMore() {
-    window.open('https://classroomio.com/blog/early-adopter', '_blank');
+    window.open('https://libreclassroom.ronzz.org', '_blank');
   }
 
   function handleUpgradeSuccess(upgradeSuccessful: boolean) {

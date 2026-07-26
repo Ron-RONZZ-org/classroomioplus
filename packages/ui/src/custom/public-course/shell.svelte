@@ -86,7 +86,7 @@
     footerNextLabel = 'Next',
     courseSlug = null,
     poweredByLabel = 'Powered by',
-    poweredByBrand = 'ClassroomIO',
+    poweredByBrand = 'LibreClassroom',
     showPoweredBy = true,
     children,
     topRight,

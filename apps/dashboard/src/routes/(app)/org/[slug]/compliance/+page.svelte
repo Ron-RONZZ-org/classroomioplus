@@ -40,7 +40,7 @@
 </script>
 
 <svelte:head>
-  <title>{$t('compliance.title')} - ClassroomIO</title>
+  <title>{$t('compliance.title')} - LibreClassroom</title>
 </svelte:head>
 
 <Page.Root class="w-full">

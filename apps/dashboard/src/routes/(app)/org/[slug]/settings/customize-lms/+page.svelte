@@ -35,7 +35,7 @@
 </script>
 
 <svelte:head>
-  <title>Customize LMS - ClassroomIO</title>
+  <title>Customize LMS - LibreClassroom</title>
 </svelte:head>
 
 <CustomizeLmsPage bind:this={customizeLmsComponent} />

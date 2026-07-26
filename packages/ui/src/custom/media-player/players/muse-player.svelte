@@ -10,7 +10,7 @@
 
   const embedUrl = $derived(
     svid
-      ? `https://muse.ai/embed/${svid}?logo=https://app.classroomio.com/logo-512.png&subtitles=auto&cover_play_position=center`
+      ? `https://muse.ai/embed/${svid}?logo=${typeof window !== 'undefined' ? window.location.origin : ''}/logo-512.png&subtitles=auto&cover_play_position=center`
       : ''
   );
 </script>

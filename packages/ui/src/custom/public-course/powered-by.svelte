@@ -8,7 +8,7 @@
     orgSlug?: string | null;
     /** Localized label. */
     label?: string;
-    /** Localized "ClassroomIO" brand label. */
+    /** Localized "LibreClassroom" brand label. */
     brand?: string;
     /** Logo-only footer (narrow sidebars). */
     compact?: boolean;
@@ -23,7 +23,7 @@
     courseSlug = null,
     orgSlug = null,
     label = 'Powered by',
-    brand = 'ClassroomIO',
+    brand = 'LibreClassroom',
     compact = false,
     align = 'center',
     utmSource = 'public-course',
@@ -31,7 +31,7 @@
   }: Props = $props();
 
   const href = $derived.by(() => {
-    const url = new URL('https://classroomio.com');
+    const url = new URL('https://libreclassroom.ronzz.org');
 
     url.searchParams.set('utm_source', utmSource);
     url.searchParams.set('utm_medium', 'powered-by');
@@ -65,7 +65,7 @@
       className
     )}
   >
-    <img src="/logo-192.png" class="ui:size-6" alt="ClassroomIO" />
+    <img src="/logo-192.png" class="ui:size-6" alt="LibreClassroom" />
     {label}
     <a
       {href}

@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-  <title>Exercises - ClassroomIO</title>
+  <title>Exercises - LibreClassroom</title>
 </svelte:head>
 
 <Page.Root class="w-full">

@@ -103,7 +103,7 @@ export function getClaudeCodeSnippet(secret: string | null) {
   "command": "npx",
   "args": ["-y", "@classroomio/mcp"],
   "env": {
-    "CLASSROOMIO_API_URL": "https://api.classroomio.com",
+    "CLASSROOMIO_API_URL": "https://api.libreclassroom.ronzz.org",
     "CLASSROOMIO_API_KEY": "${apiKey}"
   }
 }'`;
@@ -113,7 +113,7 @@ export function getCodexSnippet(secret: string | null) {
   const apiKey = getAutomationSetupSecret(secret);
 
   return `codex mcp add classroomio \\
-  --env CLASSROOMIO_API_URL=https://api.classroomio.com \\
+  --env CLASSROOMIO_API_URL=https://api.libreclassroom.ronzz.org \\
   --env CLASSROOMIO_API_KEY=${apiKey} \\
   -- npx -y @classroomio/mcp`;
 }
@@ -129,7 +129,7 @@ export function getOpenCodeSnippet(secret: string | null) {
       "command": ["npx", "-y", "@classroomio/mcp"],
       "enabled": true,
       "environment": {
-        "CLASSROOMIO_API_URL": "https://api.classroomio.com",
+        "CLASSROOMIO_API_URL": "https://api.libreclassroom.ronzz.org",
         "CLASSROOMIO_API_KEY": "${apiKey}"
       }
     }
@@ -146,7 +146,7 @@ export function getCursorSnippet(secret: string | null) {
       "command": "npx",
       "args": ["-y", "@classroomio/mcp"],
       "env": {
-        "CLASSROOMIO_API_URL": "https://api.classroomio.com",
+        "CLASSROOMIO_API_URL": "https://api.libreclassroom.ronzz.org",
         "CLASSROOMIO_API_KEY": "${apiKey}"
       }
     }
@@ -157,11 +157,11 @@ export function getCursorSnippet(secret: string | null) {
 export function getDefaultAutomationKeyLabel(type: AutomationKeyType) {
   switch (type) {
     case 'mcp':
-      return 'ClassroomIO MCP';
+      return 'LibreClassroom MCP';
     case 'api':
-      return 'ClassroomIO API';
+      return 'LibreClassroom API';
     case 'zapier':
-      return 'ClassroomIO Zapier';
+      return 'LibreClassroom Zapier';
   }
 }
 

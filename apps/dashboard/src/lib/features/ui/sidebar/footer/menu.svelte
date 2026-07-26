@@ -20,8 +20,8 @@
   import { showUserJotWidget } from '$lib/utils/services/userjot';
   import { ROLE } from '@cio/utils/constants';
 
-  const SUPPORT_EMAIL = 'help@classroomio.com';
-  const DOCS_URL = 'https://classroomio.com/docs';
+  const SUPPORT_EMAIL = 'help@libreclassroom.ronzz.org';
+  const DOCS_URL = 'https://libreclassroom.ronzz.org/docs';
 
   const sidebar = useSidebar();
 

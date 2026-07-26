@@ -18,7 +18,7 @@
 </script>
 
 <svelte:head>
-  <title>Settings - ClassroomIO</title>
+  <title>Settings - LibreClassroom</title>
 </svelte:head>
 
 <Page.Header isSticky>

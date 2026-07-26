@@ -47,7 +47,7 @@
 </script>
 
 <svelte:head>
-  <title>Email Verification Error - ClassroomIO</title>
+  <title>Email Verification Error - LibreClassroom</title>
   <meta name="description" content="There was an issue verifying your email address." />
 </svelte:head>
 

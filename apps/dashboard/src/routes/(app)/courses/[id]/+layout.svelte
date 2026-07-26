@@ -158,7 +158,7 @@
 </script>
 
 <svelte:head>
-  <title>{courseApi.course?.title || 'ClassroomIO Course'}</title>
+  <title>{courseApi.course?.title || 'LibreClassroom Course'}</title>
 </svelte:head>
 
 {#if isCourseReady}

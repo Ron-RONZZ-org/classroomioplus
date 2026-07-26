@@ -40,7 +40,7 @@ export function mountQueueDashboard(app: Hono<any, any, any>): void {
     workbench({
       basePath: '/admin/queues',
       queues: listQueueNames().map((name) => getQueue(name)),
-      title: 'ClassroomIO Jobs'
+      title: 'LibreClassroom Jobs'
     })
   );
 }
@@ -51,7 +51,7 @@ async function queueDashboardAuth(c: Context, next: Next): Promise<Response | vo
   }
 
   return c.body(null, 401, {
-    'WWW-Authenticate': 'Basic realm="ClassroomIO Queues", charset="UTF-8"'
+    'WWW-Authenticate': 'Basic realm="LibreClassroom Queues", charset="UTF-8"'
   });
 }
 
