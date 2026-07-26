@@ -2,7 +2,6 @@ import { createHash } from 'node:crypto';
 
 import { tool } from 'ai';
 import { CoursePlanSchema, getCourseTemplate } from '@cio/ai-assistant';
-import { PREMIUM_QUESTION_TYPE_KEYS, QUESTION_TYPE_ID_TO_KEY, QUESTION_TYPE_REGISTRY } from '@cio/question-types';
 import { AppError } from '@cio/utils/errors';
 import { trackAgentEvent, AgentEvent } from '../../utils/tinybird';
 import {
@@ -85,13 +84,6 @@ const DURABLE_AGENT_TOOL_NAMES = new Set([
 
 export interface BuildAgentToolsOptions {
   runId?: string;
-  /**
-   * Whether the org owning this course is on a paid plan. Defaults to true to
-   * preserve historical behavior for callers (MCP, durable run resumers) that
-   * don't pass it. When false, the question-creation tools refuse to accept
-   * premium-only question types.
-   */
-  isOrgOnPaidPlan?: boolean;
   /** Documents uploaded in this conversation — used by attach_document_to_lesson. */
   documentAssets?: { documentId: string; assetId: string | null; fileName: string }[];
 }
@@ -418,36 +410,6 @@ async function executeAgentToolBase<TArgs, TResult>(
   }
 }
 
-function assertNoPremiumQuestionTypes(
-  questionTypeIds: ReadonlyArray<number | undefined | null>,
-  isOrgOnPaidPlan: boolean
-): void {
-  if (isOrgOnPaidPlan) return;
-
-  const blockedTypenames = new Set<string>();
-  for (const typeId of questionTypeIds) {
-    if (typeId == null) continue;
-
-    const key = QUESTION_TYPE_ID_TO_KEY[typeId];
-    if (key && PREMIUM_QUESTION_TYPE_KEYS.has(key)) {
-      const registry = QUESTION_TYPE_REGISTRY.find((t) => t.id === typeId);
-      blockedTypenames.add(registry?.typename ?? key);
-    }
-  }
-
-  if (blockedTypenames.size === 0) return;
-
-  const allowed = QUESTION_TYPE_REGISTRY.filter((t) => !PREMIUM_QUESTION_TYPE_KEYS.has(t.key))
-    .map((t) => t.typename)
-    .join(', ');
-
-  throw new AppError(
-    `Question type(s) ${Array.from(blockedTypenames).join(', ')} require a paid plan and are not available on this org. Use one of: ${allowed}.`,
-    'UPGRADE_REQUIRED',
-    403
-  );
-}
-
 export function buildAgentTools(
   orgId: string,
   userId: string,
@@ -455,7 +417,6 @@ export function buildAgentTools(
   priorMessages: unknown[],
   options: BuildAgentToolsOptions = {}
 ) {
-  const isOrgOnPaidPlan = options.isOrgOnPaidPlan ?? true;
   const documentAssets = options.documentAssets ?? [];
 
   const executeAgentTool = <TArgs, TResult>(
@@ -660,11 +621,6 @@ export function buildAgentTools(
       inputSchema: createExerciseParam,
       execute: async (args) => {
         return executeAgentTool('create_exercise', { orgId, userId, courseId, args }, async () => {
-          assertNoPremiumQuestionTypes(
-            args.questions.map((q) => q.questionTypeId),
-            isOrgOnPaidPlan
-          );
-
           if (args.lessonId) {
             await verifyLessonBelongsToCourse(args.lessonId, courseId);
           }
@@ -786,11 +742,6 @@ export function buildAgentTools(
       inputSchema: addQuestionsParam,
       execute: async (args) => {
         return executeAgentTool('add_questions', { orgId, userId, courseId, args }, async () => {
-          assertNoPremiumQuestionTypes(
-            args.questions.map((q) => q.questionTypeId),
-            isOrgOnPaidPlan
-          );
-
           await verifyExerciseBelongsToCourse(args.exerciseId, courseId);
 
           if (args.exerciseSectionId !== undefined) {
@@ -852,11 +803,6 @@ export function buildAgentTools(
       inputSchema: updateQuestionsParam,
       execute: async (args) => {
         return executeAgentTool('update_questions', { orgId, userId, courseId, args }, async () => {
-          assertNoPremiumQuestionTypes(
-            args.questions.map((q) => q.questionTypeId),
-            isOrgOnPaidPlan
-          );
-
           await verifyExerciseBelongsToCourse(args.exerciseId, courseId);
 
           const sectionIdsInPatches = new Set<string>();

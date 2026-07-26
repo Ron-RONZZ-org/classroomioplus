@@ -15,7 +15,7 @@ import { createModel, getProviderConfigForProvider } from '@cio/ai-assistant/pro
 import { buildContextMessage, buildSystemPrompt } from '@cio/ai-assistant/prompt';
 import { AGENT_MODELS, DEFAULT_PICKER_MODEL_ID, type AgentModelId } from '@cio/utils/agent-models';
 import { AppError } from '@cio/utils/errors';
-import { isOrgOnPaidPlan, recordTokenUsage } from './usage';
+import { recordTokenUsage } from './usage';
 import {
   collectDocumentIds,
   getActiveCourseTemplateId,
@@ -210,10 +210,8 @@ export async function runAgentCourseGenerationJob(input: RunAgentCourseGeneratio
     });
 
     const model = createModel(providerConfig);
-    const isOrgPaid = await isOrgOnPaidPlan(initialRun.orgId);
     const agentTools = buildAgentTools(initialRun.orgId, initialRun.userId, initialRun.courseId, visibleMessages, {
       runId: initialRun.id,
-      isOrgOnPaidPlan: isOrgPaid,
       documentAssets
     });
 

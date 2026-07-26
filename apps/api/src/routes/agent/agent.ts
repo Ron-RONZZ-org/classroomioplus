@@ -28,7 +28,6 @@ import {
   getPurchasedSummary,
   getTeamLeaderboard,
   getTokenBalance,
-  isOrgOnPaidPlan,
   recordTokenUsage
 } from '@cio/core/services/agent/usage';
 import {
@@ -145,18 +144,6 @@ const agentCoreRouter = new Hono()
       const conversation = await getChatConversation(conversationId, user.id);
       if (!conversation || conversation.courseId !== courseId) {
         throw new AppError('Conversation not found', 'CONVERSATION_NOT_FOUND', 404);
-      }
-
-      const isPaid = await isOrgOnPaidPlan(orgId);
-      if (!isPaid) {
-        return c.json(
-          {
-            success: false,
-            error: 'document_upload_requires_upgrade',
-            upgradeRequired: true
-          },
-          403
-        );
       }
 
       const body = await c.req.parseBody();
@@ -436,12 +423,6 @@ const agentCoreRouter = new Hono()
         }
       }
 
-      const isOrgPaid = role === AgentRole.TEACHER ? await isOrgOnPaidPlan(orgId) : false;
-
-      if (role === AgentRole.TEACHER && !modelDescriptor.isFree && !isOrgPaid) {
-        throw new AppError('Upgrade required to use this AI model', 'UPGRADE_REQUIRED', 403);
-      }
-
       // Students go through tutor policy (workspace toggle, pool, per-learner cap).
       // Teachers continue to use the existing pool-only check.
       const studentPolicy =
@@ -527,8 +508,7 @@ const agentCoreRouter = new Hono()
       // approved plan/active template) is sent as a user-turn message instead so
       // it doesn't invalidate the tools+system cache.
       const systemPrompt = buildSystemPrompt(agentContext, {
-        tutorSettings: studentPolicy?.settings,
-        isOrgOnPaidPlan: isOrgPaid
+        tutorSettings: studentPolicy?.settings
       });
 
       const contextMessageText = buildContextMessage(agentContext, {
@@ -540,7 +520,7 @@ const agentCoreRouter = new Hono()
         role === AgentRole.STUDENT
           ? buildStudentAgentTools(orgId, user.id, courseId, studentPolicy!.settings)
           : filterToolsForChatMode(
-              buildAgentTools(orgId, user.id, courseId, messages, { isOrgOnPaidPlan: isOrgPaid, documentAssets })
+              buildAgentTools(orgId, user.id, courseId, messages, { documentAssets })
             );
 
       const contextManaged = await buildModelContextMessages({

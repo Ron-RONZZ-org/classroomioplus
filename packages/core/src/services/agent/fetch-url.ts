@@ -3,7 +3,6 @@ import { isIPv4, isIPv6 } from 'node:net';
 import { AppError } from '@cio/utils/errors';
 import { env } from '../../config/env';
 import { redis, logRedisUnavailableOnce } from '../../utils/redis/redis';
-import { isOrgOnPaidPlan } from './usage';
 import { ErrorCodes } from '@cio/utils/constants/error-codes';
 
 const JINA_READER_PREFIX = 'https://r.jina.ai/';
@@ -279,12 +278,6 @@ export async function fetchDocumentationUrl(params: {
 
   if (priorFetches >= env.AGENT_MAX_FETCHES_PER_CONVERSATION) {
     throw new AppError('Maximum documentation fetches per conversation reached', 'AGENT_FETCH_CONVERSATION_LIMIT', 429);
-  }
-
-  const paid = await isOrgOnPaidPlan(orgId);
-
-  if (!paid) {
-    throw new AppError('Documentation fetching requires a paid plan', ErrorCodes.UPGRADE_REQUIRED, 403);
   }
 
   const cacheKeyRaw = `${orgId}:${normalizedHref}`;
