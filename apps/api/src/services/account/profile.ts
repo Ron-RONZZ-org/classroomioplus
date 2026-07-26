@@ -1,12 +1,10 @@
 import { AppError, ErrorCodes } from '@api/utils/errors';
 import {
-  countActiveStudents,
   createOrganizationMember,
   getFirstOrganization,
   getOrganizationByProfileId,
   hasOrgMemberByProfileIdOrEmail
 } from '@cio/db/queries/organization';
-import { getPlanLimit, toResourceUsage } from '@cio/utils/plans';
 import {
   getProfileByEmail,
   getProfileById,
@@ -18,13 +16,10 @@ import type { OrganizationWithMemberAndPlans } from '@cio/db/queries/organizatio
 import { ROLE } from '@cio/utils/constants';
 import type { TProfile } from '@cio/db/types';
 import type { TUpdateProfile } from '@cio/utils/validation/account';
-import { env } from '@cio/core/config/env';
-import { getLicenseStatus } from '@api/services/license';
 
 export type GetAccountDataResult = {
   profile: TProfile;
   organizations: OrganizationWithMemberAndPlans[];
-  licenseFeatures: string[];
 };
 
 /**
@@ -34,12 +29,9 @@ export type GetAccountDataResult = {
  * @returns Account data with profile and organizations
  */
 export async function getAccountData(userId: string): Promise<GetAccountDataResult> {
-  const isSelfHosted = env.PUBLIC_IS_SELFHOSTED === 'true';
-
-  let [profile, organizations, licenseStatus] = await Promise.all([
+  let [profile, organizations] = await Promise.all([
     getProfileById(userId),
-    getOrganizationByProfileId(userId),
-    isSelfHosted ? getLicenseStatus() : Promise.resolve({ valid: true, features: [] as string[] })
+    getOrganizationByProfileId(userId)
   ]);
 
   if (!profile) {
@@ -50,7 +42,7 @@ export async function getAccountData(userId: string): Promise<GetAccountDataResu
 
   // Self-hosted: auto-add user as student to the single org if they are not a member.
   // Skip if they already have membership (by profileId) or a pending invite (by email).
-  if (env.PUBLIC_IS_SELFHOSTED === 'true' && organizations.length === 0) {
+  if (organizations.length === 0) {
     const firstOrg = await getFirstOrganization();
     if (firstOrg) {
       const alreadyInOrg = await hasOrgMemberByProfileIdOrEmail(firstOrg.id, userId, profile.email ?? undefined);
@@ -68,27 +60,9 @@ export async function getAccountData(userId: string): Promise<GetAccountDataResu
     }
   }
 
-  // Attach per-resource usage + plan limits for admin/tutor members only.
-  // Plain COUNTs (no rows) so the payload stays light and students never
-  // receive org limit data. Skip self-hosted (unlimited, matching the guard).
-  if (!isSelfHosted) {
-    await Promise.all(
-      organizations.map(async (org) => {
-        if (org.roleId !== ROLE.ADMIN && org.roleId !== ROLE.TUTOR) return;
-
-        const activePlan = org.plans.find((plan) => plan.isActive);
-        const studentsUsed = await countActiveStudents(org.id);
-        const studentsLimit = getPlanLimit('students', activePlan?.planName);
-
-        org.limits = { students: toResourceUsage(studentsUsed, studentsLimit) };
-      })
-    );
-  }
-
   return {
     profile,
-    organizations,
-    licenseFeatures: isSelfHosted ? licenseStatus.features : []
+    organizations
   };
 }
 

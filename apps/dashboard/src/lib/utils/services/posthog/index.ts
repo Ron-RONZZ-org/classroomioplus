@@ -1,21 +1,14 @@
 import { dev } from '$app/environment';
-import { licenseApi } from '$features/license/api/license.svelte';
 import posthog from 'posthog-js';
 
-const hasNoTracking = () => {
-  const noTracking = licenseApi.hasAccess('no-tracking');
-  console.log('license_no_tracking', noTracking);
-  return noTracking;
-};
-
 export const capturePosthogEvent = (event: string, properties?: Record<string, unknown>): void => {
-  if (dev || hasNoTracking()) return;
+  if (dev) return;
 
   posthog.capture(event, properties);
 };
 
 export const identifyPosthogUser = (id: string, properties?: Record<string, unknown>): void => {
-  if (dev || hasNoTracking()) return;
+  if (dev) return;
 
   posthog.identify(id, properties);
 };
@@ -35,7 +28,7 @@ export type PosthogBootstrapUser = {
  * autocapture events fire with the user's properties already on the person.
  */
 export const initPosthog = (user?: PosthogBootstrapUser): void => {
-  if (dev || hasNoTracking()) return;
+  if (dev) return;
 
   posthog.init('phc_JfdHOZ6v0cVlGELBYx1Tmoen2nxNOrAzvgvrPA6Ksov', {
     // Route PostHog through our own domain via the tenant-router Worker so the
