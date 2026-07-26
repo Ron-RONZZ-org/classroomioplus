@@ -1,7 +1,11 @@
 import type { EmailBranding } from '../core/branding';
 
 const DEFAULT_BUTTON_COLOR = '#1D4EE2';
-const CLASSROOMIO_LOGO = 'https://brand.cdn.clsrio.com/cio-bg-transparent.png';
+
+/** Product name used in email footer and as fallback masthead text. */
+const APP_NAME = process.env.APP_NAME || 'LibreClassroom';
+/** Fork domain used in email footer links. */
+const BRAND_ROOT_DOMAIN = process.env.BRAND_ROOT_DOMAIN || 'libreclassroom.ronzz.org';
 
 function escapeHtmlAttr(value: string): string {
   return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -22,9 +26,7 @@ function buildMasthead(branding: EmailBranding): string {
     return `<span style="font-size:18px;font-weight:600;color:#111827;">${orgName}</span>`;
   }
 
-  return `<a href="https://classroomio.com" target="_blank">
-        <img src="${CLASSROOMIO_LOGO}" alt="ClassroomIO" width="130" style="width:130px;height:auto;display:block;" />
-      </a>`;
+  return `<a href="https://${BRAND_ROOT_DOMAIN}" target="_blank" style="font-size:16px;font-weight:600;color:#111827;text-decoration:none;">${APP_NAME}</a>`;
 }
 
 export const getDefaultTemplate = (content: string, branding?: EmailBranding): string => {
@@ -148,13 +150,9 @@ export const getDefaultTemplate = (content: string, branding?: EmailBranding): s
       color:#94a3b8;
       padding:24px 30px;
       border-top:1px solid #f0f0f0;">
-      ClassroomIO ${new Date().getFullYear()}. All rights reserved.
+      ${APP_NAME} ${new Date().getFullYear()}. All rights reserved.
       <br />
-      <a href="https://classroomio.com" style="color:#94a3b8;text-decoration:none;">Website</a>
-      &nbsp;&middot;&nbsp;
-      <a href="https://classroomio.com/tos" style="color:#94a3b8;text-decoration:none;">Terms</a>
-      &nbsp;&middot;&nbsp;
-      <a href="https://classroomio.com/privacy" style="color:#94a3b8;text-decoration:none;">Privacy</a>
+      <a href="https://${BRAND_ROOT_DOMAIN}" style="color:#94a3b8;text-decoration:none;">Website</a>
     </div>
   </div>
 </body>

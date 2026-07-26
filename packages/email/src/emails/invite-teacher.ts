@@ -7,7 +7,7 @@ import { escapeHtml } from '../utils/functions/email-helpers';
 
 export const inviteTeacherEmail = defineEmail({
   id: 'inviteTeacher',
-  subject: 'You have been invited to join an organization on ClassroomIO',
+  subject: `You have been invited to join an organization on ${process.env.APP_NAME || 'LibreClassroom'}`,
   schema: z.object({
     email: z.string().email(),
     orgName: z.string().min(1),
@@ -25,9 +25,10 @@ export const inviteTeacherEmail = defineEmail({
     const inviteLink = escapeHtml(fields.inviteLink);
     const expiresAt = escapeHtml(fields.expiresAt);
 
+    const appName = process.env.APP_NAME || 'LibreClassroom';
     const invitationLine = inviterName
-      ? `<p><strong>${inviterName}</strong> invited you to join <strong>${orgName}</strong> on ClassroomIO as ${roleName}.</p>`
-      : `<p>You have been invited to join <strong>${orgName}</strong> on ClassroomIO as ${roleName}.</p>`;
+      ? `<p><strong>${inviterName}</strong> invited you to join <strong>${orgName}</strong> on ${appName} as ${roleName}.</p>`
+      : `<p>You have been invited to join <strong>${orgName}</strong> on ${appName} as ${roleName}.</p>`;
 
     const content = `
       <p>Hi there,</p>
