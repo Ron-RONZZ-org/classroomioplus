@@ -12,7 +12,6 @@ import { defaultProfileState, defaultUserState, profile, user } from '$lib/utils
 import type { AccountResponse, AccountSuccess } from './types';
 import { type AppOrgParams } from './resolve-app-org-params';
 import type { PendingOrgInvite } from '$features/lms/utils/types';
-import { PUBLIC_IS_SELFHOSTED } from '$env/static/public';
 import type { TUser } from '@cio/db/types';
 import { authClient } from '$lib/utils/services/auth/client';
 import { get } from 'svelte/store';
@@ -22,13 +21,12 @@ import { identifyPosthogUser } from '$lib/utils/services/posthog';
 import { identifyUserJotUser } from '$lib/utils/services/userjot';
 import { isOrgStudent, globalStore } from '$lib/utils/store/app';
 import { isPublicRoute } from '$lib/utils/functions/routes/isPublicRoute';
-import { licenseApi } from '$features/license/api/license.svelte';
 import { logout } from '$lib/utils/functions/logout';
 import { page } from '$app/state';
 import { resolve } from '$app/paths';
 import { setSentryUser } from '$lib/utils/services/sentry';
 import { setTheme } from '$lib/utils/functions/theme';
-import { setupAnalyticsBasedOnLicense } from '$lib/utils/functions/appSetup';
+import { setupAnalytics, setTelemetryEnabled } from '$lib/utils/functions/appSetup';
 import shouldRedirectOnAuth from '$lib/utils/functions/routes/shouldRedirectOnAuth';
 import { ROLE } from '@cio/utils/constants';
 
@@ -139,8 +137,10 @@ class AppInitApi extends BaseApi {
     this.success = true;
     this.data = accountData;
     this.setupStores(params);
-    licenseApi.syncFromAccount(accountData.licenseFeatures, get(currentOrg));
-    setupAnalyticsBasedOnLicense(
+    // Seed telemetry preference from org settings before initializing analytics
+    const currentOrgVal = get(currentOrg);
+    setTelemetryEnabled(currentOrgVal?.settings?.telemetryEnabled ?? false);
+    setupAnalytics(
       accountData.profile?.id
         ? { id: accountData.profile.id, email: accountData.profile.email, name: accountData.profile.fullname }
         : undefined
@@ -277,7 +277,6 @@ class AppInitApi extends BaseApi {
     }
 
     this.setOrgStore(params);
-    licenseApi.syncFromAccount(this.data.licenseFeatures, get(currentOrg));
   }
 
   /*
@@ -393,22 +392,11 @@ class AppInitApi extends BaseApi {
 
     const isStudent = get(isOrgStudent);
     const userHasOrganizations = this.data.organizations.length > 0;
-    const isCloud = PUBLIC_IS_SELFHOSTED !== 'true';
 
-    // CLOUD: when user has no orgs and isOrgSite is false, route to /onboarding
-    // isOrgSite - means the user is on a multi tenant organization site, we don't want to redirect to /onboarding in this case
-    if (isCloud) {
-      const shouldRedirectToOnboarding = !userHasOrganizations && !isOrgSite;
-      if (shouldRedirectToOnboarding) {
-        console.log('cloud: redirecting to onboarding');
-        return goto(resolve(`/onboarding`, {}));
-      }
-    } else {
-      // Self-hosted: when user has no orgs, route to /onboarding
-      if (!userHasOrganizations) {
-        console.log('self-hosted: redirecting to onboarding');
-        return goto(resolve(`/onboarding`, {}));
-      }
+    // Self-hosted: when user has no orgs, route to /onboarding
+    if (!userHasOrganizations) {
+      console.log('self-hosted: redirecting to onboarding');
+      return goto(resolve(`/onboarding`, {}));
     }
 
     if (!shouldRedirectOnAuth(page.url.pathname)) return;
@@ -418,32 +406,12 @@ class AppInitApi extends BaseApi {
       return;
     }
 
-    const shouldGoToLMS = isCloud ? isOrgSite || !!isStudent : !!isStudent;
+    const shouldGoToLMS = !!isStudent;
     console.log('redirecting to', shouldGoToLMS ? 'lms' : 'org');
     return shouldGoToLMS ? this.goToLMS(isOrgSite) : this.goToOrg();
   }
 
-  goToLMS(isOrgSite: boolean) {
-    const isCloud = PUBLIC_IS_SELFHOSTED !== 'true';
-    const isStudent = get(isOrgStudent);
-    const selectedOrg = get(currentOrg);
-    const userHasOneOrg = this.data.organizations.length === 1;
-    const userIsStudentInAllOrgs = this.data.organizations.every((org) => org.roleId === ROLE.STUDENT);
-    const userIsAdminInAtleastOneOrg = this.data.organizations.some((org) => org.roleId === ROLE.ADMIN);
-
-    if (userHasOneOrg && isCloud && !isOrgSite && isStudent && selectedOrg.siteName && userIsStudentInAllOrgs) {
-      window.location.href = getOrgPublicUrl(selectedOrg, '/lms');
-      return;
-    }
-
-    // User is an admin in at least one org, so they should be redirected to the org dashboard.
-    if (userIsAdminInAtleastOneOrg && isCloud && !isOrgSite) {
-      const orgWithAdminRole = this.data.organizations.find((org) => org.roleId === ROLE.ADMIN);
-
-      goto(resolve(`/org/${orgWithAdminRole.siteName}`, {}));
-      return;
-    }
-
+  goToLMS(_isOrgSite: boolean) {
     goto(resolve('/lms', {}));
   }
 
@@ -511,7 +479,6 @@ class AppInitApi extends BaseApi {
     this.syncedTenantKey = null;
     this.pendingOrgInvite = null;
     this.showPendingInviteModal = false;
-    licenseApi.reset();
 
     user.set(defaultUserState);
     profile.set(defaultProfileState);

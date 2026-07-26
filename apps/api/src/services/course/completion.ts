@@ -16,9 +16,6 @@ import {
   type TCourseCertificationRow
 } from '@cio/db/queries/course/course';
 import { claimMemberCertificateEarned } from '@cio/db/queries/course/people';
-import { getActiveOrganizationPlan } from '@cio/db/queries/organization';
-import { PLAN } from '@cio/utils/plans';
-import { env } from '@cio/core/config/env';
 import { trackServerEvent, SERVER_EVENTS } from '@cio/analytics';
 
 export type CertificationBlocker = {
@@ -272,12 +269,8 @@ export async function evaluateCourseCertification(
  * Free-plan orgs do not get certificates: no earned record, no completion email.
  * Self-hosted deployments always have certificates enabled.
  */
-async function orgHasCertificatesEnabled(orgId: string): Promise<boolean> {
-  if (env.PUBLIC_IS_SELFHOSTED === 'true') return true;
-
-  const activePlan = await getActiveOrganizationPlan(orgId);
-
-  return Boolean(activePlan && activePlan.planName !== PLAN.BASIC);
+async function orgHasCertificatesEnabled(_orgId: string): Promise<boolean> {
+  return true;
 }
 
 /**

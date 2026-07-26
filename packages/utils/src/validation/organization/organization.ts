@@ -116,6 +116,7 @@ export const ZUpdateOrganization = z.object({
         })
         .optional(),
       internalEnrollmentOnly: z.boolean().optional(),
+      telemetryEnabled: z.boolean().optional(),
       emailNotifications: z
         .object({
           newStudent: z.boolean().optional(),

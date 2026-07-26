@@ -23,8 +23,7 @@ export const accountRouter = new Hono()
           success: true,
           user,
           profile: accountData.profile,
-          organizations: accountData.organizations,
-          licenseFeatures: accountData.licenseFeatures
+          organizations: accountData.organizations
         },
         200
       );

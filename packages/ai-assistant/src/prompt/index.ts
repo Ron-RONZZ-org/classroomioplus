@@ -12,15 +12,15 @@ import type { AiTutorSettings } from '../tutor-config';
  */
 export function buildSystemPrompt(
   context: AgentContext,
-  options?: { tutorSettings?: AiTutorSettings; isOrgOnPaidPlan?: boolean }
+  options?: { tutorSettings?: AiTutorSettings }
 ): string {
   switch (context.role) {
     case AgentRole.TEACHER:
-      return buildTeacherSystemPrompt(context, { isOrgOnPaidPlan: options?.isOrgOnPaidPlan });
+      return buildTeacherSystemPrompt(context);
     case AgentRole.STUDENT:
       return buildStudentSystemPrompt(context, options?.tutorSettings);
     default:
-      return buildTeacherSystemPrompt(context, { isOrgOnPaidPlan: options?.isOrgOnPaidPlan });
+      return buildTeacherSystemPrompt(context);
   }
 }
 

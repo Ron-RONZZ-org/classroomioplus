@@ -6,7 +6,7 @@
   import { appInitApi } from '$features/app/init.svelte';
   import PendingInviteModal from '$features/lms/components/pending-invite-modal.svelte';
   import { resolveAppOrgParams } from '$features/app/resolve-app-org-params';
-  import { setupCloudAnalytics } from '$lib/utils/functions/appSetup';
+  import { setupAnalytics } from '$lib/utils/functions/appSetup';
   import { globalStore } from '$lib/utils/store/app';
   import { currentOrg, mergeAccountOrgFromServer } from '$lib/utils/store/org';
   import { get } from 'svelte/store';
@@ -32,7 +32,7 @@
     console.log('Layout', data);
 
     const sessionUser = data?.locals?.user;
-    setupCloudAnalytics(
+    setupAnalytics(
       sessionUser ? { id: sessionUser.id, email: sessionUser.email, name: sessionUser.name } : undefined
     );
 

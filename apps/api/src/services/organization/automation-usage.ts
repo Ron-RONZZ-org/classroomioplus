@@ -1,4 +1,3 @@
-import { env } from '@cio/core/config/env';
 import { AppError, ErrorCodes } from '@api/utils/errors';
 import {
   countActiveOrganizationApiKeys,
@@ -61,13 +60,9 @@ export async function assertOrganizationAutomationKeyCreationAllowed(
   const planName = await getOrganizationPlanName(organizationId);
 
   if (type === AUTOMATION_TYPE.API) {
-    const isSelfHosted = env.PUBLIC_IS_SELFHOSTED === 'true';
-
-    if (!canUsePublicApi(planName, isSelfHosted)) {
+    if (!canUsePublicApi(planName)) {
       throw new AppError(
-        isSelfHosted
-          ? 'Public API keys require an Enterprise plan'
-          : 'Public API keys require an Early Adopter or Enterprise plan',
+        'Public API keys require an Enterprise plan',
         ErrorCodes.UPGRADE_REQUIRED,
         403
       );

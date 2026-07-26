@@ -26,10 +26,7 @@ function resolveBaseURL() {
   if (dev) {
     return env.PUBLIC_SERVER_URL || `${window.location.origin}/api/auth`;
   }
-  if (env.PUBLIC_IS_SELFHOSTED === 'true') {
-    return `${window.location.origin}/api/auth`;
-  }
-  return `${window.location.origin}/proxy/api/auth`;
+  return `${window.location.origin}/api/auth`;
 }
 
 const baseURL = resolveBaseURL();

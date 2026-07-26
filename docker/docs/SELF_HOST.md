@@ -85,7 +85,7 @@ Key points:
 - **Auto-generated:** `PRIVATE_SERVER_KEY`, `BETTER_AUTH_SECRET` (by `./run-docker-full-stack.sh`). A strong value you set yourself is never overwritten.
 - **Auto-configured:** All `MINIO_*` / `OBJECT_STORAGE_*` vars (by the startup script, with randomized MinIO credentials).
 - **Email (effectively required):** SMTP (or Zoho). See [Email](#email) — without it, signup verification, password reset, and invites do not send.
-- **Optional:** Google OAuth, Unsplash, `LICENSE_KEY` (enterprise).
+- **Optional:** Google OAuth, Unsplash.
 - **Optional — upload limits:** `UPLOAD_MAX_*_MB` vars (documents, images, videos, assignment files, etc.). See [`.env.example`](../../.env.example). Passed through to both `api` and `dashboard` containers; unset values use built-in defaults. Raise your reverse-proxy body-size limit too if you increase these.
 
 `PRIVATE_SERVER_KEY` must be the same value in both API and dashboard — the script ensures this.

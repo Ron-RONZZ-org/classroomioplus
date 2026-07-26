@@ -8,7 +8,6 @@
   import { VideoUploader } from '$lib/utils/services/courses/presign';
   import { MediaUploader } from './media-uploader';
   import { encodeAndUploadHls, cleanupAbortedHlsUpload, type HlsEncodeProgress } from './hls-encoder';
-  import { env as publicEnv } from '$env/dynamic/public';
   import { Button } from '@cio/ui/base/button';
   import * as FileDropZone from '@cio/ui/custom/file-drop-zone';
   import { mediaApi } from '$features/media/api';
@@ -30,11 +29,7 @@
   let hlsAbortController: AbortController | null = null;
   let hlsReservedAssetId: string | null = $state(null);
 
-  /**
-   * HLS is the default upload path on Cloud. Self-hosted installs fall
-   * back to raw-MP4 upload (no R2 + tenant-router edge dependency).
-   */
-  const hlsEnabled = $derived(publicEnv.PUBLIC_IS_SELFHOSTED !== 'true');
+  const hlsEnabled = true;
 
   let formRes: {
     url?: string;

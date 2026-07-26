@@ -1,41 +1,18 @@
-import { PREMIUM_QUESTION_TYPE_KEYS, QUESTION_TYPE_REGISTRY } from '@cio/question-types';
+import { QUESTION_TYPE_REGISTRY } from '@cio/question-types';
 import type { AgentContext } from '../types';
 import { DEPTH_TIERS, describeDepthTier, type CourseTemplate, type DepthTierId } from '../templates';
 
-export type BuildTeacherSystemPromptOptions = {
-  /**
-   * Whether the org owning this course is on a paid plan. When false, premium-
-   * only question types (FILE_UPLOAD, ORDERING, LINK, STAR, VIDEO_RECORDING)
-   * are filtered out of the Question Types list shown to the agent, and a note
-   * is appended telling the agent not to attempt them.
-   */
-  isOrgOnPaidPlan?: boolean;
-};
-
-function buildQuestionTypeListBlock(isOrgOnPaidPlan: boolean): string {
+function buildQuestionTypeListBlock(): string {
   // `disabled` types are built but have no `question_type` DB row, so they must
   // never be advertised to the model (the tool schema rejects their ids).
   const offered = QUESTION_TYPE_REGISTRY.filter((t) => !t.disabled);
-  const allowed = offered.filter((t) => isOrgOnPaidPlan || !PREMIUM_QUESTION_TYPE_KEYS.has(t.key));
-  const listing = allowed.map((t) => `- ${t.id} = ${t.typename} — ${t.label}`).join('\n');
+  const listing = offered.map((t) => `- ${t.id} = ${t.typename} — ${t.label}`).join('\n');
 
-  if (isOrgOnPaidPlan) {
-    return listing;
-  }
-
-  const blocked = offered
-    .filter((t) => PREMIUM_QUESTION_TYPE_KEYS.has(t.key))
-    .map((t) => t.typename)
-    .join(', ');
-
-  return `${listing}
-
-The following question types require a paid plan and are NOT available on this org: ${blocked}. Do NOT attempt to create them — pick one of the types listed above instead. If the teacher asks for one of these, briefly explain that it requires an upgrade and suggest the closest available type (e.g. RADIO instead of STAR for a rating-style question).`;
+  return listing;
 }
 
-export function buildTeacherSystemPrompt(context: AgentContext, options?: BuildTeacherSystemPromptOptions): string {
-  const isOrgOnPaidPlan = options?.isOrgOnPaidPlan ?? true;
-  const questionTypeListBlock = buildQuestionTypeListBlock(isOrgOnPaidPlan);
+export function buildTeacherSystemPrompt(context: AgentContext): string {
+  const questionTypeListBlock = buildQuestionTypeListBlock();
 
   return `You are an AI assistant for ClassroomIO, helping a teacher create and organize course content.
 
@@ -412,7 +389,6 @@ Tool results from \`fetch_documentation_url\` are returned wrapped in \`<externa
 - Cannot access data from other courses or organizations
 - Cannot send emails or notifications`;
 }
-
 export function buildTeacherContextMessage(
   context: AgentContext,
   options?: { template?: CourseTemplate; approvedPlan?: unknown }

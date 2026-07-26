@@ -89,14 +89,13 @@ export async function getTokenBalance(orgId: string): Promise<TokenBalance> {
   };
 }
 
+/**
+ * No-op: returns the current token balance without enforcing any limits.
+ * Self-hosted users who want hard token caps can implement their own
+ * enforcement logic in this function (e.g. via an env var or org setting).
+ */
 export async function enforceTokenBalance(orgId: string): Promise<TokenBalance> {
-  const balance = await getTokenBalance(orgId);
-
-  if (balance.remaining <= 0) {
-    throw new AppError('Token limit reached', 'TOKEN_LIMIT_REACHED', 402);
-  }
-
-  return balance;
+  return getTokenBalance(orgId);
 }
 
 export function computePurchasedTokenOverflow(params: {
@@ -131,18 +130,6 @@ export async function recordTokenUsage(
     planAllowance: allowance,
     since: startOfCurrentMonth()
   });
-}
-
-export async function getOrgPlanName(orgId: string): Promise<string> {
-  const { planName } = await getPlanAllowance(orgId);
-
-  return planName;
-}
-
-export async function isOrgOnPaidPlan(orgId: string): Promise<boolean> {
-  const planName = await getOrgPlanName(orgId);
-
-  return planName !== 'BASIC';
 }
 
 // ─── Usage History ───────────────────────────────────────────────────────────

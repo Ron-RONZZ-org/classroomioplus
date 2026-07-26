@@ -8,10 +8,8 @@
   import { isOrgStudent } from '$lib/utils/store/app';
   import { appInitApi } from '$features/app/init.svelte';
   import { AppHeader } from '$features/ui';
-  import { PUBLIC_IS_SELFHOSTED } from '$env/static/public';
 
   import { OrgSidebar } from '$features/ui/sidebar/org-sidebar';
-  import { AddOrgModal } from '$features/org';
 
   let { data, children } = $props();
 
@@ -34,10 +32,6 @@
     }
   });
 </script>
-
-{#if PUBLIC_IS_SELFHOSTED !== 'true'}
-  <AddOrgModal />
-{/if}
 
 <Sidebar.Provider>
   <OrgSidebar />

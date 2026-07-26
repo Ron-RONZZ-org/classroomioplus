@@ -43,7 +43,6 @@ import {
   insertOrganizationMembersOnConflictDoNothing
 } from '@cio/db/queries/organization';
 import { getStudentLimit } from '@cio/utils/plans';
-import { env } from '../../config/env';
 import { annotateCourseContentWithProgression } from './progression';
 import { buildCourseContent, calcPercentageWithRounding, type CourseContent } from './utils';
 import { guardCourseTypeTransition } from './public-course-guard';
@@ -54,7 +53,7 @@ import { guardCourseTypeTransition } from './public-course-guard';
  * duplicated here since packages/core can't depend on the api app).
  */
 async function isStudentLimitReached(orgId: string): Promise<boolean> {
-  if (env.PUBLIC_IS_SELFHOSTED === 'true') return false;
+  return false;
 
   const activePlan = await getActiveOrganizationPlan(orgId);
   const limit = getStudentLimit(activePlan?.planName);

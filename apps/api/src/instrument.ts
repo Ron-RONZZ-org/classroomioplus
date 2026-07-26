@@ -8,9 +8,8 @@ import * as Sentry from '@sentry/node';
 
 const dsn = process.env.SENTRY_DSN?.trim();
 const isProd = process.env.NODE_ENV === 'production';
-const isSelfHosted = process.env.PUBLIC_IS_SELFHOSTED === 'true';
 
-if (dsn && isProd && !isSelfHosted) {
+if (dsn && isProd) {
   Sentry.init({
     dsn,
     environment: process.env.SENTRY_ENVIRONMENT?.trim() || 'production',

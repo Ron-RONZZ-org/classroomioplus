@@ -1,5 +1,4 @@
 import { dev } from '$app/environment';
-import { PUBLIC_IS_SELFHOSTED } from '$env/static/public';
 import { get } from 'svelte/store';
 import { globalStore } from '$lib/utils/store/app';
 
@@ -9,7 +8,6 @@ let isInitialized = false;
 
 function isWidgetAllowed(): boolean {
   if (dev) return false;
-  if (PUBLIC_IS_SELFHOSTED === 'true') return false;
   if (get(globalStore).isOrgSite) return false;
 
   return true;

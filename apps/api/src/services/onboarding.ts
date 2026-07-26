@@ -10,7 +10,6 @@ import {
 } from '@cio/db/queries';
 import { getProfileById, updateProfile } from '@cio/db/queries/auth';
 
-import { env } from '@cio/core/config/env';
 import { ROLE } from '@cio/utils/constants';
 import { PLAN } from '@cio/utils/plans';
 import { db } from '@cio/db/drizzle';
@@ -25,11 +24,9 @@ export async function createOrganizationWithOwner(
   }
 ) {
   // Self-hosted: block org creation when an org already exists
-  if (env.PUBLIC_IS_SELFHOSTED === 'true') {
-    const count = await getOrganizationCount();
-    if (count > 0) {
-      throw new AppError('Self-hosted instances support only one organization', ErrorCodes.VALIDATION_ERROR, 403);
-    }
+  const count = await getOrganizationCount();
+  if (count > 0) {
+    throw new AppError('Self-hosted instances support only one organization', ErrorCodes.VALIDATION_ERROR, 403);
   }
 
   // Business Logic: Check sitename availability
@@ -61,8 +58,7 @@ export async function createOrganizationWithOwner(
       );
 
       // Self-hosted: assign Enterprise plan to the new org
-      if (env.PUBLIC_IS_SELFHOSTED === 'true') {
-        await createOrganizationPlan(
+      await createOrganizationPlan(
           {
             orgId: organization.id,
             planName: PLAN.ENTERPRISE as 'ENTERPRISE',
@@ -74,7 +70,6 @@ export async function createOrganizationWithOwner(
           },
           tx
         );
-      }
 
       return { organization, member };
     });

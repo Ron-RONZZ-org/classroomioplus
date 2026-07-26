@@ -1,12 +1,11 @@
-import { browser, dev } from '$app/environment';
+import { browser } from '$app/environment';
 import { derived, writable } from 'svelte/store';
 import merge from 'lodash/merge';
 
 import type { AccountOrg } from '$features/app/types';
 import type { OrgTeamMember } from '../types/org';
 import { canUsePublicApi, getStudentLimit, isOrgOnFreePlan, isResourceLimitReached, PLAN } from '@cio/utils/plans';
-import { PUBLIC_IS_SELFHOSTED } from '$env/static/public';
-import { BRAND_ROOT_DOMAIN, ROLE, TENANT_ROOT_DOMAIN } from '@cio/utils/constants';
+import { ROLE } from '@cio/utils/constants';
 import { STEPS } from '../constants/quiz';
 import type { Writable } from 'svelte/store';
 
@@ -99,11 +98,7 @@ type OrgPublicOrigin = Pick<AccountOrg, 'customDomain' | 'isCustomDomainVerified
  * and other admin-only URLs — not student-facing tenant pages.
  */
 export function getAppOrigin(): string {
-  if (PUBLIC_IS_SELFHOSTED === 'true' || dev) {
-    return browser ? window.location.origin : '';
-  }
-
-  return `https://app.${BRAND_ROOT_DOMAIN}`;
+  return browser ? window.location.origin : '';
 }
 
 /**
@@ -111,23 +106,7 @@ export function getAppOrigin(): string {
  * Self-hosted uses the current deployment URL. On cloud, verified custom domains win over the
  * admin host so `app.classroomio.com` still hands off to the org's `example.com` tenant site.
  */
-export function getOrgPublicOrigin(org: OrgPublicOrigin): string {
-  if (PUBLIC_IS_SELFHOSTED === 'true') {
-    return browser ? window.location.origin : '';
-  }
-
-  if (org.customDomain && org.isCustomDomainVerified) {
-    return `https://${org.customDomain}`;
-  }
-
-  if (dev && browser) {
-    return window.location.origin;
-  }
-
-  if (org.siteName) {
-    return `https://${org.siteName}.${TENANT_ROOT_DOMAIN}`;
-  }
-
+export function getOrgPublicOrigin(_org: OrgPublicOrigin): string {
   return browser ? window.location.origin : '';
 }
 
@@ -156,23 +135,16 @@ export const currentOrgDomain = derived(currentOrg, ($currentOrg) => getOrgPubli
 export const isFreePlan = derived(currentOrg, ($currentOrg) =>
   isOrgOnFreePlan({
     plans: $currentOrg.plans,
-    isSelfHosted: PUBLIC_IS_SELFHOSTED === 'true',
     orgId: $currentOrg.id
   })
 );
 
-export const isEnterprisePlan = derived(currentOrg, ($currentOrg) => {
-  if (PUBLIC_IS_SELFHOSTED === 'true') return true;
-
-  const plan = getActivePlan($currentOrg);
-
-  return plan?.planName === PLAN.ENTERPRISE;
-});
+export const isEnterprisePlan = derived(currentOrg, () => true);
 
 export const hasPublicApiAccess = derived(currentOrg, ($currentOrg) => {
   const plan = getActivePlan($currentOrg);
 
-  return canUsePublicApi(plan?.planName, PUBLIC_IS_SELFHOSTED === 'true');
+  return canUsePublicApi(plan?.planName);
 });
 
 export const currentOrgMaxAudience = derived(currentOrgPlan, ($plan) => {
