@@ -129,6 +129,38 @@ Shared packages live under `packages/` (`packages/db`, `packages/utils`, `packag
 
 5. Login: `admin@test.com` / `123456`
 
+### Testing
+
+This monorepo has tests at several layers, though coverage is still maturing (tracked in [epic #16](https://github.com/Ron-RONZZ-org/classroomioplus/issues/16)).
+
+```bash
+# API service logic (vitest) — ~61 tests
+pnpm --filter @cio/api test
+
+# Question type validation (vitest)
+pnpm --filter @cio/question-types test
+
+# Email template rendering (vitest)
+pnpm --filter @cio/email test
+
+# Course-app template unit tests (vitest)
+pnpm --filter @cio/course-app test
+
+# Dashboard utility tests (vitest)
+pnpm --filter @cio/dashboard test
+```
+
+**Dashboard unit tests** are currently broken (Jest config issue) — tracked in [#17](https://github.com/Ron-RONZZ-org/classroomioplus/issues/17).
+
+**E2E tests**: The repo has no browser E2E tests for the dashboard yet. A single Playwright spec exists for the course-app template at `packages/course-app/src/template/tests/course.spec.ts`:
+
+```bash
+cd packages/course-app/src/template
+pnpm test:e2e
+```
+
+See the [testing coverage epic](https://github.com/Ron-RONZZ-org/classroomioplus/issues/16) for the planned phased improvements.
+
 ### Enabling AI Features
 
 Set at least one provider API key in `apps/api/.env`:
