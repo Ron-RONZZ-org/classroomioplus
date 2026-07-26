@@ -4,12 +4,31 @@ export * from './rate-limiter';
 
 export const API_PORT = env.PORT ? parseInt(env.PORT) : 3002;
 export const API_SERVER_URL = env.PUBLIC_SERVER_URL || `http://localhost:${API_PORT}`;
+// Auto-detect trusted origins from env vars the self-hoster already sets,
+// instead of hardcoding upstream domains. In order of precedence:
+//   1. TRUSTED_ORIGINS env var — explicit user override
+//   2. PUBLIC_SERVER_URL — the API URL the self-hoster configured
+//   3. Localhost defaults — always allow local dev
+// DASHBOARD_ORIGIN is appended separately at the end.
+const autoDetectedOrigins = ['http://localhost:5173', 'http://localhost:5180'];
+
+if (env.PUBLIC_SERVER_URL) {
+  try {
+    const origin = new URL(env.PUBLIC_SERVER_URL).origin;
+    autoDetectedOrigins.push(origin);
+  } catch {
+    // Ignore invalid URLs
+  }
+}
+
 const configuredTrustedOrigins = env.TRUSTED_ORIGINS
   ? env.TRUSTED_ORIGINS.split(',')
-  : ['http://localhost:5173', 'http://localhost:5180', 'https://*.classroomio.com', 'https://*.myclassroomio.com'];
+      .map((o: string) => o.trim())
+      .filter(Boolean)
+  : autoDetectedOrigins;
 
 export const TRUSTED_ORIGINS = [
-  ...configuredTrustedOrigins.map((origin) => origin.trim()).filter(Boolean),
+  ...configuredTrustedOrigins,
   ...(env.DASHBOARD_ORIGIN ? [env.DASHBOARD_ORIGIN.trim().replace(/\/$/, '')] : [])
 ];
 

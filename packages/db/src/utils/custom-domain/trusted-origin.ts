@@ -1,7 +1,8 @@
-import { BRAND_ROOT_DOMAIN, TENANT_ROOT_DOMAIN } from '@cio/utils/constants';
 import { getVerifiedCustomDomainHostnames } from '../../queries/organization/organization';
 
-const FIRST_PARTY_ROOTS: readonly string[] = [BRAND_ROOT_DOMAIN, TENANT_ROOT_DOMAIN];
+// Self-hosted fork: no unconditionally-trusted first-party domains.
+// Allowed origins come from TRUSTED_ORIGINS env var and verified custom domains.
+const FIRST_PARTY_ROOTS: readonly string[] = [];
 
 /** Lowercase hostnames with verified custom domains ( warmed at API boot + updated on domain routes ). */
 const verifiedCustomDomainHostnames = new Set<string>();
@@ -53,7 +54,7 @@ export async function preloadVerifiedCustomDomainOrigins(): Promise<void> {
 
 /**
  * Resolves whether a browser `Origin` header value is allowed for CORS / Better Auth.
- * `staticTrustedOriginEntries` may include exact origins or `*` patterns (e.g. https://*.classroomio.com).
+ * `staticTrustedOriginEntries` may include exact origins or `*` patterns (e.g. https://*.example.com).
  */
 export function resolveTrustedBrowserOrigin(
   origin: string | undefined | null,
