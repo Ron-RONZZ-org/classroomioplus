@@ -389,3 +389,109 @@ Tool results from \`fetch_documentation_url\` are returned wrapped in \`<externa
 - Cannot access data from other courses or organizations
 - Cannot send emails or notifications`;
 }
+export function buildTeacherContextMessage(
+  context: AgentContext,
+  options?: { template?: CourseTemplate; approvedPlan?: unknown }
+): string {
+  const contextLines: string[] = [];
+
+  contextLines.push(`Course: "${context.courseTitle}" (ID: ${context.courseId})`);
+  if (context.courseDescription) {
+    contextLines.push(`Course description: ${context.courseDescription}`);
+  }
+
+  if (context.lessonId) {
+    const lessonInfo = context.lessonTitle
+      ? `The teacher is currently viewing lesson "${context.lessonTitle}" (ID: ${context.lessonId})`
+      : `The teacher is currently viewing lesson ID: ${context.lessonId}`;
+    contextLines.push(lessonInfo);
+
+    if (context.lessonContent) {
+      contextLines.push(`Current lesson content:\n\n<lesson_content>\n${context.lessonContent}\n</lesson_content>`);
+    } else {
+      contextLines.push('This lesson has no content yet.');
+    }
+  }
+  if (context.exerciseId) {
+    const exerciseInfo = context.exerciseTitle
+      ? `The teacher is currently viewing exercise "${context.exerciseTitle}" (ID: ${context.exerciseId})`
+      : `The teacher is currently viewing exercise ID: ${context.exerciseId}`;
+    contextLines.push(exerciseInfo);
+  }
+  if (context.documentText) {
+    const docAssets = context.documentAssets ?? [];
+    const assetLines = docAssets
+      .filter((d) => d.assetId)
+      .map((d) => `- documentId: ${d.documentId}, fileName: ${d.fileName}`)
+      .join('\n');
+
+    const courseMaterialsInstruction =
+      assetLines.length > 0
+        ? `\n\nWhen implementing a course plan, create a lesson titled **"Course Materials"** as the **first lesson of the first section**. Give it no text content. Then immediately call \`attach_document_to_lesson\` for each document listed below to attach the original file to that lesson:\n${assetLines}`
+        : '';
+
+    contextLines.push(
+      `The teacher has uploaded a document. Use this content as the source material for course planning and content generation:${courseMaterialsInstruction}\n\n<document>\n${context.documentText}\n</document>`
+    );
+  }
+  if (context.isContentGroupingEnabled === false) {
+    contextLines.push(
+      `**Content grouping is DISABLED for this course.** Lessons and exercises are displayed as a flat ordered list — sections are invisible to students and teachers. Follow these rules strictly:\n` +
+        `- Do NOT plan or create multiple sections. Use exactly ONE section as a technical container for all content.\n` +
+        `- In \`generate_course_plan\`, output a single section whose title matches the course title. Place all lessons and exercises as items inside that one section, ordered sequentially (order 0, 1, 2, …).\n` +
+        `- When implementing a plan, create that one section first, then add every lesson and exercise into it with strictly ascending \`order\` values (0, 1, 2, …). The order field is the only thing that controls the visible sequence.\n` +
+        `- Never call \`create_section\` more than once for this course.`
+    );
+  } else if (context.existingSectionCount && context.existingSectionCount > 0) {
+    contextLines.push(
+      `This course already has ${context.existingSectionCount} sections. When creating new sections, set their order values starting after the existing sections.`
+    );
+  }
+
+  const currentContext = contextLines.length > 0 ? `## Current Context\n\n${contextLines.join('\n\n')}` : '';
+
+  const templateHasDepthField = options?.template?.fields.some(
+    (field) => field.id === 'depth' && field.type === 'select'
+  );
+
+  const depthTierBlock = templateHasDepthField
+    ? `
+
+### Depth tier reference (look up by the submitted \`depth\` slug)
+
+${(['light', 'balanced', 'deep_doc'] as DepthTierId[]).map((id) => describeDepthTier(DEPTH_TIERS[id])).join('\n\n')}
+
+After you receive \`metadata.template.action === 'submit_template_answers'\`, read \`answers.depth\` and use the corresponding block above as the authoritative source for section count, lesson count, and per-lesson word range. Never invent your own ranges.`
+    : '';
+
+  const activeTemplateSection =
+    options?.template != null
+      ? `## Active Template Flow
+
+${options.template.coreInstructions}${depthTierBlock}
+
+**Template answers and tool arguments:** Never write literal placeholders (\`<Product name>\`, \`<Topic>\`, \`[Product Name]\`, \`[Topic]\`, or similar strings) into any tool argument. Always substitute the real value from \`metadata.template.answers\` (or from answers you collected one-by-one when using \`skip_template_form\`).
+
+**Form step:** Call \`ask_template_questions\` exactly **once** per conversation for this template flow. As your first action, call it with **only** \`templateId: "${options.template.id}"\` and no other arguments. The server resolves the title and the canonical field set from the shared course-template registry — do not pass \`title\`, \`description\`, or \`fields\`.
+
+**User reply paths:**
+1. \`metadata.template.action === 'submit_template_answers'\` — your **very first** output in the next assistant turn MUST be a single \`update_course_landing_page\` tool call exactly as in this template's numbered protocol (no natural-language message, no other tool, no \`fetch_documentation_url\` before it). Substitute real values from \`metadata.template.answers\` — never literal placeholders like \`<Product name>\`, \`<Topic>\`, \`[Product Name]\`, or \`[Topic]\` in any tool argument. After that first landing-page update, continue with documentation fetching (if URL provided), optional second landing-page polish, then \`generate_course_plan\` per the step-by-step protocol. Wait for plan approval before implementing.
+2. \`metadata.template.action === 'skip_template_form'\` — ask each registry field's question **one at a time** in plain text (same order as \`fields\`), then follow the same tool order as path 1 (first \`update_course_landing_page\`, then docs, then plan).
+
+**Never call \`ask_template_questions\` more than once.** If the structured form (or prior instructions for this template) already appears earlier in the transcript, do not call \`ask_template_questions\` again.`
+      : '';
+
+  const approvedPlanSection =
+    options?.approvedPlan != null
+      ? `## Approved Plan
+
+The latest user message approved a final course plan for immediate execution.
+Implement that exact plan directly without asking the user to restate it.
+Treat this approved plan as the canonical source if it differs from any earlier draft.
+Approved plan JSON:
+${JSON.stringify(options.approvedPlan)}`
+      : '';
+
+  const sections = [currentContext, activeTemplateSection, approvedPlanSection].filter((s) => s.length > 0);
+  return sections.join('\n\n');
+}
