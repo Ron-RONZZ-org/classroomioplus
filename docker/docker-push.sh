@@ -9,8 +9,7 @@ set -e  # Exit on error
 # Configuration
 DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME:-classroomio}"  # Change this to your Docker Hub username
 VERSION="${VERSION:?set VERSION to the tag to publish, e.g. VERSION=1.4.2 — this script never pushes :latest (CI owns latest from main)}"
-PUBLIC_IS_SELFHOSTED="${PUBLIC_IS_SELFHOSTED:-true}"
-PLATFORMS="${PLATFORMS:-linux/amd64,linux/arm64}"
+
 
 # This manual/local helper pushes ONLY the explicit ${VERSION} tag. `latest` is published
 # exclusively by CI from `main` (see .github/workflows/docker-publish.yml) — to move `latest`,
@@ -50,11 +49,10 @@ echo ""
 
 # Build and push Dashboard
 echo -e "${GREEN}Building + pushing Dashboard image...${NC}"
-echo "Dashboard build arg PUBLIC_IS_SELFHOSTED=${PUBLIC_IS_SELFHOSTED}"
+
 docker buildx build \
     --platform "${PLATFORMS}" \
     -f docker/Dockerfile.dashboard \
-    --build-arg PUBLIC_IS_SELFHOSTED=${PUBLIC_IS_SELFHOSTED} \
     -t ${DOCKERHUB_USERNAME}/dashboard:${VERSION} \
     --push \
     .

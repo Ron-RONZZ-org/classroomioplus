@@ -65,7 +65,6 @@ case "${SERVICE}" in
   dashboard)
     docker run -d --name "${NAME}" --network host \
       -e NODE_ENV=production -e PORT=3082 -e ORIGIN=http://localhost:3082 \
-      -e PUBLIC_IS_SELFHOSTED=true \
       -e PRIVATE_SERVER_URL=http://localhost:3081 -e PRIVATE_SERVER_KEY=smoke \
       "${IMAGE}"
     # Boot check: the SvelteKit server should listen even if the API is absent.
