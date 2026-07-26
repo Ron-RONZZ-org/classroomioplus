@@ -7,7 +7,7 @@ import {
   getActivePlanForPrimary,
   listWorkspacesForAccount
 } from '@cio/db/queries/account';
-import { canCreateWorkspaces, getWorkspaceAllowance } from '@cio/utils/plans';
+import { getWorkspaceAllowance } from '@cio/utils/plans';
 
 import { ROLE } from '@cio/utils/constants';
 import type { TOrganization } from '@cio/db/types';
@@ -51,11 +51,6 @@ export async function createWorkspaceForAccount(
 ): Promise<AccountWorkspace> {
   const primary = await resolvePrimaryOrThrow(activeOrgId);
   const planName = await getActivePlanForPrimary(primary.id);
-
-  if (!canCreateWorkspaces(planName)) {
-    throw new AppError('Multi-workspace requires the Enterprise plan', ErrorCodes.PLAN_UPGRADE_REQUIRED, 402);
-  }
-
   const allowance = getWorkspaceAllowance(planName);
   const current = await countWorkspacesForAccount(primary.id);
   if (current >= allowance) {
@@ -113,15 +108,15 @@ export async function deleteWorkspaceFromAccount(activeOrgId: string, targetWork
 
 export async function getWorkspaceLimits(activeOrgId: string) {
   const primary = await resolvePrimaryOrThrow(activeOrgId);
-  const planName = await getActivePlanForPrimary(primary.id);
   const used = await countWorkspacesForAccount(primary.id);
+  const planName = await getActivePlanForPrimary(primary.id);
   const allowance = getWorkspaceAllowance(planName);
 
   return {
     planName,
-    canCreate: canCreateWorkspaces(planName) && used < allowance,
+    canCreate: used < allowance,
     used,
     allowance,
-    requiresUpgrade: !canCreateWorkspaces(planName)
+    requiresUpgrade: false
   };
 }

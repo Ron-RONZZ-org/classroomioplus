@@ -12,7 +12,6 @@ import type { TOrganizationApiKey, TOrganizationApiKeyType, TPlan } from '@db/ty
 import {
   AUTOMATION_TYPE,
   getMcpAutomationCategory,
-  canUsePublicApi,
   getMcpAutomationLimits,
   MCP_TOOL_CREDIT_COST,
   type TMcpToolName
@@ -57,22 +56,11 @@ export async function assertOrganizationAutomationKeyCreationAllowed(
   organizationId: string,
   type: TOrganizationApiKeyType
 ): Promise<void> {
-  const planName = await getOrganizationPlanName(organizationId);
-
-  if (type === AUTOMATION_TYPE.API) {
-    if (!canUsePublicApi(planName)) {
-      throw new AppError(
-        'Public API keys require an Enterprise plan',
-        ErrorCodes.UPGRADE_REQUIRED,
-        403
-      );
-    }
-  }
-
   if (type !== AUTOMATION_TYPE.MCP) {
     return;
   }
 
+  const planName = await getOrganizationPlanName(organizationId);
   const limits = getMcpAutomationLimits(planName);
   const activeKeys = await countActiveOrganizationApiKeys(organizationId, type);
 

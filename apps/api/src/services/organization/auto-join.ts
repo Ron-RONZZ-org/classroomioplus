@@ -13,8 +13,6 @@ import {
 import { ROLE } from '@cio/utils/constants';
 import { getProfileById } from '@cio/db/queries/auth';
 import { db } from '@cio/db/drizzle';
-import { assertStudentCapacityOrThrow } from './student-limit';
-
 interface OrgSignupSettings {
   signup?: {
     inviteOnly?: boolean;
@@ -111,8 +109,6 @@ export async function autoJoinOrg(userId: string, orgId: string): Promise<AutoJo
   if (settings?.signup?.inviteOnly) {
     throw new AppError('This organization requires an invitation to join', ErrorCodes.FORBIDDEN, 403);
   }
-
-  await assertStudentCapacityOrThrow(orgId, 1);
 
   await createOrganizationMember({
     organizationId: orgId,

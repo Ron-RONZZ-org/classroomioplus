@@ -49,8 +49,6 @@ import {
 } from '@cio/db/queries/organization';
 import { ROLE } from '@cio/utils/constants';
 import { db } from '@cio/db/drizzle';
-import { assertStudentCapacityOrThrow } from '../organization/student-limit';
-
 type CohortMemberEnrollment = {
   profileId: string;
   email: string | null;
@@ -77,8 +75,6 @@ async function enrollCohortStudentsInGroups(
   const newStudentProfileIds = new Set(
     studentProfileIds.filter((profileId) => !existingMemberProfileIds.has(profileId))
   );
-
-  await assertStudentCapacityOrThrow(organizationId, newStudentProfileIds.size);
 
   const organizationMemberRows = studentMembers.map((member) => ({
     organizationId,
@@ -262,10 +258,6 @@ export async function addCohortMembers(cohortId: string, data: TAddCohortMembers
               member.profileId,
               tx
             );
-            if (!existingOrgMemberId) {
-              await assertStudentCapacityOrThrow(cohort.organizationId, 1);
-            }
-
             await insertOrganizationMembersOnConflictDoNothing(
               [
                 {
