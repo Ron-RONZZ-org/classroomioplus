@@ -396,6 +396,9 @@
       "purchase_success": "Gói AI credits đã được thêm vào số dư của bạn.",
       "checkout_failed": "Không thể bắt đầu thanh toán. Vui lòng thử lại."
     },
+    "ai_provider": {
+      "saved": "AI provider settings saved."
+    },
     "public_course": {
       "url_copied": "Đã sao chép URL khóa học",
       "url_copy_failed": "Không thể sao chép URL"
@@ -3474,6 +3477,7 @@
       "domains_tab": "Tên miền",
       "teams_tab": "Đội",
       "ai_credits_tab": "Tín dụng AI",
+      "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "Gia sư AI",
       "notifications_tab": "Thông báo"
     },

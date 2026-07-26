@@ -33,7 +33,6 @@
     mentionItems: MentionItem[];
     uploadedDocument: UploadedDocument | null;
     selectedModel: AgentModelId;
-    lockedModelIds?: readonly AgentModelId[];
     isStudent?: boolean;
     /** Set to 'LEARNER_CAP_REACHED' | 'POOL_EXHAUSTED' | 'AI_TUTOR_DISABLED' to render the take-a-break empty state. */
     tutorBlocked?: 'LEARNER_CAP_REACHED' | 'POOL_EXHAUSTED' | 'AI_TUTOR_DISABLED' | null;
@@ -42,7 +41,6 @@
     onFileSelect: (file: File) => void;
     onRemoveDocument: () => void;
     onSelectModel: (id: AgentModelId) => void;
-    onLockedModelSelect?: (id: AgentModelId) => void;
   }
 
   let {
@@ -54,7 +52,6 @@
     mentionItems,
     uploadedDocument,
     selectedModel,
-    lockedModelIds = [],
     isStudent = false,
     tutorBlocked = null,
     onSend,
@@ -292,13 +289,7 @@
                 <SquareIcon size={12} />
               </Button>
             {:else if !isStudent}
-              <ModelPicker
-                value={selectedModel}
-                disabled={isStreaming}
-                {lockedModelIds}
-                onChange={onSelectModel}
-                onLockedSelect={onLockedModelSelect}
-              />
+              <ModelPicker value={selectedModel} disabled={isStreaming} onChange={onSelectModel} />
             {:else}
               <Button size="sm" onclick={onSend} disabled={!inputValue.trim()} class="shrink-0">
                 {$t('ai_assistant.send')}

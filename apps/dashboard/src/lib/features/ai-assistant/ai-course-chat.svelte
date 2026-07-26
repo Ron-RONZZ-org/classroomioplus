@@ -123,18 +123,12 @@
   let activeConversationId: string | null = $state(null);
   let isLoadingHistory = $state(false);
   let selectedModel: AgentModelId = $state(DEFAULT_PICKER_MODEL_ID);
-  const paidModelIds = UI_PICKER_MODEL_IDS.filter((id) => !AGENT_MODELS[id].isFree);
 
   function isAgentModelId(value: unknown): value is AgentModelId {
     return typeof value === 'string' && (AGENT_MODEL_IDS as readonly string[]).includes(value);
   }
 
   function handleSelectModel(id: AgentModelId) {
-    if ($isFreePlan && paidModelIds.includes(id)) {
-      openUpgradeModal();
-      return;
-    }
-
     selectedModel = id;
 
     try {
@@ -144,25 +138,7 @@
     }
   }
 
-  function handleLockedModelSelect() {
-    openUpgradeModal();
-  }
-
   const tokenUsage = $derived(aiAssistantApi.status?.usage ?? null);
-
-  $effect(() => {
-    if (!$isFreePlan || !paidModelIds.includes(selectedModel)) {
-      return;
-    }
-
-    selectedModel = DEFAULT_PICKER_MODEL_ID;
-
-    try {
-      localStorage.setItem(AI_CHAT_MODEL_STORAGE_KEY, DEFAULT_PICKER_MODEL_ID);
-    } catch {
-      // localStorage unavailable
-    }
-  });
 
   function getStorageKey(courseId: string) {
     return `ai-chat-active-${courseId}`;
@@ -1249,11 +1225,6 @@
       pendingInitialTemplateId = templateFromHome ?? null;
 
       if (model && isAgentModelId(model)) {
-        if ($isFreePlan && paidModelIds.includes(model)) {
-          openUpgradeModal();
-          return;
-        }
-
         handleSelectModel(model);
       }
 
@@ -1353,14 +1324,12 @@
       {selectedModel}
       {isStudent}
       {tutorBlocked}
-      lockedModelIds={$isFreePlan ? paidModelIds : []}
       error={chat.error}
       onSend={handleSend}
       onStop={handleStop}
       onFileSelect={handleFileSelect}
       onRemoveDocument={handleRemoveDocument}
       onSelectModel={handleSelectModel}
-      onLockedModelSelect={handleLockedModelSelect}
     />
   {/if}
 </div>

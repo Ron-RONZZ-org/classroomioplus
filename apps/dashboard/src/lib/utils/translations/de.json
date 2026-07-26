@@ -396,6 +396,9 @@
       "purchase_success": "AI credit pack zu Ihrem Guthaben hinzugefügt.",
       "checkout_failed": "Checkout konnte nicht gestartet werden. Bitte versuchen Sie es erneut."
     },
+    "ai_provider": {
+      "saved": "AI provider settings saved."
+    },
     "public_course": {
       "url_copied": "Kurs-URL kopiert",
       "url_copy_failed": "URL konnte nicht kopiert werden"
@@ -3474,6 +3477,7 @@
       "domains_tab": "Domänen",
       "teams_tab": "Mannschaften",
       "ai_credits_tab": "KI-Credits",
+      "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "KI-Tutor",
       "notifications_tab": "Benachrichtigungen"
     },

@@ -8,3 +8,4 @@ export * from './token-usage';
 export * from './usage-aggregations';
 export * from './tutor-config';
 export * from './tutor-usage';
+export * from './ai-provider';

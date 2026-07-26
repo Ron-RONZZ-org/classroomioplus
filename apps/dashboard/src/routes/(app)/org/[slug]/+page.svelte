@@ -20,8 +20,6 @@
   import GraduationCapIcon from '@lucide/svelte/icons/graduation-cap';
   import CompassIcon from '@lucide/svelte/icons/compass';
   import AwardIcon from '@lucide/svelte/icons/award';
-  import { openUpgradeModal } from '$lib/utils/functions/org';
-  import { isFreePlan } from '$lib/utils/store/org';
   import { AI_CHAT_MODEL_STORAGE_KEY } from '$features/ai-assistant/utils/constants';
   import type { TCourseType } from '@cio/db/types';
   import {
@@ -46,7 +44,6 @@
   let pinnedTemplatePrompt: string | null = $state(null);
   let selectedTemplateId: CourseTemplateId | null = $state(null);
   let selectedModel: AgentModelId = $state(DEFAULT_PICKER_MODEL_ID);
-  const paidModelIds = UI_PICKER_MODEL_IDS.filter((id) => !AGENT_MODELS[id].isFree);
 
   function isAgentModelId(value: unknown): value is AgentModelId {
     return typeof value === 'string' && (UI_PICKER_MODEL_IDS as readonly string[]).includes(value);
@@ -66,11 +63,6 @@
   function handleModelChange(model: string) {
     if (!isAgentModelId(model)) return;
 
-    if ($isFreePlan && paidModelIds.includes(model)) {
-      openUpgradeModal();
-      return;
-    }
-
     selectedModel = model;
 
     try {
@@ -79,24 +71,6 @@
       // localStorage unavailable
     }
   }
-
-  function handleLockedModelSelect() {
-    openUpgradeModal();
-  }
-
-  $effect(() => {
-    if (!$isFreePlan || !paidModelIds.includes(selectedModel)) {
-      return;
-    }
-
-    selectedModel = DEFAULT_PICKER_MODEL_ID;
-
-    try {
-      localStorage.setItem(AI_CHAT_MODEL_STORAGE_KEY, DEFAULT_PICKER_MODEL_ID);
-    } catch {
-      // localStorage unavailable
-    }
-  });
 
   function selectTemplate(template: CourseTemplate) {
     composerPrompt = template.promptTemplate;
@@ -117,11 +91,6 @@
 
   async function handleCreate({ prompt, level, model }: { prompt: string; level: string; model?: string }) {
     if (isAgentModelId(model)) {
-      if ($isFreePlan && paidModelIds.includes(model)) {
-        openUpgradeModal();
-        return;
-      }
-
       handleModelChange(model);
     }
 
@@ -167,12 +136,6 @@
       const storedModel = localStorage.getItem(AI_CHAT_MODEL_STORAGE_KEY);
 
       if (isAgentModelId(storedModel)) {
-        if ($isFreePlan && paidModelIds.includes(storedModel)) {
-          selectedModel = DEFAULT_PICKER_MODEL_ID;
-          localStorage.setItem(AI_CHAT_MODEL_STORAGE_KEY, DEFAULT_PICKER_MODEL_ID);
-          return;
-        }
-
         selectedModel = storedModel;
       }
     } catch {
@@ -235,9 +198,7 @@
           { value: 'intermediate', label: $t('course.creator.level.intermediate') },
           { value: 'advanced', label: $t('course.creator.level.advanced') }
         ]}
-        lockedModelIds={$isFreePlan ? paidModelIds : []}
         onModelChange={handleModelChange}
-        onLockedModelSelect={handleLockedModelSelect}
         onsubmit={handleCreate}
       />
 

@@ -3,33 +3,20 @@
   import * as Select from '../../base/select';
   import ChevronDownIcon from '@lucide/svelte/icons/chevron-down';
   import CheckIcon from '@lucide/svelte/icons/check';
-  import RocketIcon from '@lucide/svelte/icons/rocket';
   import { AGENT_MODELS, UI_PICKER_MODEL_IDS, type AgentModelId } from '@cio/utils/agent-models';
 
   interface Props {
     value: AgentModelId;
     disabled?: boolean;
     variant?: 'compact' | 'select';
-    lockedModelIds?: readonly AgentModelId[];
     onChange: (id: AgentModelId) => void;
-    onLockedSelect?: (id: AgentModelId) => void;
   }
 
-  let { value, disabled = false, variant = 'compact', lockedModelIds = [], onChange, onLockedSelect }: Props = $props();
+  let { value, disabled = false, variant = 'compact', onChange }: Props = $props();
 
   let open = $state(false);
 
-  function isLocked(id: AgentModelId) {
-    return lockedModelIds.includes(id);
-  }
-
   function handleSelect(id: AgentModelId) {
-    if (isLocked(id)) {
-      onLockedSelect?.(id);
-      open = false;
-      return;
-    }
-
     onChange(id);
     open = false;
   }
@@ -53,9 +40,6 @@
           <span class="ui:flex ui:w-full ui:items-center ui:justify-between ui:gap-2">
             <span class="ui:flex ui:min-w-0 ui:items-center ui:gap-2">
               <span>{AGENT_MODELS[id].label}</span>
-              {#if isLocked(id)}
-                <RocketIcon size={16} class="ui:text-primary! ui:shrink-0" />
-              {/if}
             </span>
             <span
               class={AGENT_MODELS[id].costTier === 'high'
@@ -95,9 +79,6 @@
           >
             <span class="ui:flex ui:min-w-0 ui:items-center ui:gap-2">
               <span class="ui:min-w-0 truncate">{AGENT_MODELS[id].label}</span>
-              {#if isLocked(id)}
-                <RocketIcon size={16} class="ui:text-primary! ui:shrink-0" />
-              {/if}
             </span>
             <span class="ui:flex ui:shrink-0 ui:items-center ui:gap-1">
               {#if AGENT_MODELS[id].costTier === 'high'}

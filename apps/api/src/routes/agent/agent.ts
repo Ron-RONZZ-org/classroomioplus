@@ -54,6 +54,7 @@ import {
   type AgentStatus
 } from '@cio/ai-assistant';
 import { createModel, getProviderConfigForProvider, pickAnyConfiguredProvider } from '@cio/ai-assistant/providers';
+import { getOrgAwareProviderConfig } from '@api/services/organization/ai-provider';
 import { AGENT_MODELS, DEFAULT_PICKER_MODEL_ID } from '@cio/utils/agent-models';
 import { buildSystemPrompt, buildContextMessage } from '@cio/ai-assistant/prompt';
 import { trackAgentEvent, AgentEvent } from '@cio/core/utils/tinybird';
@@ -387,7 +388,14 @@ const agentCoreRouter = new Hono()
       const modelId =
         role === AgentRole.STUDENT ? DEFAULT_PICKER_MODEL_ID : (requestedModel ?? DEFAULT_PICKER_MODEL_ID);
       const modelDescriptor = AGENT_MODELS[modelId];
-      const baseProviderConfig = getProviderConfigForProvider(modelDescriptor.provider as AIProvider);
+
+      // Resolve provider config: org-level settings take precedence over env vars.
+      const baseProviderConfig =
+        (await getOrgAwareProviderConfig(
+          orgId,
+          modelDescriptor.provider as AIProvider,
+          modelDescriptor.backendModelId
+        )) ?? getProviderConfigForProvider(modelDescriptor.provider as AIProvider);
 
       if (!baseProviderConfig) {
         throw new AppError(`AI assistant is not configured for model "${modelId}"`, 'AI_NOT_CONFIGURED', 503);
@@ -519,9 +527,7 @@ const agentCoreRouter = new Hono()
       const agentTools =
         role === AgentRole.STUDENT
           ? buildStudentAgentTools(orgId, user.id, courseId, studentPolicy!.settings)
-          : filterToolsForChatMode(
-              buildAgentTools(orgId, user.id, courseId, messages, { documentAssets })
-            );
+          : filterToolsForChatMode(buildAgentTools(orgId, user.id, courseId, messages, { documentAssets }));
 
       const contextManaged = await buildModelContextMessages({
         conversationId,
