@@ -104,11 +104,9 @@ export async function resolveVerificationOrg(options: {
     }
   }
 
-  if (process.env.PUBLIC_IS_SELFHOSTED === 'true') {
-    const org = await getFirstOrganization();
-    if (org) {
-      return org;
-    }
+  const org = await getFirstOrganization();
+  if (org) {
+    return org;
   }
 
   if (options.userId) {

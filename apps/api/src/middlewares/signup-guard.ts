@@ -43,8 +43,6 @@ const INVITE_REQUIRED = {
   message: 'This organization requires an invitation to sign up'
 } as const;
 
-const isSelfHosted = env.PUBLIC_IS_SELFHOSTED === 'true';
-
 function normalizeEmail(email?: string) {
   return email?.trim().toLowerCase();
 }
@@ -73,10 +71,6 @@ async function getOrganizationSafely(orgId: string) {
 }
 
 async function canProceedWithoutOrgContext(c: Context) {
-  if (!isSelfHosted) {
-    return true;
-  }
-
   const firstOrg = await getFirstOrganization();
   if (!firstOrg) {
     return true;

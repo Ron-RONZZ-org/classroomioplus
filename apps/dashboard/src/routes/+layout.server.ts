@@ -1,13 +1,11 @@
 import type { AccountOrg } from '$features/app/types';
 import type { MetaTagsProps } from 'svelte-meta-tags';
 import type { UploadLimits } from '$lib/utils/config/upload-limits';
-import { PUBLIC_IS_SELFHOSTED } from '$env/static/public';
 import { env } from '$env/dynamic/private';
 import { env as publicEnv } from '$env/dynamic/public';
 import { getBaseMetaTags } from '$lib/utils/functions/metaTags.server';
 import { getOrgSiteInfo } from '$features/app/layout-setup';
 import { getUploadLimits } from '$lib/utils/config/upload-limits';
-import { resolveOrgSiteOgWarmUrl } from '$lib/utils/functions/org-site-og-url';
 
 export const ssr = true;
 
@@ -34,7 +32,7 @@ export const load = async ({ url, cookies, request, locals }): Promise<LoadOutpu
   if (orgSiteInfo.isOrgSite && orgSiteInfo.org?.siteName) {
     const warmUrl = resolveOrgSiteOgWarmUrl({
       siteName: orgSiteInfo.org.siteName,
-      isSelfHosted: PUBLIC_IS_SELFHOSTED === 'true',
+      isSelfHosted: true,
       privateServerUrl: env.PRIVATE_SERVER_URL,
       publicServerUrl: publicEnv.PUBLIC_SERVER_URL
     });
@@ -59,9 +57,7 @@ export const load = async ({ url, cookies, request, locals }): Promise<LoadOutpu
   };
 
   const loadMs = Math.round((performance.now() - loadStart) * 100) / 100;
-  console.log(
-    `[+layout.server] load: ${loadMs}ms (getOrgSiteInfo: ${orgSiteInfoMs}ms) | PUBLIC_IS_SELFHOSTED=${PUBLIC_IS_SELFHOSTED}`
-  );
+  console.log(`[+layout.server] load: ${loadMs}ms (getOrgSiteInfo: ${orgSiteInfoMs}ms)`);
 
   // If it isn't a registered dashboard domain and also not a valid sub domain.
   // if (!APP_SUBDOMAINS.includes(orgSiteInfo.subdomain) && !dev && !orgSiteInfo.isOrgSite) {

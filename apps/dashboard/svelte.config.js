@@ -8,7 +8,7 @@ import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 const IS_CLOUDFLARE = process.env.CI_ENVIRONMENT === 'cloudflare';
 
 const adapterCloudflare = IS_CLOUDFLARE ? (await import('@sveltejs/adapter-cloudflare')).default : null;
-const isSelfHosted = process.env.PUBLIC_IS_SELFHOSTED === 'true';
+const isSelfHosted = true;
 const csp = getCspDomains(isSelfHosted, process.env.PUBLIC_SERVER_URL);
 
 /** @type {import('@sveltejs/kit').Config} */

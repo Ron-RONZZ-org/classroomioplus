@@ -51,7 +51,7 @@ export async function resolveOrgSiteOgImageUrl(options: {
     return null;
   }
 
-  const mediaCdnUrl = options.mediaCdnUrl?.trim() || (!options.isSelfHosted ? DEFAULT_CLOUD_MEDIA_CDN_URL : '');
+  const mediaCdnUrl = options.mediaCdnUrl?.trim() || '';
   if (mediaCdnUrl && isPublicHttpOrigin(mediaCdnUrl)) {
     const cdnUrl = buildOrgSiteOgCdnUrl(siteName, mediaCdnUrl);
     if (await isOrgSiteOgCdnObjectAvailable(cdnUrl)) {
@@ -86,10 +86,6 @@ export function resolveOrgSiteOgWarmUrl(options: {
   const publicServerUrl = options.publicServerUrl?.trim();
   if (publicServerUrl && isPublicHttpOrigin(publicServerUrl)) {
     return buildOrgSiteOgApiUrl(siteName, publicServerUrl);
-  }
-
-  if (!options.isSelfHosted) {
-    return buildOrgSiteOgApiUrl(siteName, 'https://api.classroomio.com');
   }
 
   return null;

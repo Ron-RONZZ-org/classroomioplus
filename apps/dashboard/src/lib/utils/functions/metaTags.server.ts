@@ -1,11 +1,8 @@
 import type { MetaTagsProps } from 'svelte-meta-tags';
 import type { OrgSiteInfo } from '$features/app/layout-setup';
-import { PUBLIC_IS_SELFHOSTED } from '$env/static/public';
 import { env as publicEnv } from '$env/dynamic/public';
 import { buildOrgSiteTitle, extractOrgSiteMetaCopy } from '$lib/utils/functions/org-site-meta';
 import { resolveOrgSiteOgImageUrl } from '$lib/utils/functions/org-site-og-url';
-
-const isSelfHosted = PUBLIC_IS_SELFHOSTED === 'true';
 
 const DEFAULT_TITLE = 'ClassroomIO | One Platform for Customer, Partner, and Employee Training';
 const DEFAULT_DESCRIPTION =
@@ -24,7 +21,7 @@ async function resolveOgImageUrl(url: URL, orgSiteInfo: OrgSiteInfo): Promise<st
     const dynamicOgUrl = await resolveOrgSiteOgImageUrl({
       siteName: orgSiteInfo.org.siteName,
       pageOrigin: url.origin,
-      isSelfHosted,
+      isSelfHosted: true,
       mediaCdnUrl: publicEnv.PUBLIC_MEDIA_CDN_URL,
       publicServerUrl: publicEnv.PUBLIC_SERVER_URL
     });
@@ -33,22 +30,20 @@ async function resolveOgImageUrl(url: URL, orgSiteInfo: OrgSiteInfo): Promise<st
     }
   }
 
-  if (isSelfHosted) {
-    const org = orgSiteInfo.org;
-    if (!org) {
-      return CLOUD_OG_IMAGE;
-    }
+  const org = orgSiteInfo.org;
+  if (!org) {
+    return CLOUD_OG_IMAGE;
+  }
 
-    const orgImage =
-      org.avatarUrl ||
-      org.landingpage?.header?.banner?.image ||
-      (org as { customization?: { dashboard?: { bannerImage?: string } } }).customization?.dashboard?.bannerImage;
-    if (orgImage) {
-      try {
-        return new URL(orgImage, url.origin).href;
-      } catch {
-        // fall through to bundled default
-      }
+  const orgImage =
+    org.avatarUrl ||
+    org.landingpage?.header?.banner?.image ||
+    (org as { customization?: { dashboard?: { bannerImage?: string } } }).customization?.dashboard?.bannerImage;
+  if (orgImage) {
+    try {
+      return new URL(orgImage, url.origin).href;
+    } catch {
+      // fall through to bundled default
     }
   }
 
@@ -97,14 +92,14 @@ export async function getBaseMetaTags(url: URL, orgSiteInfo: OrgSiteInfo): Promi
   const title =
     orgMeta?.title ||
     publicEnv.PUBLIC_APP_TITLE?.trim() ||
-    (isSelfHosted && orgSiteInfo.org?.name ? `${orgSiteInfo.org.name} | Learning Platform` : DEFAULT_TITLE);
+    (orgSiteInfo.org?.name ? `${orgSiteInfo.org.name} | Learning Platform` : DEFAULT_TITLE);
 
   const description = orgMeta?.description || publicEnv.PUBLIC_APP_DESCRIPTION?.trim() || DEFAULT_DESCRIPTION;
 
   const siteName =
     orgMeta?.siteName ||
     publicEnv.PUBLIC_APP_TITLE?.trim() ||
-    (isSelfHosted && orgSiteInfo.org?.name ? orgSiteInfo.org.name : null) ||
+    (orgSiteInfo.org?.name ? orgSiteInfo.org.name : null) ||
     'ClassroomIO';
 
   const ogImageUrl = await resolveOgImageUrl(url, orgSiteInfo);

@@ -31,10 +31,8 @@ export { mintLoginLinkToken } from './auth/login-link';
  * the OAuth proxy plugin is only needed for cloud tenant/BYOD domains.
  */
 function buildOAuthProxyPlugin() {
-  if (process.env.PUBLIC_IS_SELFHOSTED === 'true') {
-    return [];
-  }
-  return [oAuthProxy({ productionURL: CONSTANTS.BASE_URL })];
+  // Self-hosted: no OAuth proxy needed (direct browser-to-API via dashboard origin)
+  return [];
 }
 
 export const auth: ReturnType<typeof betterAuth> = betterAuth({

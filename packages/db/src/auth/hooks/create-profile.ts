@@ -9,11 +9,10 @@ import { getOrganizationCount } from '@db/queries/organization';
 import { ssoProvisioningHook } from './sso-provisioning';
 
 /**
- * True when this is a first-time signup on a self-hosted instance (no orgs exist yet).
- * The first signup creates the only org; we auto-verify their email.
+ * True when this is a first-time signup (no orgs exist yet).
+ * The first signup auto-verifies their email.
  */
-async function isSelfHostedFirstSignup(): Promise<boolean> {
-  if (process.env.PUBLIC_IS_SELFHOSTED !== 'true') return false;
+async function isFirstSignup(): Promise<boolean> {
   const count = await getOrganizationCount();
   return count === 0;
 }
@@ -23,7 +22,7 @@ async function isSelfHostedFirstSignup(): Promise<boolean> {
  *
  * We use the profile table for everything related to the user because we heavily used supabase and supabase didn't allow you add fields to the auth.users table.
  *
- * Self-hosted first signup: auto-verify email (no orgs exist yet, this user will create the only org).
+ * First-time signup: auto-verify email (no orgs exist yet, this user will create the only org).
  */
 export const createProfileHook = async (user: User, _request?: Request) => {
   console.log('[auth] createProfileHook: running', { userId: user.id });
@@ -33,8 +32,8 @@ export const createProfileHook = async (user: User, _request?: Request) => {
 
   let isEmailVerified = user.emailVerified || (await hasVerifiedEmailProvider(user.id));
 
-  // Self-hosted first signup: auto-verify email and update existing profile if needed
-  if (!isEmailVerified && (await isSelfHostedFirstSignup())) {
+  // First signup: auto-verify email and update existing profile if needed
+  if (!isEmailVerified && (await isFirstSignup())) {
     isEmailVerified = true;
     await db.update(schema.user).set({ emailVerified: true }).where(eq(schema.user.id, user.id));
     // Also mark the profile as verified if it already exists

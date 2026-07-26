@@ -1,7 +1,6 @@
 import { currentOrg, currentOrgPath } from './org';
 import { derived, writable } from 'svelte/store';
 
-import { PUBLIC_IS_SELFHOSTED } from '$env/static/public';
 import { ROLE } from '@cio/utils/constants';
 
 export const globalStore = writable<{
@@ -21,14 +20,10 @@ export const isOrgStudent = derived(currentOrg, ($currentOrg) => {
 });
 
 /**
- * The goal of this store is to determine whether we should display the app in student or admin/teacher mode.
- * Cloud: orgSite is always student (a teacher on an org subdomain sees the student view).
+ * Determines whether we should display the app in student or admin/teacher mode.
  * Self-hosted: derived from isOrgStudent (role-based).
  */
-export const isStudentExperience = derived([globalStore, isOrgStudent], ([$gs, $isStudent]) => {
-  const isCloud = PUBLIC_IS_SELFHOSTED !== 'true';
-  if (isCloud) return $gs.isOrgSite;
-
+export const isStudentExperience = derived([globalStore, isOrgStudent], ([_gs, $isStudent]) => {
   return $isStudent ?? false;
 });
 

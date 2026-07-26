@@ -10,7 +10,6 @@
   import { hasPublicApiAccess, isOrgAdmin } from '$lib/utils/store/org';
   import { t } from '$lib/utils/functions/translations';
   import { snackbar } from '$features/ui/snackbar/store';
-  import { PUBLIC_IS_SELFHOSTED } from '$env/static/public';
   import * as Alert from '@cio/ui/base/alert';
   import { Badge } from '@cio/ui/base/badge';
   import { Button } from '@cio/ui/base/button';
@@ -35,9 +34,7 @@
   let keyLabel = $state('');
 
   const canCreateKey = $derived(keyLabel.trim().length > 0 && !automationApi.isLoading);
-  const upgradeMessageKey = $derived(
-    PUBLIC_IS_SELFHOSTED === 'true' ? 'upgrade.enterprise_required' : 'upgrade.public_api_required'
-  );
+  const upgradeMessageKey = 'upgrade.enterprise_required';
 
   function resetCreateKeyModal() {
     keyLabel = '';

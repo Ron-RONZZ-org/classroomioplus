@@ -2,7 +2,6 @@ import { AppError, ErrorCodes } from '@api/utils/errors';
 import { enqueueTransactionalEmail } from '@api/services/jobs';
 import { getDashboardBaseUrl } from '@cio/core/config/dashboard-url';
 import { getStudentLimit } from '@cio/utils/plans';
-import { env } from '@cio/core/config/env';
 import {
   countActiveStudents,
   getActiveOrganizationPlan,
@@ -60,7 +59,6 @@ async function notifyStudentMilestone(
  */
 export async function assertStudentCapacityOrThrow(orgId: string, additionalStudents: number): Promise<void> {
   if (additionalStudents <= 0) return;
-  if (env.PUBLIC_IS_SELFHOSTED === 'true') return;
 
   const activePlan = await getActiveOrganizationPlan(orgId);
   const limit = getStudentLimit(activePlan?.planName);
