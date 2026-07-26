@@ -7,8 +7,10 @@
   import { currentOrg } from '$lib/utils/store/org';
   import { setTheme } from '$lib/utils/functions/theme';
   import { orgApi } from '$features/org/api/org.svelte';
+  import { setTelemetryEnabled } from '$lib/utils/functions/appSetup';
 
   import { Input } from '@cio/ui/base/input';
+  import { Switch } from '@cio/ui/base/switch';
   import { UploadImage, UnsavedChanges } from '$features/ui';
   import * as Field from '@cio/ui/base/field';
 
@@ -163,6 +165,28 @@
           />
         </div>
       </div>
+    </Field.Field>
+  </Field.Set>
+
+  <Field.Separator />
+
+  <Field.Set>
+    <Field.Legend>Analytics &amp; Telemetry</Field.Legend>
+    <Field.Description>
+      Help improve this platform by sharing anonymous usage data. No personal information is collected.
+    </Field.Description>
+    <Field.Field orientation="horizontal">
+      <Switch
+        checked={$currentOrg.settings?.telemetryEnabled ?? false}
+        onCheckedChange={(enabled) => {
+          if ($currentOrg.id) {
+            $currentOrg.settings = { ...($currentOrg.settings ?? {}), telemetryEnabled: enabled };
+            setTelemetryEnabled(enabled);
+            orgApi.update($currentOrg.id, { settings: $currentOrg.settings });
+          }
+        }}
+      />
+      <Field.Label>Enable telemetry</Field.Label>
     </Field.Field>
   </Field.Set>
 </Field.Group>
