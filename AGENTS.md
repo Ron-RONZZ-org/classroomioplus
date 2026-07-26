@@ -1,3 +1,61 @@
+# AGENTS.md — ClassroomIO Plus
+
+This is the canonical instruction file for AI agents working on **ClassroomIO Plus**.
+
+## Project Identity
+
+ClassroomIO Plus is a **community-maintained fork** of [ClassroomIO](https://github.com/classroomio/classroomio) — an open-source learning management system. We extend our gratitude to the upstream maintainers who built the foundation. This fork exists to serve self-hosters with enhancements that may not align with upstream's SaaS-focused roadmap.
+
+## Tone — First Principle
+
+**Never antagonise upstream.** The upstream team built this software. Our patches are small and focused. Frame changes as self-hosting improvements, not as "fixes" to upstream's choices. Prefer language like "self-hosting defaults", "optional for self-hosted", "bypassed on self-hosted" over "remove paywalls", "debloat", "strip telemetry".
+
+Our value is in curation and maintenance, not in claiming upstream did something wrong.
+
+## How This Fork Works
+
+Our `main` branch tracks upstream's `main` with our commits on top. When upstream releases a new version, rebase our commits onto it:
+
+```bash
+./scripts/rebase-upstream.sh v1.5.0
+```
+
+If a commit conflicts, fix it during the rebase — same as any kernel-style patch series.
+
+## Our Commits
+
+| Commit | Topic | Files |
+|--------|-------|-------|
+| 1 | Fork infrastructure | `AGENTS.md`, `scripts/`, `docker-compose.yaml` |
+| 2 | Self-hosting defaults (license server, analytics guards) | `apps/api/src/services/license.ts`, dashboard analytics files |
+| 3 | Custom AI provider support | `packages/ai-assistant/src/providers/index.ts` |
+
+## Scope — What We Patch
+
+Our patches are limited to:
+- **License server**: skip the `enterprise-api.classroomio.dev` phone-home on self-hosted
+- **Analytics guards**: prevent Umami, Posthog, Senja from loading on self-hosted instances
+- **Custom AI endpoint**: `OPENAI_BASE_URL` and `OPENAI_MODEL` env vars for the OpenAI provider
+- **Plan enforcement**: bypass token caps on self-hosted (you bring your own API key)
+
+## What We Do NOT Change (Upstream Compatibility Guarantee)
+
+- Database schemas and migrations
+- SvelteKit component tree and UI
+- API route signatures, types, or response shapes
+- Authentication flow
+- Webhooks and integrations
+
+Users can switch between vanilla classroomio and classroomioplus without data migration.
+
+---
+
+# Upstream Agent Guidance (preserved verbatim)
+
+The content below is **upstream's AGENTS.md** — preserved as-is. All the development conventions, build commands, coding patterns, and workflow rules apply to this fork identically. Our changes are transparent to anyone working with the codebase.
+
+---
+
 # Agent Guidance
 
 This document collects implementation rules and workflow conventions for code changes.
