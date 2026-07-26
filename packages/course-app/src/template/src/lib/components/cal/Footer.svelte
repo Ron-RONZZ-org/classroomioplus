@@ -40,7 +40,7 @@
         target="_blank noopener noreferrer"
         class="flex w-full items-center justify-center gap-1 text-white hover:underline md:w-fit lg:justify-start"
       >
-        <p class="text-base font-bold">Built with ❤️ by ClassroomIO</p>
+        <p class="text-base font-bold">Built on LibreClassroom</p>
       </a>
     </div>
   </nav>

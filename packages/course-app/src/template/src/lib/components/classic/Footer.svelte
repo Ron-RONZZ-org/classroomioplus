@@ -23,12 +23,12 @@
       <Logo src={seo?.settings.logo} alt={seo?.settings.title} />
 
       <a
-        href="https://classroomio.com"
+        href="https://libreclassroom.ronzz.org"
         target="_blank"
         rel="noopener noreferrer"
         class="flex items-center gap-1 md:hidden"
       >
-        <p class="text-base font-semibold text-[#0233BD] underline">Built on ClassroomIO</p>
+        <p class="text-base font-semibold text-[#0233BD] underline">Built on LibreClassroom</p>
       </a>
     </div>
     <ul
@@ -64,12 +64,12 @@
       {/if}
     </ul>
     <a
-      href="https://classroomio.com"
+      href="https://libreclassroom.ronzz.org"
       target="_blank"
       rel="noopener noreferrer"
       class="hidden items-center gap-1 md:flex"
     >
-      <p class="text-base font-semibold text-[#0233BD] underline">Built on ClassroomIO</p>
+      <p class="text-base font-semibold text-[#0233BD] underline">Built on LibreClassroom</p>
     </a>
   </nav>
 {/if}

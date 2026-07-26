@@ -11,7 +11,7 @@ const VERIFY_EMAIL_CONTENT = `
 
 const WELCOME_CONTENT = `
   <p>Dear Alex,</p>
-  <p>My name is Best, the founder of ClassroomIO. I saw you signed up, any questions so far?</p>
+  <p>My name is Best, the founder of LibreClassroom. I saw you signed up, any questions so far?</p>
   <p>Would you like to get a walkthrough of the platform in a 30 minute product demo? It's free and we won't try to sell you anything, just want to learn from your use case and show you all the cool features and flows we thought about.</p>
   <p>Interested? just book a 30-minute demo slot in our calendar!</p>
   <div><a class="button" href="https://classroomio.com/demo">Book demo</a></div>
@@ -20,7 +20,7 @@ const WELCOME_CONTENT = `
 
 const FORGOT_PASSWORD_CONTENT = `
   <p>Hello Jane,</p>
-  <p>You are receiving this email because you have requested a password reset for your ClassroomIO account.</p>
+  <p>You are receiving this email because you have requested a password reset for your LibreClassroom account.</p>
   <p>Please click the button below to reset your password:</p>
   <div><a class="button" href="#">Reset my password</a></div>
   <p>PS: If you did not initiate this request, reply to this email or write to help@classroomio.com so we can look into a possible attempt to breach your account.</p>
@@ -29,7 +29,7 @@ const FORGOT_PASSWORD_CONTENT = `
 const COURSE_WELCOME_CONTENT = `
   <p>Hi there,</p>
   <p>You now have access to <strong>Introduction to Web Development</strong> in <strong>Acme Coding School</strong>.</p>
-  <p><a href="#">Sign in to ClassroomIO</a> to open the course and get started.</p>
+  <p><a href="#">Sign in to LibreClassroom</a> to open the course and get started.</p>
   <p>If you run into any issues, reach out to your instructor(s).</p>
   <p>Cheers,</p>
   <p>Acme Coding School</p>
@@ -37,7 +37,7 @@ const COURSE_WELCOME_CONTENT = `
 
 const INVITE_TEACHER_CONTENT = `
   <p>Hi there,</p>
-  <p><strong>Sarah Johnson</strong> invited you to join <strong>Acme Coding School</strong> on ClassroomIO as <strong>Admin</strong>.</p>
+  <p><strong>Sarah Johnson</strong> invited you to join <strong>Acme Coding School</strong> on LibreClassroom as <strong>Admin</strong>.</p>
   <p>This invite expires on <strong>Jul 15, 2026</strong> (UTC).</p>
   <div><a class="button" href="#">Accept Invitation</a></div>
 `;

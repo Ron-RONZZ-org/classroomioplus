@@ -1,10 +1,10 @@
-# AGENTS.md — ClassroomIO Plus
+# AGENTS.md — LibreClassroom
 
-This is the canonical instruction file for AI agents working on **ClassroomIO Plus**.
+This is the canonical instruction file for AI agents working on **LibreClassroom**.
 
 ## Project Identity
 
-ClassroomIO Plus is a **community-maintained fork** of [ClassroomIO](https://github.com/classroomio/classroomio) — an open-source learning management system. We extend our gratitude to the upstream maintainers who built the foundation. This fork exists to serve self-hosters with enhancements that may not align with upstream's SaaS-focused roadmap.
+LibreClassroom is a **community-maintained fork** of [ClassroomIO](https://github.com/classroomio/classroomio) — an open-source learning management system. We extend our gratitude to the upstream maintainers who built the foundation. This fork exists to serve self-hosters with enhancements that may not align with upstream's SaaS-focused roadmap.
 
 ## Tone — First Principle
 
@@ -46,7 +46,7 @@ Our patches are limited to:
 - Authentication flow
 - Webhooks and integrations
 
-Users can switch between vanilla classroomio and classroomioplus without data migration.
+Users can switch between vanilla classroomio and libreclassroom without data migration.
 
 ---
 
@@ -120,17 +120,17 @@ Also run `pnpm format:check` (see Translation, Formatting, and Git Workflow abov
 
 Git worktrees do NOT share `node_modules` with the parent checkout. After entering a worktree:
 
-1. Check if the parent checkout at `/home/rongzhou/kodo/classroomioplus` has `node_modules` installed:
+1. Check if the parent checkout at `/home/rongzhou/kodo/libreclassroom` has `node_modules` installed:
    ```bash
-   ls /home/rongzhou/kodo/classroomioplus/node_modules/.pnpm/ | head -3
+   ls /home/rongzhou/kodo/libreclassroom/node_modules/.pnpm/ | head -3
    ```
 2. If not, install there first (takes ~1 min):
    ```bash
-   cd /home/rongzhou/kodo/classroomioplus && pnpm install --frozen-lockfile
+   cd /home/rongzhou/kodo/libreclassroom && pnpm install --frozen-lockfile
    ```
 3. Symlink the worktree's `node_modules` to the parent's:
    ```bash
-   ln -sf /home/rongzhou/kodo/classroomioplus/node_modules /home/rongzhou/.local/share/opencode/worktree/classroomioplus/<branch>/node_modules
+   ln -sf /home/rongzhou/kodo/libreclassroom/node_modules /home/rongzhou/.local/share/opencode/worktree/libreclassroom/<branch>/node_modules
    ```
 4. Verify the symlink works:
    ```bash

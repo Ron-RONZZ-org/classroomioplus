@@ -1,4 +1,4 @@
-# ClassroomIO — Local Dev Setup Guide
+# LibreClassroom — Local Dev Setup Guide
 
 A practical guide to running classroomio locally for development, plus a
 troubleshooting reference for the errors you're likely to hit. Use it to set up a
