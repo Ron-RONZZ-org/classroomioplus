@@ -7,7 +7,6 @@ import {
   createOrganizationPlan,
   deleteOrganizationAudienceMember,
   deleteOrganizationMember,
-  getActiveOrganizationPlan,
   getFirstOrganizationWithPlans,
   getLatestOrgInvitesByEmails,
   getOrgIdBySiteName,
@@ -40,7 +39,7 @@ import { getAccountPrimary } from '@cio/db/queries/account';
 import { getLastLogin, getProfileCourseProgress, getUserExercisesStats } from '@cio/db/queries/analytics';
 
 import type { OrganizationWithPlans } from '@cio/db/queries/organization/types';
-import { PLAN } from '@cio/utils/plans';
+
 import { ROLE } from '@cio/utils/constants';
 import { createOrganizationWithOwner } from '@api/services/onboarding';
 import { deriveAudienceMemberStatus } from '@api/utils/audience-member-status';
@@ -648,21 +647,6 @@ export async function createOrgPlan(data: TNewOrganizationPlan) {
  */
 export async function updateOrg(orgId: string, data: Partial<TOrganization>) {
   try {
-    // Enforce plan restriction: only paid plans can use non-minimal landing page themes
-    if (data.landingpage && typeof data.landingpage === 'object') {
-      const landingpage = data.landingpage as Record<string, unknown>;
-      const theme = landingpage.theme;
-
-      if (typeof theme === 'string' && theme !== 'minimal') {
-        const activePlan = await getActiveOrganizationPlan(orgId);
-        const planName = activePlan?.planName ?? PLAN.BASIC;
-
-        if (planName === PLAN.BASIC) {
-          throw new AppError('Landing page themes require a paid plan', ErrorCodes.UPGRADE_REQUIRED, 403);
-        }
-      }
-    }
-
     let previousCustomDomainHostname: string | undefined;
 
     if (data.customDomain !== undefined || data.isCustomDomainVerified !== undefined) {

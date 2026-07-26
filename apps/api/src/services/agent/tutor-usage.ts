@@ -73,6 +73,7 @@ export interface TutorPolicyResult {
  *
  * Each failure logs a cap event so admins can see why a learner was blocked.
  * Cap enforcement is gated behind `AI_TUTOR_CAP_ENFORCED` for Phase 1 rollout.
+ * `enforceTokenBalance` is currently a no-op (#10) pending configurable budget (#11).
  */
 export async function enforceStudentTutorPolicy(
   orgId: string,

@@ -34,7 +34,6 @@ import { enqueueTransactionalEmail } from '@api/services/jobs';
 import { getProfileByEmail, markUserAndProfileEmailVerified } from '@cio/db/queries/auth';
 import { generateSlug } from '@cio/utils/functions';
 import { ensureComplianceEnrollmentRecordsForProfiles } from './compliance';
-import { assertStudentCapacityOrThrow } from '../organization/student-limit';
 import { getWelcomeSessionIcs } from './session-invite';
 import { db } from '@cio/db/drizzle';
 import { trackServerEvent, SERVER_EVENTS } from '@cio/analytics';
@@ -675,8 +674,6 @@ export async function enrollInCourse(
   }
 
   if (!orgMemberId) {
-    await assertStudentCapacityOrThrow(org.id, 1);
-
     await createOrganizationMember({
       organizationId: org.id,
       roleId: ROLE.STUDENT,
@@ -1009,8 +1006,6 @@ export async function acceptStudentInvite(token: string, user: TAuthUser, contex
     const orgMemberId = await getOrganizationMemberIdByOrgAndProfile(organization.id, user.id, tx);
 
     if (!orgMemberId) {
-      await assertStudentCapacityOrThrow(organization.id, 1);
-
       await createOrganizationMember(
         {
           organizationId: organization.id,

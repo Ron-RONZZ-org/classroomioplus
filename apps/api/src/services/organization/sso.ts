@@ -16,19 +16,6 @@ import {
 
 import { ROLE } from '@cio/utils/constants';
 import { db } from '@cio/db/drizzle';
-import { getOrganizationPlanStatus } from '@cio/db/queries/organization/organization';
-
-// Check if organization has Enterprise plan
-async function assertEnterprisePlan(orgId: string): Promise<void> {
-  const plans = await getOrganizationPlanStatus(orgId);
-  const hasEnterprise = plans.some(
-    (p: { planName: string | null; isActive: boolean | null }) => p.planName === 'ENTERPRISE' && p.isActive
-  );
-
-  if (!hasEnterprise) {
-    throw new AppError('SSO requires Enterprise plan', ErrorCodes.UPGRADE_REQUIRED, 403);
-  }
-}
 
 // Generate a unique provider ID for Better Auth
 function generateProviderId(orgId: string, provider: string): string {
@@ -59,9 +46,6 @@ export async function createSsoConnection(
   authApi: { registerSSOProvider: (args: unknown) => Promise<unknown> },
   requestHeaders?: Headers
 ) {
-  // Check Enterprise plan
-  await assertEnterprisePlan(orgId);
-
   // Check if org already has SSO config
   const existing = await getOrganizationSsoConfig(orgId);
   if (existing) {
