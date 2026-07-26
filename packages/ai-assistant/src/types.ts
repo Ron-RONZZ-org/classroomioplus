@@ -15,7 +15,8 @@ export const AIProvider = {
   OPENAI: 'openai',
   ANTHROPIC: 'anthropic',
   GOOGLE: 'google',
-  MOONSHOT: 'moonshot'
+  MOONSHOT: 'moonshot',
+  DEEPSEEK: 'deepseek'
 } as const;
 
 export type AIProvider = (typeof AIProvider)[keyof typeof AIProvider];
@@ -23,6 +24,18 @@ export type AIProvider = (typeof AIProvider)[keyof typeof AIProvider];
 export interface AIProviderConfig {
   provider: AIProvider;
   apiKey: string;
+  model?: string;
+  baseURL?: string;
+}
+
+/**
+ * Resolved AI provider settings for an org.
+ * This is the shape stored in organization.settings.aiProvider.
+ */
+export interface OrgAiProviderSettings {
+  provider: AIProvider;
+  apiKey?: string;
+  baseURL?: string;
   model?: string;
 }
 

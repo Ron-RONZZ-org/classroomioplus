@@ -7,10 +7,16 @@
  *   even though it isn't currently exposed to users.
  */
 
-export const AGENT_MODEL_IDS = ['gemini-3.1-flash-lite', 'gpt-5.4-mini', 'claude-sonnet-3-5', 'kimi-k2.6'] as const;
+export const AGENT_MODEL_IDS = [
+  'gemini-3.1-flash-lite',
+  'gpt-5.4-mini',
+  'claude-sonnet-3-5',
+  'kimi-k2.6',
+  'deepseek-chat'
+] as const;
 
 export type AgentModelId = (typeof AGENT_MODEL_IDS)[number];
-export type AgentModelProvider = 'google' | 'openai' | 'anthropic' | 'moonshot';
+export type AgentModelProvider = 'google' | 'openai' | 'anthropic' | 'moonshot' | 'deepseek';
 export type AgentModelCostTier = 'low' | 'high';
 
 export interface AgentModelDescriptor {
@@ -18,8 +24,6 @@ export interface AgentModelDescriptor {
   label: string;
   /** The exact model id passed to the provider SDK. */
   backendModelId: string;
-  /** Whether this model is available on the free plan. */
-  isFree: boolean;
   /** Cost tier shown in the model picker — 'low' ($) or 'high' ($$$). */
   costTier: AgentModelCostTier;
   /** Context window size in tokens. Used to show context usage indicator. */
@@ -31,7 +35,6 @@ export const AGENT_MODELS: Record<AgentModelId, AgentModelDescriptor> = {
     provider: 'google',
     label: 'Gemini 3.1 Flash Lite',
     backendModelId: 'gemini-3.1-flash-lite',
-    isFree: true,
     costTier: 'low',
     contextWindow: 1_048_576
   },
@@ -39,7 +42,6 @@ export const AGENT_MODELS: Record<AgentModelId, AgentModelDescriptor> = {
     provider: 'openai',
     label: 'GPT-5.4 Mini',
     backendModelId: 'gpt-5.4-mini',
-    isFree: false,
     costTier: 'low',
     contextWindow: 400_000
   },
@@ -47,7 +49,6 @@ export const AGENT_MODELS: Record<AgentModelId, AgentModelDescriptor> = {
     provider: 'anthropic',
     label: 'Claude Sonnet 4.6',
     backendModelId: 'claude-sonnet-4-6',
-    isFree: false,
     costTier: 'high',
     contextWindow: 1_000_000
   },
@@ -55,13 +56,20 @@ export const AGENT_MODELS: Record<AgentModelId, AgentModelDescriptor> = {
     provider: 'moonshot',
     label: 'Kimi K2.6',
     backendModelId: 'kimi-k2.6',
-    isFree: true,
     costTier: 'low',
     contextWindow: 262_144
+  },
+  'deepseek-chat': {
+    provider: 'deepseek',
+    label: 'DeepSeek Chat',
+    backendModelId: 'deepseek-chat',
+    costTier: 'low',
+    contextWindow: 1_000_000
   }
 };
 
 export const UI_PICKER_MODEL_IDS = [
+  'deepseek-chat',
   'kimi-k2.6',
   'gemini-3.1-flash-lite',
   'gpt-5.4-mini',

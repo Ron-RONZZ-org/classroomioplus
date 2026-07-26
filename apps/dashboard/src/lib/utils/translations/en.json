@@ -403,6 +403,7 @@
       "landing_page_tab": "Landing Page",
       "billing_tab": "Billing",
       "ai_credits_tab": "AI Credits",
+      "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "AI Tutor",
       "integrations_tab": "Integrations",
       "language_tab": "Language",
@@ -4095,6 +4096,9 @@
     "ai_credits": {
       "purchase_success": "AI credit pack added to your balance.",
       "checkout_failed": "Could not start checkout. Please try again."
+    },
+    "ai_provider": {
+      "saved": "AI provider settings saved."
     },
     "account": {
       "workspaceCreated": "Workspace created",

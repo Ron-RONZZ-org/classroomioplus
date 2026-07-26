@@ -2049,6 +2049,13 @@ export const organization = pgTable(
         enrollmentWelcome?: boolean;
         courseCompletion?: boolean;
       };
+      /** AI provider configuration for this org. Overrides env-var defaults. */
+      aiProvider?: {
+        provider: 'openai' | 'anthropic' | 'google' | 'moonshot' | 'deepseek';
+        apiKey?: string;
+        baseURL?: string;
+        model?: string;
+      };
     }>(),
     landingpage: jsonb().default({}).$type<{
       header?: {

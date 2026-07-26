@@ -116,6 +116,29 @@ Also run `pnpm format:check` (see Translation, Formatting, and Git Workflow abov
   org.limits = { students: toResourceUsage(studentsUsed, studentsLimit) };
   ```
 
+## Worktree Node Modules
+
+Git worktrees do NOT share `node_modules` with the parent checkout. After entering a worktree:
+
+1. Check if the parent checkout at `/home/rongzhou/kodo/classroomioplus` has `node_modules` installed:
+   ```bash
+   ls /home/rongzhou/kodo/classroomioplus/node_modules/.pnpm/ | head -3
+   ```
+2. If not, install there first (takes ~1 min):
+   ```bash
+   cd /home/rongzhou/kodo/classroomioplus && pnpm install --frozen-lockfile
+   ```
+3. Symlink the worktree's `node_modules` to the parent's:
+   ```bash
+   ln -sf /home/rongzhou/kodo/classroomioplus/node_modules /home/rongzhou/.local/share/opencode/worktree/classroomioplus/<branch>/node_modules
+   ```
+4. Verify the symlink works:
+   ```bash
+   ls node_modules/@cio/ai-assistant  # should show a directory, not "No such file"
+   ```
+
+pnpm uses content-addressable storage in `.pnpm-store`, so the symlink is safe — no double disk usage.
+
 ## Creating a New Route
 
 ### Step 1: Validation Schema

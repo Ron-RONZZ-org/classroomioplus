@@ -24,9 +24,7 @@
     loading?: boolean;
     levelOptions?: SelectOption[];
     model?: AgentModelId;
-    lockedModelIds?: readonly AgentModelId[];
     onModelChange?: (model: AgentModelId) => void;
-    onLockedModelSelect?: (model: AgentModelId) => void;
     onsubmit?: (payload: SubmitPayload) => void;
     prompt?: string;
   }
@@ -37,9 +35,7 @@
     loading = false,
     levelOptions = [],
     model = DEFAULT_PICKER_MODEL_ID,
-    lockedModelIds = [],
     onModelChange,
-    onLockedModelSelect,
     onsubmit,
     prompt = $bindable('')
   }: Props = $props();
@@ -104,14 +100,7 @@
         </Select.Content>
       </Select.Root>
 
-      <ModelPicker
-        value={selectedModel}
-        disabled={loading}
-        variant="select"
-        {lockedModelIds}
-        onChange={handleModelChange}
-        onLockedSelect={onLockedModelSelect}
-      />
+      <ModelPicker value={selectedModel} disabled={loading} variant="select" onChange={handleModelChange} />
 
       <div class="ui:ml-auto">
         <Button variant="default" size="icon" disabled={!canSubmit} onclick={handleSubmit}>

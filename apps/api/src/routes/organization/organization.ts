@@ -51,6 +51,7 @@ import { ROLE } from '@cio/utils/constants';
 import { TOrganization } from '@db/types';
 import { assetsRouter } from '@api/routes/organization/assets';
 import { autoJoinOrg } from '@api/services/organization/auto-join';
+import { organizationAiProviderRouter } from '@api/routes/organization/ai-provider';
 import { organizationAiTutorRouter } from '@api/routes/organization/ai-tutor';
 import { organizationMemberEmailNotificationsRouter } from '@api/routes/organization/member-email-notifications';
 import { authMiddleware } from '@api/middlewares/auth';
@@ -768,6 +769,7 @@ export const organizationRouter = new Hono()
   .route('/tags', tagsRouter)
   .route('/widgets', widgetsRouter)
   .route('/assets', assetsRouter)
+  .route('/ai-provider', organizationAiProviderRouter)
   .route('/ai-tutor', organizationAiTutorRouter)
   .route('/member/email-notifications', organizationMemberEmailNotificationsRouter)
   .route('/:orgId/quiz', quizRouter);

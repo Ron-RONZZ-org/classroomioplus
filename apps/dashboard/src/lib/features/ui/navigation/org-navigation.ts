@@ -247,6 +247,10 @@ export const baseNavConfig: NavItemConfig[] = [
         path: '/settings/ai-credits'
       },
       {
+        titleKey: 'settings.tabs.ai_provider_tab',
+        path: '/settings/ai-provider'
+      },
+      {
         titleKey: 'settings.tabs.ai_tutor_tab',
         path: '/settings/ai-tutor'
       },
@@ -269,6 +273,10 @@ export const baseNavConfig: NavItemConfig[] = [
       {
         path: 'ai-credits',
         titleKey: 'settings.tabs.ai_credits_tab'
+      },
+      {
+        path: 'ai-provider',
+        titleKey: 'settings.tabs.ai_provider_tab'
       },
       {
         path: 'ai-tutor',
