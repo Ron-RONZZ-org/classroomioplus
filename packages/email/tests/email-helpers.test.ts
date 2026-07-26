@@ -7,7 +7,7 @@ import {
   sanitizeEmailSubject
 } from '../src/utils/functions/email-helpers';
 
-const DEFAULT_FROM = '"Best from ClassroomIO" <notify@mail.classroomio.com>';
+const DEFAULT_FROM = '"LibreClassroom" <notify@mail.classroomio.com>';
 
 describe('escapeHtml', () => {
   it('escapes HTML metacharacters', () => {
@@ -51,13 +51,13 @@ describe('buildEmailFromName', () => {
 
   it('wraps a plain display name in a quoted From header', () => {
     expect(buildEmailFromName('Acme Academy (via ClassroomIO.com)')).toBe(
-      '"Acme Academy (via ClassroomIO.com)" <notify@mail.classroomio.com>'
+      '"Acme Academy (via LibreClassroom.com)" <notify@mail.classroomio.com>'
     );
   });
 
   it('sanitizes embedded quotes in the display name', () => {
     expect(buildEmailFromName('Alice "Admin" Academy (via ClassroomIO.com)')).toBe(
-      '"Alice \\"Admin\\" Academy (via ClassroomIO.com)" <notify@mail.classroomio.com>'
+      '"Alice \\"Admin\\" Academy (via LibreClassroom.com)" <notify@mail.classroomio.com>'
     );
   });
 });

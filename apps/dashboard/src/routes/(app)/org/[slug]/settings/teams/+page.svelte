@@ -23,7 +23,7 @@
 </script>
 
 <svelte:head>
-  <title>Teams - ClassroomIO</title>
+  <title>Teams - LibreClassroom</title>
 </svelte:head>
 
 <TeamsPage />

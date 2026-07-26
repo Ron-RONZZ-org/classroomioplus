@@ -88,7 +88,7 @@ services:
       - minio
 
   api:
-    image: classroomio/api:${CIO_VERSION:-latest}
+    image: libreclassroom/api:${CIO_VERSION:-latest}
     container_name: cio-api
     ports:
       - '3081:3081'
@@ -149,7 +149,7 @@ services:
     restart: unless-stopped
 
   dashboard:
-    image: classroomio/dashboard:${CIO_VERSION:-latest}
+    image: libreclassroom/dashboard:${CIO_VERSION:-latest}
     container_name: cio-dashboard
     ports:
       - '3082:3082'
@@ -184,7 +184,7 @@ services:
   # Background worker (BullMQ). Drains the Redis queue: video processing, transcription,
   # AI course generation, and emails.
   jobs:
-    image: classroomio/jobs:${CIO_VERSION:-latest}
+    image: libreclassroom/jobs:${CIO_VERSION:-latest}
     container_name: cio-jobs
     depends_on:
       postgres:

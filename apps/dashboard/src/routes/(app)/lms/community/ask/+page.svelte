@@ -10,7 +10,7 @@
 </script>
 
 <svelte:head>
-  <title>Ask the Community - ClassroomIO</title>
+  <title>Ask the Community - LibreClassroom</title>
 </svelte:head>
 
 <Page.Root class="mx-auto w-[90%]!">

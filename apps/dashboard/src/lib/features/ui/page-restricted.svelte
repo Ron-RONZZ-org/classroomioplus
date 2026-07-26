@@ -2,6 +2,7 @@
   import { Button } from '@cio/ui/base/button';
   import LockIcon from '@lucide/svelte/icons/lock';
   import { Empty } from '@cio/ui/custom/empty';
+  import { BRAND_ROOT_DOMAIN } from '$lib/utils/constants/branding';
 </script>
 
 <div class="flex h-screen w-screen flex-col items-center justify-center">
@@ -13,6 +14,6 @@
     layout="full-page"
     showLogo={true}
   >
-    <Button href="https://classroomio.com">Go Home</Button>
+    <Button href="https://{BRAND_ROOT_DOMAIN}">Go Home</Button>
   </Empty>
 </div>

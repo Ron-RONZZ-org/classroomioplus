@@ -20,8 +20,7 @@
   import { showUserJotWidget } from '$lib/utils/services/userjot';
   import { ROLE } from '@cio/utils/constants';
 
-  const SUPPORT_EMAIL = 'help@classroomio.com';
-  const DOCS_URL = 'https://classroomio.com/docs';
+  import { SUPPORT_EMAIL, DOCS_URL } from '$lib/utils/constants/branding';
 
   const sidebar = useSidebar();
 
@@ -126,19 +125,23 @@
                   </span>
                 </DropdownMenu.Item>
 
-                <DropdownMenu.Item class="m-0">
-                  <a href={DOCS_URL} target="_blank" rel="noopener noreferrer" class="flex w-full items-center gap-2">
-                    <BookOpenIcon size={16} />
-                    <p class="text-sm">{$t('profileMenu.documentation')}</p>
-                  </a>
-                </DropdownMenu.Item>
+                {#if DOCS_URL}
+                  <DropdownMenu.Item class="m-0">
+                    <a href={DOCS_URL} target="_blank" rel="noopener noreferrer" class="flex w-full items-center gap-2">
+                      <BookOpenIcon size={16} />
+                      <p class="text-sm">{$t('profileMenu.documentation')}</p>
+                    </a>
+                  </DropdownMenu.Item>
+                {/if}
 
-                <DropdownMenu.Item class="m-0">
-                  <a href="mailto:{SUPPORT_EMAIL}" class="flex w-full items-center gap-2">
-                    <BadgeHelpIcon size={16} />
-                    <p class="text-sm">{$t('profileMenu.need_help')}</p>
-                  </a>
-                </DropdownMenu.Item>
+                {#if SUPPORT_EMAIL}
+                  <DropdownMenu.Item class="m-0">
+                    <a href="mailto:{SUPPORT_EMAIL}" class="flex w-full items-center gap-2">
+                      <BadgeHelpIcon size={16} />
+                      <p class="text-sm">{$t('profileMenu.need_help')}</p>
+                    </a>
+                  </DropdownMenu.Item>
+                {/if}
               </div>
             {/if}
 

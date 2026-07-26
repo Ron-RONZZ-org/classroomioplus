@@ -5,7 +5,7 @@
 </script>
 
 <svelte:head>
-  <title>{t.get('settings.auth.tabs.sso')} - ClassroomIO</title>
+  <title>{t.get('settings.auth.tabs.sso')} - LibreClassroom</title>
 </svelte:head>
 
 <Page.Header>

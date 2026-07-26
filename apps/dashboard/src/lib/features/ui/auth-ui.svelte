@@ -13,6 +13,7 @@
   import { preventDefault } from '$lib/utils/functions/svelte';
   import { ROUTE } from '$lib/utils/constants/routes';
   import { DotPattern } from '@cio/ui/custom/animation/dot-pattern';
+  import { APP_NAME } from '$lib/utils/constants/branding';
 
   interface Props {
     isLogin?: boolean;
@@ -85,9 +86,9 @@
         <Avatar.Root>
           <Avatar.Image
             src={$currentOrg.avatarUrl ? $currentOrg.avatarUrl : '/logo-192.png'}
-            alt={$currentOrg.name ? $currentOrg.name : 'ClassroomIO'}
+            alt={$currentOrg.name ? $currentOrg.name : APP_NAME}
           />
-          <Avatar.Fallback>{$currentOrg.name ? $currentOrg.name : 'ClassroomIO'}</Avatar.Fallback>
+          <Avatar.Fallback>{$currentOrg.name ? $currentOrg.name : APP_NAME}</Avatar.Fallback>
         </Avatar.Root>
 
         {#if !showOnlyContent}

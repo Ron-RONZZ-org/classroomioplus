@@ -123,7 +123,7 @@
     const ics = [
       'BEGIN:VCALENDAR',
       'VERSION:2.0',
-      'PRODID:-//ClassroomIO//Live Session//EN',
+      'PRODID:-//LibreClassroom//Live Session//EN',
       'BEGIN:VEVENT',
       `UID:session-${startMs}@classroomio`,
       `DTSTAMP:${toIcsUtc(now)}`,

@@ -5,6 +5,7 @@
   import { Badge } from '@cio/ui/base/badge';
   import { PLAN_NAMES, PLAN } from '@cio/utils/plans';
   import { BRAND_ROOT_DOMAIN, TENANT_ROOT_DOMAIN } from '@cio/utils/constants';
+  import { APP_NAME } from '$lib/utils/constants/branding';
 
   const plan = $derived($currentOrg.plans?.[0]?.planName || PLAN.BASIC);
   const utmSource = $derived(
@@ -27,10 +28,10 @@
           {...props}
         >
           <Avatar.Root class="ui:flex ui:size-6 ui:items-center ui:justify-center">
-            <Avatar.Image src="/logo-192.png" alt="ClassroomIO logo" />
+            <Avatar.Image src="/logo-192.png" alt={APP_NAME} />
           </Avatar.Root>
 
-          <span class="truncate font-normal">ClassroomIO</span>
+          <span class="truncate font-normal">{APP_NAME}</span>
           <Badge variant="outline" class="capitalize">
             {PLAN_NAMES[plan] || plan}
           </Badge>

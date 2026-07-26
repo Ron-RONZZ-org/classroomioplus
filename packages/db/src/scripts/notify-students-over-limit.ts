@@ -50,7 +50,7 @@ async function main() {
     );
 
     if (execute) {
-      const upgradeUrl = `https://app.classroomio.com/org/${org.siteName ?? ''}?upgrade=true`;
+      const upgradeUrl = `https://libreclassroom.ronzz.org/org/${org.siteName ?? ''}?upgrade=true`;
 
       await Promise.all(
         admins.map((admin) =>

@@ -115,7 +115,7 @@
 </script>
 
 <svelte:head>
-  <title>Setup - ClassroomIO</title>
+  <title>Setup - LibreClassroom</title>
 </svelte:head>
 
 <Page.Root class="w-full md:max-w-4xl lg:mx-auto">

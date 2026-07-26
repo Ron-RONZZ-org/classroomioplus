@@ -101,7 +101,7 @@ export const mockOrgLandingPageProps: OrgLandingPageProps = {
   embed: {
     title: 'How Automated Certification Works',
     description:
-      'See how teams use ClassroomIO to assign programs, track progress, and generate certificates — automatically.',
+      'See how teams use LibreClassroom to assign programs, track progress, and generate certificates — automatically.',
     code: `
       <div style="width: 100%; max-width: 720px; margin: 0 auto; border-radius: 24px; border: 1px solid rgba(148,163,184,.35); background: linear-gradient(135deg, rgba(59,130,246,.10), rgba(15,23,42,.04)); padding: 32px; box-sizing: border-box;">
         <div style="font-family: sans-serif;">

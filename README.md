@@ -1,4 +1,4 @@
-<h1 align="center">ClassroomIO Plus</h1>
+<h1 align="center">LibreClassroom</h1>
 <p align="center">
   Community fork of <a href="https://github.com/classroomio/classroomio">ClassroomIO</a> —
   an open-source LMS — focused on easy self-hosting
@@ -8,13 +8,13 @@
 
 ## About
 
-ClassroomIO Plus is a **community-maintained fork** of [ClassroomIO](https://github.com/classroomio/classroomio), the open-source Learning Management System for organizations. This fork exists to serve self-hosters with enhancements that may not align with upstream's SaaS-focused roadmap.
+LibreClassroom is a **community-maintained fork** of [ClassroomIO](https://github.com/classroomio/classroomio), the open-source Learning Management System for organizations. This fork exists to serve self-hosters with enhancements that may not align with upstream's SaaS-focused roadmap.
 
 **We are immensely grateful to the upstream ClassroomIO team** — they built the foundation. Our changes are small and focused on making self-hosting cleaner and easier.
 
 ### What's different
 
-| Area | ClassroomIO | ClassroomIO Plus |
+| Area | ClassroomIO | LibreClassroom |
 |------|-------------|-----------------|
 | Custom AI endpoint | Selected providers | **Configurable** — any OpenAI-compatible provider|
 | Telemetry (Posthog, Umami) | Enabled by default | **Off by default** — opt-in toggle in admin settings |
@@ -53,7 +53,7 @@ ClassroomIO Plus is a **community-maintained fork** of [ClassroomIO](https://git
 
 ## Deploy
 
-The easiest way to run ClassroomIO Plus:
+The easiest way to run LibreClassroom:
 
 ```bash
 # 1. Clone

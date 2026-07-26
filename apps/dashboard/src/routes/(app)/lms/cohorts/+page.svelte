@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-  <title>{$t('lms_navigation.cohorts') || 'Cohorts'} - ClassroomIO</title>
+  <title>{$t('lms_navigation.cohorts') || 'Cohorts'} - LibreClassroom</title>
 </svelte:head>
 
 <Page.Root class="w-full">

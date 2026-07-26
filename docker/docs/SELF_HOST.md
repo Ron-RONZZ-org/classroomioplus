@@ -8,8 +8,8 @@
 ## Quick Start
 
 ```bash
-git clone https://github.com/classroomio/classroomio.git
-cd classroomio
+git clone https://github.com/classroomioplus/classroomioplus.git
+cd classroomioplus
 cp .env.example .env
 # Edit .env — set your dashboard domain and secrets
 ./run-docker-full-stack.sh
@@ -24,13 +24,13 @@ It auto-generates secure values for `PRIVATE_SERVER_KEY` and `BETTER_AUTH_SECRET
 ## Run from Pre-built Images (no build)
 
 The Quick Start builds images from source — that needs the full repo and ~8 GB RAM for the
-dashboard build. Most self-hosters should instead **pull** the published `classroomio/{api,dashboard,jobs}`
+dashboard build. Most self-hosters should instead **pull** the published `classroomioplus/{api,dashboard,jobs}`
 images. You only need [`docker-compose.images.yaml`](../../docker-compose.images.yaml) and a `.env`:
 
 ```bash
 # 1. Get just the compose file + env template (no full clone required)
-curl -O https://raw.githubusercontent.com/classroomio/classroomio/main/docker-compose.images.yaml
-curl -o .env https://raw.githubusercontent.com/classroomio/classroomio/main/.env.example
+curl -O https://raw.githubusercontent.com/classroomio/classroomioplus/classroomioplus/main/docker-compose.images.yaml
+curl -o .env https://raw.githubusercontent.com/classroomio/classroomioplus/classroomioplus/main/.env.example
 # 2. Edit .env — set CIO_VERSION (pin a release!), DASHBOARD_ORIGIN, secrets, SMTP
 # 3. Pull and start
 CIO_VERSION=1.4.2 docker compose -f docker-compose.images.yaml --env-file .env pull
@@ -93,7 +93,7 @@ Key points:
 ## Verify
 
 ```bash
-docker compose --env-file .env -p classroomio -f docker-compose.yaml ps
+docker compose --env-file .env -p classroomioplus -f docker-compose.yaml ps
 curl -sS http://localhost:3081/    # API — returns JSON
 curl -I  http://localhost:3082/    # Dashboard — returns 200
 ```
@@ -112,7 +112,7 @@ docker exec cio-api pnpm --filter @cio/db db:setup:seed
 All commands use this prefix — abbreviated as `dc` below:
 
 ```
-dc = docker compose --env-file .env -p classroomio -f docker-compose.yaml
+dc = docker compose --env-file .env -p classroomioplus -f docker-compose.yaml
 ```
 
 | Task | Command |
@@ -131,8 +131,8 @@ dc = docker compose --env-file .env -p classroomio -f docker-compose.yaml
 ### Build Images Locally
 
 ```bash
-docker build -f docker/Dockerfile.api -t classroomio/api:latest .
-docker build -f docker/Dockerfile.dashboard -t classroomio/dashboard:latest .
+docker build -f docker/Dockerfile.api -t classroomioplus/api:latest .
+docker build -f docker/Dockerfile.dashboard -t classroomioplus/dashboard:latest .
 ```
 
 ### Inspect Container Env Vars
@@ -187,7 +187,7 @@ It shares Redis and the database with the API. It is started automatically by th
 script. If it is not running, jobs accumulate in Redis and silently never complete.
 
 ```bash
-docker compose --env-file .env -p classroomio -f docker-compose.yaml logs -f jobs
+docker compose --env-file .env -p classroomioplus -f docker-compose.yaml logs -f jobs
 ```
 
 > Note: the in-course **AI tutor chat** runs synchronously inside the API and does not need the
@@ -254,10 +254,10 @@ This setup builds images from source (no live hot reload). Code changes require 
 
 ```bash
 # One service
-docker compose --env-file .env -p classroomio -f docker-compose.yaml up -d --build api
+docker compose --env-file .env -p classroomioplus -f docker-compose.yaml up -d --build api
 
 # Both (e.g. shared packages/* changed)
-docker compose --env-file .env -p classroomio -f docker-compose.yaml up -d --build api dashboard
+docker compose --env-file .env -p classroomioplus -f docker-compose.yaml up -d --build api dashboard
 
 # Full stack
 ./run-docker-full-stack.sh
@@ -288,7 +288,7 @@ Postgres has not finished starting. Wait 30-60 seconds and retry. The compose he
 Same root cause as disk full. Free space using the steps above and restart MinIO:
 
 ```bash
-docker compose --env-file .env -p classroomio -f docker-compose.yaml restart minio
+docker compose --env-file .env -p classroomioplus -f docker-compose.yaml restart minio
 ```
 
 ### SMTP Errors in Logs

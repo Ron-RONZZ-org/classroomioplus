@@ -383,7 +383,7 @@ async function sendNewsfeedPostEmail(feedId: string, authorId: string) {
         branding
       },
       from: buildEmailFromName(`${orgName} - ClassroomIO`),
-      replyTo: feedData.author?.email || 'noreply@classroomio.com',
+      replyTo: feedData.author?.email || 'noreply@libreclassroom.ronzz.org',
       idempotencyKey: `newsfeed:post:${feedId}`,
       preference: { organizationId: feedData.organization.id }
     });
@@ -427,7 +427,7 @@ async function sendNewsfeedCommentEmail(feedId: string, commentContent: string) 
         branding
       },
       from: buildEmailFromName(`${orgName} - ClassroomIO`),
-      replyTo: 'noreply@classroomio.com',
+      replyTo: 'noreply@libreclassroom.ronzz.org',
       preference: { organizationId: feedData.organization.id }
     });
   } catch (error) {

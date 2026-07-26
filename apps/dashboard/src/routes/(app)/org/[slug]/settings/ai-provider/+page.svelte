@@ -3,7 +3,7 @@
 </script>
 
 <svelte:head>
-  <title>AI Provider Settings - ClassroomIO</title>
+  <title>AI Provider Settings - LibreClassroom</title>
 </svelte:head>
 
 <OrgAiProviderSettingsPage />

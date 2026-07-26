@@ -492,7 +492,7 @@
     <Field.Description>
       {$t('course.navItem.settings.course_type_desc')}
       <a
-        href="https://classroomio.com/docs/guides/course-types"
+        href="https://libreclassroom.ronzz.org/docs/guides/course-types"
         target="_blank"
         rel="noopener noreferrer"
         class="ui:text-primary underline"

@@ -8,6 +8,7 @@
   import { isStudentExperience } from '$lib/utils/store/app';
   import { currentOrgPath } from '$lib/utils/store/org';
   import { t } from '$lib/utils/functions/translations';
+  import { APP_NAME } from '$lib/utils/constants/branding';
 
   interface Props {
     title?: string;
@@ -38,7 +39,7 @@
         id="logo"
         class="line-clamp-1 text-lg"
       >
-        {isCoursePage ? title : 'ClassroomIO'}
+        {isCoursePage ? title : APP_NAME}
       </a>
     </div>
 

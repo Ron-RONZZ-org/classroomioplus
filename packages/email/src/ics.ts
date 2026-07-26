@@ -59,7 +59,7 @@ export function buildSessionIcs(input: SessionIcsInput): string {
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//ClassroomIO//Live Session//EN',
+    'PRODID:-//LibreClassroom//Live Session//EN',
     'CALSCALE:GREGORIAN',
     `METHOD:${method}`,
     'BEGIN:VEVENT',

@@ -20,7 +20,8 @@ export const publicApiCors = cors({
 
 /**
  * Cookie/session routes (dashboard RPC, Better Auth, org dashboards).
- * Allowed origins: configured `TRUSTED_ORIGINS`, `*.classroomio.com`, verified custom domains.
+ * Allowed origins: configured `TRUSTED_ORIGINS` env var, auto-detected from
+ * `PUBLIC_SERVER_URL`/`DASHBOARD_ORIGIN`, and verified custom domains.
  */
 export const sessionCors = cors({
   ...sharedCorsOptions,

@@ -58,7 +58,12 @@ export function buildEmailFromName(name?: string): string {
     return EMAIL_FROM;
   }
 
-  const displayName = sanitizeEmailDisplayName(name);
+  // Replace any upstream brand references with fork identity,
+  // so ~30+ call sites are handled without touching each one.
+  const appName = process.env.APP_NAME || 'LibreClassroom';
+  const rebranded = name.replace(/ClassroomIO/gi, appName);
+
+  const displayName = sanitizeEmailDisplayName(rebranded);
   if (!displayName) {
     return EMAIL_FROM;
   }
