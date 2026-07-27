@@ -76,7 +76,7 @@ If you already run classroomio/classroomio with Docker:
 
 ```bash
 docker compose down
-docker compose -f docker-compose.plus.yaml up -d
+docker compose -f docker-compose.images.yaml up -d
 ```
 
 Same volumes, same data. No migration needed.
@@ -84,6 +84,20 @@ Same volumes, same data. No migration needed.
 ## Development
 
 Since this is a fork with our commits on top of upstream, see [AGENTS.md](AGENTS.md) for the workflow.
+
+### Quick Start (one command)
+
+```bash
+./scripts/dev.sh
+```
+
+This single command does everything: checks prerequisites, creates `.env` files if missing, starts Postgres + Redis via Docker, builds shared packages, seeds the database, then launches the API and dashboard. Point your browser to `http://localhost:5173` and log in with `admin@test.com` / `123456`.
+
+```bash
+./scripts/dev.sh --light   # API-only (no background workers) + dashboard
+./scripts/dev.sh stop       # Stop all dev servers
+./scripts/dev.sh status     # Show which servers are running
+```
 
 ### Prerequisites
 
@@ -103,7 +117,7 @@ This repo is a monorepo (same structure as upstream):
 
 Shared packages live under `packages/` (`packages/db`, `packages/utils`, `packages/ui`, etc.).
 
-### Local Setup
+### Manual Local Setup
 
 1. **Install dependencies:**
 
@@ -133,7 +147,6 @@ Shared packages live under `packages/` (`packages/db`, `packages/utils`, `packag
    #   PUBLIC_SERVER_URL=http://localhost:3002
    #   PRIVATE_SERVER_URL=http://localhost:3002
    #   PRIVATE_SERVER_KEY=<same SERVER_KEY value>
-   #   PUBLIC_IS_SELFHOSTED=true
 
    # Jobs (copy from API — same DATABASE_URL and REDIS_URL)
    cp apps/api/.env apps/jobs/.env
@@ -168,36 +181,57 @@ Shared packages live under `packages/` (`packages/db`, `packages/utils`, `packag
 
 ### Testing
 
-The monorepo has tests at three layers. See the [testing coverage epic](https://github.com/Ron-RONZZ-org/classroomioplus/issues/16) for history.
+Tests live at multiple layers. All three phases of testing improvements are complete ([epic #16](https://github.com/Ron-RONZZ-org/classroomioplus/issues/16)).
 
 ```bash
-# ── Unit tests (vitest) ────────────────────────
-
-# API service logic — 123 tests
+# API unit tests (vitest) — 123 tests
 pnpm --filter @cio/api test
 
-# Dashboard utilities — migrated from jest → vitest
-pnpm --filter @cio/dashboard test
-
-# Question type validation, email rendering, course-app templates
-pnpm --filter @cio/question-types test
-pnpm --filter @cio/email test
-pnpm --filter @cio/course-app test
-
-# ── API integration tests (real Postgres) ──────
-# 14 tests covering auth, courses, org membership, smoke
+# API integration tests (vitest, real Postgres) — 14 tests
 pnpm --filter @cio/api test:integration
 
-# ── Browser E2E smoke tests (Playwright) ──────
-# 7 tests: login, dashboard, courses, settings,
-# fork-specific (AI provider, SSO), logout
-# Requires both dev servers to be running:
-#   pnpm api:dev  (port 3002)
-#   pnpm dashboard:dev  (port 5173)
+# Dashboard utility tests (vitest)
+pnpm --filter @cio/dashboard test
+
+# Question type validation (vitest)
+pnpm --filter @cio/question-types test
+
+# Email template rendering (vitest)
+pnpm --filter @cio/email test
+
+# Course-app template unit tests (vitest)
+pnpm --filter @cio/course-app test
+```
+
+**E2E smoke tests** (Playwright, headless Chromium) — 7 tests covering login, dashboard, course creation, settings, AI provider config, SSO, and logout:
+
+```bash
+# Requires both dev servers running (pnpm api:dev + pnpm dashboard:dev):
 pnpm --filter @cio/dashboard test:e2e
 ```
 
-**Known limitations**: 8 bugs documented in [#34](https://github.com/Ron-RONZZ-org/classroomioplus/issues/34) (invite atomicity, case-sensitive email, stale session cache, etc.) remain unfixed. The course-app template has a separate Playwright spec at `packages/course-app/src/template/tests/course.spec.ts`.
+```bash
+# Course-app template E2E (separate test suite)
+cd packages/course-app/src/template
+pnpm test:e2e
+```
+
+**Test totals (all passing):** 123 API unit + 14 API integration + 7 Playwright E2E.
+
+**Known limitations**: 8 bugs documented in [#34](https://github.com/Ron-RONZZ-org/classroomioplus/issues/34) (invite atomicity, case-sensitive email, stale session cache, etc.) remain unfixed.
+
+### Available Scripts
+
+| Script | Purpose |
+|--------|---------|
+| `scripts/dev.sh` | **One-command dev environment** — creates `.env`, starts Docker services, builds, seeds DB, launches API + dashboard |
+| `scripts/backup.sh` | Full backup: PostgreSQL dump + file archives into a single tarball |
+| `scripts/restore.sh` | Restore from a backup tarball |
+| `scripts/rebase-upstream.sh` | Replay fork commits on top of a new upstream release tag |
+| `scripts/run-docker-full-stack.sh` | Run the full stack with Docker Compose (build from source) |
+| `scripts/format-changed.mjs` | Format only changed files with Prettier (used by pre-commit hooks) |
+| `scripts/impersonate.mjs` | Generate a login-link URL for support/debugging (admin only) |
+| `scripts/postinstall.mjs` | Cross-platform postinstall — install lefthook git hooks |
 
 ### Enabling AI Features
 

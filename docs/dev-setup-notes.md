@@ -51,7 +51,6 @@ PRIVATE_SERVER_KEY="<generate-with-openssl-rand-hex-32>"   # generate once; use 
 PUBLIC_SERVER_URL="http://localhost:3002"
 PRIVATE_SERVER_URL="http://localhost:3002"      # used by the SSR auth proxy — required for login
 PRIVATE_SERVER_KEY="<generate-with-openssl-rand-hex-32>"   # must match the API (paste the value generated above)
-PUBLIC_IS_SELFHOSTED=true
 ```
 
 **`apps/jobs/.env`** — only if you'll run the background workers (`pnpm api:dev` starts

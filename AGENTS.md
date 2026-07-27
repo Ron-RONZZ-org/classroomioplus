@@ -26,21 +26,23 @@ If a commit conflicts, fix it during the rebase — same as any kernel-style pat
 
 | Commit | Topic | Files |
 |--------|-------|-------|
-| 1 | Fork infrastructure | `AGENTS.md`, `scripts/`, `docker-compose.yaml` |
-| 2 | Self-hosting defaults (license server, analytics guards) | `apps/api/src/services/license.ts`, dashboard analytics files |
-| 3 | Custom AI provider support | `packages/ai-assistant/src/providers/index.ts` |
-| 4 | Testing: API unit test infra fix + dashboard jest→vitest migration | `apps/dashboard/vitest.config.ts`, `apps/dashboard/package.json`, validation tests |
-| 5 | Testing: API integration tests (real Postgres) | `apps/api/src/__tests__/integration/`, `apps/api/vitest.integration.config.ts` |
-| 6 | Testing: Playwright E2E smoke tests for dashboard | `apps/dashboard/e2e/` |
+| 1 | Fork infrastructure | `AGENTS.md`, `CLAUDE.md`, `scripts/`, `docker-compose.yaml` |
+| 2 | Self-hosting defaults (license removal, telemetry toggle, hardcoded mode) | `apps/api/src/services/license.ts`, dashboard analytics, onboarding, env vars |
+| 3 | Custom AI provider + DeepSeek support | `packages/ai-assistant/src/providers/index.ts`, AI provider config UI |
+| 4 | **Branding migration**: ClassroomIO → LibreClassroom | Project-wide branding, repo rename, issue/PR templates |
+| 5 | **Testing improvements** (Phases 1-3) | Jest-to-vitest migration, API integration tests, Playwright E2E smoke tests |
+| 6 | **Backup/restore scripts** | `scripts/backup.sh`, `scripts/restore.sh` |
+| 7 | **Course import/export UI** | Draft-based import pipeline with JSON files |
+| 8 | **Raw HTML source toggle** in lesson note editor | Source toggle between WYSIWYG and raw HTML `<textarea>` |
 
 ## Scope — What We Patch
 
 Our patches are limited to:
-- **License server**: removed entirely (`apps/api/src/services/license.ts`). No external phone-home, no plan gating. `isEnterprisePlan` store hardcoded to `true`.
-- **Analytics guards**: prevent Umami, Posthog, Senja from loading on self-hosted instances
-- **Custom AI endpoint**: `OPENAI_BASE_URL` and `OPENAI_MODEL` env vars for the OpenAI provider
-- **Plan enforcement**: bypass token caps on self-hosted (you bring your own API key)
-- **Testing infrastructure**: jest→vitest migration, API integration tests (real Postgres), Playwright E2E smoke tests
+- **License server**: completely removed — no phone-home to `enterprise-api.classroomio.dev`
+- **Analytics guards**: Umami, Posthog, Senja are off by default; opt-in toggle in admin settings
+- **Custom AI endpoint**: `OPENAI_BASE_URL` and `OPENAI_MODEL` env vars for any OpenAI-compatible provider; DeepSeek provider added
+- **Plan enforcement**: all token caps, paygates, and `UPGRADE_REQUIRED` checks removed
+- **Hardcoded self-hosted mode**: `PUBLIC_IS_SELFHOSTED` env var removed; fork always runs as self-hosted
 
 ## What We Do NOT Change (Upstream Compatibility Guarantee)
 
@@ -124,17 +126,17 @@ Also run `pnpm format:check` (see Translation, Formatting, and Git Workflow abov
 
 Git worktrees do NOT share `node_modules` with the parent checkout. After entering a worktree:
 
-1. Check if the parent checkout at `/home/rongzhou/kodo/libreclassroom` has `node_modules` installed:
+1. Check if the parent checkout at `/home/rongzhou/kodo/classroomioplus` has `node_modules` installed:
    ```bash
-   ls /home/rongzhou/kodo/libreclassroom/node_modules/.pnpm/ | head -3
+   ls /home/rongzhou/kodo/classroomioplus/node_modules/.pnpm/ | head -3
    ```
 2. If not, install there first (takes ~1 min):
    ```bash
-   cd /home/rongzhou/kodo/libreclassroom && pnpm install --frozen-lockfile
+   cd /home/rongzhou/kodo/classroomioplus && pnpm install --frozen-lockfile
    ```
 3. Symlink the worktree's `node_modules` to the parent's:
    ```bash
-   ln -sf /home/rongzhou/kodo/libreclassroom/node_modules /home/rongzhou/.local/share/opencode/worktree/libreclassroom/<branch>/node_modules
+   ln -sf /home/rongzhou/kodo/classroomioplus/node_modules /home/rongzhou/.local/share/opencode/worktree/classroomioplus/<branch>/node_modules
    ```
 4. Verify the symlink works:
    ```bash
@@ -657,24 +659,14 @@ Do not use `pnpm dev` (it trips turbo's concurrency cap). Build shared package `
 ### Known caveats
 - **Vite SSR circular dependency (layerchart):** authenticated/chart pages occasionally render "Something unexpected occurred" on a cold load. Reload the page (or restart `dashboard:dev`) and it renders — it is intermittent, not a setup failure.
 - **MinIO is optional and not started by default.** Without it, image/media thumbnails show "Failed to load"; that is expected. Start it with `docker compose -f docker-compose.yaml --profile minio up -d minio minio-init` and add the `OBJECT_STORAGE_*` vars from `README.md` to `apps/api/.env`.
-- **Pre-existing lint/test issues (not environment problems):** `pnpm --filter @cio/api lint` fails (missing ESLint v9 `eslint.config.*`); `pnpm --filter @cio/dashboard lint` runs but reports pre-existing errors; api `vitest run` passes 61 tests but 5 files fail to load `@cio/core/services/*/*` subpaths (Vite nested-wildcard exports quirk; Node resolves them fine); `pnpm --filter @cio/dashboard test` (jest) fails to parse `jest.config.ts`. The pre-commit gate `pnpm format:check` passes.
+- **Pre-existing lint/test issues (not environment problems):** `pnpm --filter @cio/api lint` fails (missing ESLint v9 `eslint.config.*`); `pnpm --filter @cio/dashboard lint` runs but reports pre-existing errors; api `vitest run` passes 123 unit + 14 integration tests but 5 files fail to load `@cio/core/services/*/*` subpaths (Vite nested-wildcard exports quirk; Node resolves them fine); dashboard tests migrated from jest to vitest and pass. The pre-commit gate `pnpm format:check` passes.
 - The optional `@cio/storybook` build fails on an unresolved `@lucide/svelte/icons/bot` import; it does not affect api/dashboard.
 
-### Deployment mode: self-hosted vs cloud (affects which features you can test)
-A single flag, `PUBLIC_IS_SELFHOSTED`, switches the whole product between **self-hosted** and **cloud** behavior. It is read in two places: the dashboard via `$env/static/public` (e.g. `apps/dashboard/src/lib/features/app/layout-setup.ts`) and the API/db layer via `@cio/core/config/env` (e.g. `apps/api/src/services/license.ts`, `apps/api/src/middlewares/license.ts`, `apps/api/src/services/onboarding.ts`). `docs/feature-audit.md` §5 is the source-of-truth feature-by-feature map.
+### Deployment mode: always self-hosted (fork hardcodes this)
 
-**This VM's local env is configured for CLOUD mode** (`PUBLIC_IS_SELFHOSTED=false` in both `apps/dashboard/.env` and `apps/api/.env`) so multi-tenant and all license-gated features are testable. The README contributor default is self-hosted; to switch this VM back, set `PUBLIC_IS_SELFHOSTED=true` in both files (or remove it from `apps/api/.env`) and restart both dev servers.
+**This fork removes the `PUBLIC_IS_SELFHOSTED` toggle.** The fork always runs as self-hosted: single-org mode is enabled (`onboarding.ts` creates a `selfhosted` `ENTERPRISE` plan), the license gate is a no-op (no phone-home to `enterprise-api.classroomio.dev`), and Polar billing / PostHog / Umami are off. SSO and token-auth are unlocked without a `LICENSE_KEY`.
 
-- **Self-hosted (`PUBLIC_IS_SELFHOSTED=true`)** — the README contributor default:
-  - Single organization, single domain: creating a 2nd org is blocked (`onboarding.ts`), the "add org" UI is hidden, and the org is auto-assigned a `selfhosted` `ENTERPRISE` plan.
-  - Enterprise features `sso`, `token-auth`, `no-tracking` are gated behind `LICENSE_KEY`, verified against the external `https://enterprise-api.classroomio.dev`. Without a key, `requireLicense` returns 403.
-  - Polar billing and PostHog/Umami analytics are off.
-- **Cloud (`PUBLIC_IS_SELFHOSTED` unset or `false`)**:
-  - Multi-tenant: multiple orgs per user, "add org" shown; org is resolved from the **subdomain** (`acme.<PRIVATE_APP_HOST>`) or a custom domain. Locally there are no subdomains, so an org public site is simulated with the `?org=<siteName>` query param (sets the `_orgSiteName` cookie — see `layout-setup.ts`).
-  - The license gate is a **no-op**, so all enterprise features are unlocked **without** a `LICENSE_KEY` — i.e. cloud mode is the easiest way to exercise SSO/token-auth/multi-org in dev.
-  - Polar billing and analytics activate but are themselves gated by their own keys (absent keys just no-op), so they don't block startup.
-
-Non-obvious gotcha: the README local-dev setup only sets `PUBLIC_IS_SELFHOSTED=true` in `apps/dashboard/.env`; `apps/api/.env` leaves it unset, so the **API behaves as cloud** (license no-op, 2nd org allowed) while the **dashboard UI is self-hosted**. To exercise a coherent mode, set the flag the same way in both files. The flag is read at process start, so restart the dev servers after editing it.
+For multi-tenant testing during development, you can still demonstrate org isolation by visiting each org's public catalog via the `?org=<siteName>` query param (simulates subdomain routing). See `docs/feature-audit.md` §5 for the full feature map.
 
 ### Seeded tenants (good for multi-tenant testing)
 The seed (`packages/db/src/utils/seed/organizationmember.ts`) creates **three independent organizations**, each with its own admin + student. All accounts use password `123456`:
