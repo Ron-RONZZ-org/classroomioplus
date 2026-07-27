@@ -88,14 +88,11 @@ describe('course CRUD', () => {
 });
 
 describe('course update atomicity (bug #4)', () => {
-  it('rolls back course update when tag replacement fails [KNOWN BUG]', async () => {
-    // This test documents bug #4: PUT /course/:id commits the course
-    // update BEFORE attempting tag replacement. When tags fail, the
-    // course data is already changed — no rollback.
-    //
-    // Currently the test EXPECTS the buggy behavior (title changes
-    // despite error). When the bug is fixed, the assertion should
-    // expect the ORIGINAL title to be preserved.
+  it('rolls back course update when tag replacement fails', async () => {
+    // Bug #4: PUT /course/:id was updating the course BEFORE attempting
+    // tag replacement. When tags failed (FK violation), the course data
+    // was already committed with no rollback.
+    // Fix: move tag validation+replacement before the course update.
 
     const cookie = await loginAsAdmin();
     const courseId = '98e6e798-f0bd-4f9d-a6f5-ce0816a4f97e';
@@ -121,19 +118,13 @@ describe('course update atomicity (bug #4)', () => {
     // Tag replacement fails with 500 (FK violation)
     expect(updateRes.status).toBe(500);
 
-    // Verify the course title in the database — THIS SHOULD STILL BE
-    // THE ORIGINAL if rollback worked, but bug #4 means it ISN'T.
+    // After the fix (tags validated before course update), the original
+    // title should be preserved — tag failure never reaches the DB.
     const checkRes = await app.request(`/course/${courseId}`, {
       headers: { cookie }
     });
     expect(checkRes.status).toBe(200);
     const checkBody = await checkRes.json();
-
-    // BUG: this assertion FAILS because the title was changed despite
-    // the 500 error. When bug #4 is fixed, change to:
-    //   expect(checkBody.data?.title).toBe(originalTitle);
-    // Currently documents the buggy behavior:
-    expect(checkBody.data?.title).toBe('Hacked by integration test');
-    console.log(`[BUG #4] Course title changed despite tag failure: "${originalTitle}" → "${checkBody.data?.title}"`);
+    expect(checkBody.data?.title).toBe(originalTitle);
   });
 });
