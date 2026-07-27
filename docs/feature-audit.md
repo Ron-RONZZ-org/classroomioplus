@@ -31,7 +31,7 @@ run as the **cloud** product. (`README.md` → lines 11–50 — feature summary
 - **Frontend**: SvelteKit + Svelte 5 + TailwindCSS. `README.md` → 52–58 ("Built With");
   `apps/dashboard/svelte.config.js`.
 - **Backend API**: Hono (TypeScript). `apps/api/src/app.ts` → `new Hono()` app;
-  `ARCHITECHTURE.md` → layered architecture (Routes → Services → Queries).
+  `docs/architecture.md` → layered architecture (Routes → Services → Queries).
 - **Database**: PostgreSQL via Drizzle ORM. `packages/db/src/schema.ts` (~3,400 lines
   of `pgTable`/`pgEnum`); `packages/db/src/drizzle.ts`.
 - **Auth**: Better Auth (sessions, OAuth, SSO). `apps/api/src/app.ts` → 12, 107–188
@@ -44,7 +44,7 @@ run as the **cloud** product. (`README.md` → lines 11–50 — feature summary
 - **AI providers**: OpenAI / Google (Gemini) / Anthropic. `.env.example` → 110–115;
   `packages/utils/src/agent-models` (per `README.md` → 236).
 
-**High‑level architecture** (`ARCHITECHTURE.md` → 9–51):
+**High‑level architecture** (`docs/architecture.md` → 9–51):
 ```
 SvelteKit dashboard (apps/dashboard)  ──RPC (Hono client)──▶  Hono API (apps/api)
         │  server-side SSR proxy (.server.ts, PRIVATE_SERVER_KEY)        │
@@ -55,9 +55,9 @@ SvelteKit dashboard (apps/dashboard)  ──RPC (Hono client)──▶  Hono API
                                               PostgreSQL · Redis/BullMQ · S3/MinIO
 ```
 - Layered API: **Routes** (HTTP/validation/auth) → **Services** (business logic/
-  transactions) → **Queries** (pure Drizzle). `ARCHITECHTURE.md` → 44–50.
+  transactions) → **Queries** (pure Drizzle). `docs/architecture.md` → 44–50.
 - Shared **Zod validation** in `packages/utils/src/validation/*`, used by both API and
-  dashboard. `ARCHITECHTURE.md` → 45; `AGENTS.md` → 17–25.
+  dashboard. `docs/architecture.md` → 45; `AGENTS.md` → 17–25.
 - Dashboard talks to the API through a typed Hono RPC client and an SSR auth proxy
   authenticated with `PRIVATE_SERVER_KEY`. `README.md` → 149–156.
 
@@ -113,7 +113,7 @@ gated/limited or doc claims exceed code; **Stub/Planned** = PRD only, little/no 
 | 41 | SCORM support | SCORM package support | `prd/scorm-support` (todo) | **Stub/Planned ⚠️** |
 | 42 | Notification system | In‑app notifications | `prd/notification-system` (todo) | **Stub/Planned ⚠️** |
 
-> Items 40–42 are listed in `PRD-TRACKER.md` → 9, 16, 24 as **todo**; treat as not yet
+> Items 40–42 are listed in `docs/prd-tracker.md` → 9, 16, 24 as **todo**; treat as not yet
 > shipped. See **§7**.
 
 ---
@@ -251,7 +251,7 @@ gated/limited or doc claims exceed code; **Stub/Planned** = PRD only, little/no 
 ### 3.12 Community Q&A & Newsfeed
 - **Purpose:** per‑course discussion (questions/answers) and announcements.
 - **How it works:** `apps/api/src/routes/community/community.ts` with route‑specific
-  `middlewares/question-author-or-team` (`ARCHITECHTURE.md:241–252`); tables
+  `middlewares/question-author-or-team` (`docs/architecture.md:241–252`); tables
   `communityQuestion`/`communityAnswer` (`schema.ts:1558`,`1522`), `courseNewsfeed`/
   `…Comment` (`1605`,`1632`). Comment‑author middlewares `newsfeed-comment-author-or-team.ts`,
   `cohort-newsfeed-comment-author-or-team.ts`.
@@ -339,7 +339,7 @@ gated/limited or doc claims exceed code; **Stub/Planned** = PRD only, little/no 
   `widgetCourse`/`widgetVersion` (`schema.ts:2255`,`2305`,`2336`) with status/layout/
   selection enums (`42–52`). PRD `course-widget-embed [DONE]`.
 - **User flow:** Widgets → create widget → choose courses/layout → publish → copy embed
-  snippet (`embed-preview.html`).
+  snippet (`docs/embed-preview.html`).
 - **Edge cases:** draft vs published widget; manual vs published course selection mode.
 
 ### 3.22 Public REST API (v1) & Automation Keys
@@ -437,7 +437,7 @@ per‑request DB lookup** (`apps/api/src/middlewares/org-team-member.ts:5–53`)
 **Resource‑scoped middlewares** (`apps/api/src/middlewares/`):
 - `authMiddleware` — requires a session (`auth.ts`).
 - `orgMemberMiddleware` — must be org member; `orgTeamMemberMiddleware` — ADMIN|TUTOR;
-  `orgAdminMiddleware` — ADMIN only (`ARCHITECHTURE.md:233–237`).
+  `orgAdminMiddleware` — ADMIN only (`docs/architecture.md:233–237`).
 - `courseMemberMiddleware` / `courseTeamMemberMiddleware` — course‑level membership/team.
 - `cohortMemberMiddleware` / `cohortTeamMemberMiddleware` — cohort-level.
 - `apiKeyMiddleware` / `automationKeyMiddleware` (+ `automationKeyScopesMiddleware`) —
@@ -467,7 +467,7 @@ both the API/db layer (`process.env.PUBLIC_IS_SELFHOSTED`) and the dashboard
 
 ### 5.1 Self‑Hosted mode (`PUBLIC_IS_SELFHOSTED=true`)
 - **Setup:** Docker Compose full stack — `cp .env.example .env` then
-  `./run-docker-full-stack.sh` (auto‑generates `PRIVATE_SERVER_KEY`, `BETTER_AUTH_SECRET`);
+  `scripts/run-docker-full-stack.sh` (auto‑generates `PRIVATE_SERVER_KEY`, `BETTER_AUTH_SECRET`);
   `README.md:240–249`, `docker-compose.yaml`, `docker/Dockerfile.{api,dashboard}`,
   `docker/docs/SELF_HOST.md`. Bundled Postgres, Redis, MinIO.
 - **Single organization:** org creation **blocks a second org**
@@ -572,19 +572,19 @@ Upgrade or Buy tokens (api/polar/subscribe | buy-tokens)
    "REST API + Webhooks … receive events (`certificate.issued`, `enrollment.completed`)",
    but the only webhook code is **inbound Polar billing**
    (`apps/dashboard/src/routes/api/polar/webhook`) and `prd/webhooks` is **todo**
-   (`PRD-TRACKER.md:24`). No outbound event‑emission/delivery system was found in
+   (`docs/prd-tracker.md:24`). No outbound event‑emission/delivery system was found in
    `apps/api/src` or `packages/db/src`. **Code wins: outbound webhooks appear unimplemented.**
    QA should not test event delivery as a shipped feature. ⚠️
 2. **SCORM support** — README does not promise it, but `prd/scorm-support` is **todo**
-   (`PRD-TRACKER.md:16`). No SCORM code located. ⚠️ Treat as not shipped.
+   (`docs/prd-tracker.md:16`). No SCORM code located. ⚠️ Treat as not shipped.
 3. **In‑app notification system** — `prd/notification-system` is **todo**
-   (`PRD-TRACKER.md:9`). Transactional *email* exists (§3.28); in‑app notifications appear
+   (`docs/prd-tracker.md:9`). Transactional *email* exists (§3.28); in‑app notifications appear
    unbuilt. Verify before demoing. ⚠️
 4. **Selective exercise assignment** — `prd/selective-exercise-assignment` is **todo**
-   (`PRD-TRACKER.md:15`). Assigning specific exercises to specific students may not exist;
+   (`docs/prd-tracker.md:15`). Assigning specific exercises to specific students may not exist;
    confirm against `exercise.ts` behavior. ⚠️
 5. **Course templates / cohorts / import variants** — `prd/course-templates`,
-   `prd/course-cohorts`, `prd/course-import` are **todo** (`PRD-TRACKER.md:10,12,13`),
+   `prd/course-cohorts`, `prd/course-import` are **todo** (`docs/prd-tracker.md:10,12,13`),
    yet related schema exists (`exerciseTemplate` `schema.ts:2401`; `courseImportDraft`
    `schema.ts:2603`; cohorts are DONE). Scope of what's actually wired end‑to‑end vs.
    schema‑only should be verified per feature before writing test cases. ⚠️
@@ -628,8 +628,8 @@ These exist in source but are infra/dev tooling rather than demoable product fea
 ---
 
 ### How this audit was verified
-Every section traces to files read during the audit: `README.md`, `ARCHITECHTURE.md`,
-`AGENTS.md`, `.env.example`, `PRD-TRACKER.md`, `apps/api/src/app.ts`,
+Every section traces to files read during the audit: `README.md`, `docs/architecture.md`,
+`AGENTS.md`, `.env.example`, `docs/prd-tracker.md`, `apps/api/src/app.ts`,
 `packages/db/src/schema.ts`, the role/RBAC middlewares, `signup-guard.ts`,
 `onboarding.ts`, `appSetup.ts`, the Polar webhook, the v1 public‑API router, and the
 license constants/middleware. No application was run and no tests were executed —

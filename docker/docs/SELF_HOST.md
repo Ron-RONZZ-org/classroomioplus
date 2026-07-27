@@ -12,7 +12,7 @@ git clone https://github.com/classroomioplus/classroomioplus.git
 cd classroomioplus
 cp .env.example .env
 # Edit .env — set your dashboard domain and secrets
-./run-docker-full-stack.sh
+./scripts/run-docker-full-stack.sh
 ```
 
 The script builds and starts: **postgres**, **redis**, **minio** (object storage), **api** (`localhost:3081`), **dashboard** (`localhost:3082`), and the **jobs** worker (background processing). Database schema setup runs automatically inside the `api` container on startup (see [`docker/entrypoint-api.sh`](../entrypoint-api.sh); skip with `SKIP_DB_SETUP=true`).
@@ -37,7 +37,7 @@ CIO_VERSION=1.4.2 docker compose -f docker-compose.images.yaml --env-file .env p
 CIO_VERSION=1.4.2 docker compose -f docker-compose.images.yaml --env-file .env up -d
 ```
 
-From a full clone you can also use the helper: `./run-docker-full-stack.sh --images`.
+From a full clone you can also use the helper: `./scripts/run-docker-full-stack.sh --images`.
 
 > Secrets aren't auto-generated in this path (the helper script does that). Set `BETTER_AUTH_SECRET`
 > and `PRIVATE_SERVER_KEY` to strong random values yourself.
@@ -82,7 +82,7 @@ Key points:
 - **Direct API access (optional):** Set `PUBLIC_SERVER_URL` and `TRUSTED_ORIGINS` only if browsers or third-party clients need to call the API origin directly.
 - **CSP (runtime):** `ALLOWED_EXTERNAL_DOMAINS` (overrides all) or per-directive: `CSP_SCRIPT_SRC_DOMAINS`, `CSP_STYLE_SRC_DOMAINS`, `CSP_CONNECT_SRC_DOMAINS`, `CSP_FRAME_SRC_DOMAINS`, `CSP_FONT_SRC_DOMAINS`, `CSP_MEDIA_SRC_DOMAINS`. These are read at container startup — no image rebuild needed. The API does not need to be added for normal dashboard calls.
 - **Auth cookies:** No cookie-domain env is needed. The dashboard proxy makes auth first-party and Better Auth sets host-only dashboard cookies.
-- **Auto-generated:** `PRIVATE_SERVER_KEY`, `BETTER_AUTH_SECRET` (by `./run-docker-full-stack.sh`). A strong value you set yourself is never overwritten.
+- **Auto-generated:** `PRIVATE_SERVER_KEY`, `BETTER_AUTH_SECRET` (by `./scripts/run-docker-full-stack.sh`). A strong value you set yourself is never overwritten.
 - **Auto-configured:** All `MINIO_*` / `OBJECT_STORAGE_*` vars (by the startup script, with randomized MinIO credentials).
 - **Email (effectively required):** SMTP (or Zoho). See [Email](#email) — without it, signup verification, password reset, and invites do not send.
 - **Optional:** Google OAuth, Unsplash.
@@ -117,9 +117,9 @@ dc = docker compose --env-file .env -p classroomioplus -f docker-compose.yaml
 
 | Task | Command |
 |------|---------|
-| Full stack (pulls pre-built images, with MinIO) | `./run-docker-full-stack.sh` |
-| Build from source instead of pulling | `./run-docker-full-stack.sh --build` |
-| Exclude MinIO | `./run-docker-full-stack.sh --no-minio` |
+| Full stack (pulls pre-built images, with MinIO) | `./scripts/run-docker-full-stack.sh` |
+| Build from source instead of pulling | `./scripts/run-docker-full-stack.sh --build` |
+| Exclude MinIO | `./scripts/run-docker-full-stack.sh --no-minio` |
 | API-only smoke test | `dc up --build -d postgres redis api` |
 | Service status | `dc ps` |
 | Stream logs | `dc logs -f api dashboard` |
@@ -260,7 +260,7 @@ docker compose --env-file .env -p classroomioplus -f docker-compose.yaml up -d -
 docker compose --env-file .env -p classroomioplus -f docker-compose.yaml up -d --build api dashboard
 
 # Full stack
-./run-docker-full-stack.sh
+./scripts/run-docker-full-stack.sh
 ```
 
 ## Troubleshooting
@@ -277,7 +277,7 @@ docker container prune -f      # free stopped containers
 
 > **Warning:** `docker volume prune` removes volumes not used by any container. If run after `docker compose ... down`, it deletes `postgres-data`, `redis-data`, and `minio-data`. Use only the prunes above to free space safely.
 
-Then restart: `./run-docker-full-stack.sh`
+Then restart: `./scripts/run-docker-full-stack.sh`
 
 ### "The database system is in recovery mode" (57P03)
 

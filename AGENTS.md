@@ -657,7 +657,7 @@ Do not use `pnpm dev` (it trips turbo's concurrency cap). Build shared package `
 - The optional `@cio/storybook` build fails on an unresolved `@lucide/svelte/icons/bot` import; it does not affect api/dashboard.
 
 ### Deployment mode: self-hosted vs cloud (affects which features you can test)
-A single flag, `PUBLIC_IS_SELFHOSTED`, switches the whole product between **self-hosted** and **cloud** behavior. It is read in two places: the dashboard via `$env/static/public` (e.g. `apps/dashboard/src/lib/features/app/layout-setup.ts`) and the API/db layer via `@cio/core/config/env` (e.g. `apps/api/src/services/license.ts`, `apps/api/src/middlewares/license.ts`, `apps/api/src/services/onboarding.ts`). `FEATURE_AUDIT.md` §5 is the source-of-truth feature-by-feature map.
+A single flag, `PUBLIC_IS_SELFHOSTED`, switches the whole product between **self-hosted** and **cloud** behavior. It is read in two places: the dashboard via `$env/static/public` (e.g. `apps/dashboard/src/lib/features/app/layout-setup.ts`) and the API/db layer via `@cio/core/config/env` (e.g. `apps/api/src/services/license.ts`, `apps/api/src/middlewares/license.ts`, `apps/api/src/services/onboarding.ts`). `docs/feature-audit.md` §5 is the source-of-truth feature-by-feature map.
 
 **This VM's local env is configured for CLOUD mode** (`PUBLIC_IS_SELFHOSTED=false` in both `apps/dashboard/.env` and `apps/api/.env`) so multi-tenant and all license-gated features are testable. The README contributor default is self-hosted; to switch this VM back, set `PUBLIC_IS_SELFHOSTED=true` in both files (or remove it from `apps/api/.env`) and restart both dev servers.
 
