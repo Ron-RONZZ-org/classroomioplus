@@ -84,7 +84,7 @@ export async function updateCourseImportDraft(
  * List all course import drafts for an organization, ordered by newest first.
  * Excludes the large `draft` JSONB column — use `getCourseImportDraftById` to fetch the full payload.
  */
-export async function listCourseImportDrafts(orgId: string): Promise<TCourseImportDraft[]> {
+export async function listCourseImportDrafts(orgId: string): Promise<Omit<TCourseImportDraft, 'draft'>[]> {
   try {
     return await db
       .select({
