@@ -35,7 +35,7 @@ const config = {
       mode: 'auto',
       directives: {
         'default-src': ['self'],
-        'script-src': ['self', ...csp.scriptSrc, 'unsafe-hashes', 'unsafe-eval'],
+        'script-src': ['self', ...csp.scriptSrc, 'unsafe-inline', 'unsafe-hashes', 'unsafe-eval'],
         'style-src': ['self', 'unsafe-inline', ...csp.styleSrc],
         'style-src-elem': ['self', 'unsafe-inline', ...csp.styleSrc],
         // data: covers inlined woff2 (e.g. PDF.js / icon fonts); file fonts use 'self'
@@ -68,7 +68,7 @@ const config = {
       },
       reportOnly: {
         'default-src': ['self'],
-        'script-src': ['self', ...csp.scriptSrc, 'unsafe-hashes', 'unsafe-eval'],
+        'script-src': ['self', ...csp.scriptSrc, 'unsafe-inline', 'unsafe-hashes', 'unsafe-eval'],
         'style-src': ['self', 'unsafe-inline', ...csp.styleSrc],
         'style-src-elem': ['self', 'unsafe-inline', ...csp.styleSrc],
         'font-src': ['self', 'data:', ...csp.fontSrc],

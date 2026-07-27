@@ -92,7 +92,7 @@
     <p class="ui:text-muted-foreground text-sm">{$t(`${INVITE_MODAL}.no_invites_yet`)}</p>
   {:else}
     <div class="space-y-3">
-      {#each invites as invite}
+      {#each invites as invite (invite.id)}
         <div class="rounded-md border p-3">
           <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div class="space-y-1 text-sm">
@@ -138,7 +138,7 @@
               {#if !inviteAuditById[invite.id]?.length}
                 <p class="ui:text-muted-foreground text-sm">{$t(`${INVITE_MODAL}.no_audit_events`)}</p>
               {:else}
-                {#each inviteAuditById[invite.id] as event}
+                {#each inviteAuditById[invite.id] as event (event.id)}
                   <div class="rounded border p-2 text-xs">
                     <div class="font-semibold">{event.eventType}</div>
                     <div>{$t(`${INVITE_MODAL}.audit_at`)}: {formatDate(event.createdAt)}</div>

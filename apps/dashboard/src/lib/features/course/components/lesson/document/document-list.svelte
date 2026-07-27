@@ -43,7 +43,7 @@
 {#if !isEmpty(displayDocuments)}
   {@const isEditMode = mode === MODES.edit}
   <Item.Group class="flex w-full gap-4">
-    {#each displayDocuments as document, index}
+    {#each displayDocuments as document, index (document.key)}
       <DocumentCard
         {document}
         {index}

@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from 'vite';
 
 import fs from 'fs';
+import path from 'path';
 import { sveltekit } from '@sveltejs/kit/vite';
 
 export default ({ mode }) => {
@@ -23,7 +24,34 @@ export default ({ mode }) => {
         // workspace packages (e.g. `@cio/ui/custom/editor`) emit as absolute
         // paths into their own source tree. Without it, dev 403s on those
         // `@fs/.../packages/ui/...` URLs.
-        allow: ['..', '../../packages']
+        //
+        // Git worktrees symlink node_modules to the parent checkout. Vite
+        // resolves symlinks to their real (outside-project) paths, which
+        // are blocked by fs.allow unless we add them explicitly. Detect
+        // the symlink target at build time — no hardcoded paths.
+        allow: (() => {
+          // `../..` is the repo root (apps/dashboard/ → ../..)
+          const base = ['..', '../..', '../../packages'];
+          try {
+            // Git worktrees symlink the REPO ROOT's node_modules to the
+            // parent checkout. Vite follows the symlink and blocks the
+            // real (outside-project) path. Detect and add it.
+            const repoRootNm = '../../node_modules';
+            const stat = fs.lstatSync(repoRootNm);
+            if (stat.isSymbolicLink()) {
+              // real = /home/user/kodo/classroomioplus/node_modules
+              const real = fs.realpathSync(repoRootNm);
+              // Allow the parent checkout root so all pnpm store paths
+              // under it (e.g. node_modules/.pnpm/@sveltejs+kit@...)
+              // are accessible.
+              const checkoutRoot = path.resolve(real, '..');
+              base.push(checkoutRoot);
+            }
+          } catch {
+            // node_modules doesn't exist yet (first `pnpm install`)
+          }
+          return base;
+        })()
       },
       watch: {
         ignored: ['**/node_modules/!(@cio)/**', '**/.git/**']
