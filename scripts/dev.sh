@@ -187,6 +187,22 @@ ensure_infra() {
     exit 1
   fi
 
+  # Check if the docker socket is accessible (catching permission denied)
+  if ! docker info &>/dev/null; then
+    err "Cannot connect to the Docker daemon. Is the docker socket accessible?"
+    err ""
+    err "  If you just installed Docker, your user may not be in the 'docker' group yet."
+    err "  Run the following to fix it:"
+    err ""
+    err "    sudo usermod -aG docker \$USER"
+    err "    newgrp docker   # activate immediately (no logout needed)"
+    err ""
+    err "  Then re-run this script."
+    err ""
+    err "  See README.md → Prerequisites → Docker for details."
+    exit 1
+  fi
+
   # Start Postgres + Redis if not running
   if ! docker compose -f "$REPO_ROOT/docker-compose.yaml" ps --status running postgres redis 2>/dev/null | grep -q "postgres\|redis"; then
     info "Starting Postgres and Redis..."

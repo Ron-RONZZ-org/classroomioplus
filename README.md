@@ -105,6 +105,19 @@ This single command does everything: checks prerequisites, creates `.env` files 
 - **[pnpm](https://pnpm.io/installation)** (v10)
 - **[Docker](https://docs.docker.com/engine/install/)** — runs Postgres + Redis
   - **Ubuntu**: `sudo apt-get install docker-compose-v2` for `docker compose` (v2) support
+  - **Docker group**: After installing Docker, add your user to the `docker` group to run `docker` commands without `sudo`:
+    ```bash
+    sudo usermod -aG docker $USER
+    ```
+    The `usermod` command permanently adds your user to the group, but your current shell session
+    won't see the change until you log out and back in. To avoid logging out, run this once in
+    your terminal **before** `dev.sh`:
+    ```bash
+    newgrp docker
+    ```
+    This starts a sub-shell with the `docker` group active. Run `dev.sh` inside that sub-shell,
+    then `exit` to return to your original shell when done.
+  - **Verify**: `docker ps` should show a table of running containers (or an empty list), not a `permission denied` error.
 
 ### Project Structure
 
