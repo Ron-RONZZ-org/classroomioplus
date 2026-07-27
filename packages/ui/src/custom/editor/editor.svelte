@@ -4,6 +4,7 @@
   import { EdraEditor, EdraToolBar, EdraBubbleMenu, EdraDragHandleExtended } from './ui';
   import { slide } from 'svelte/transition';
   import { cn } from '$src/tools';
+  import Code from '@lucide/svelte/icons/code';
 
   interface Props {
     // Content of the editor
@@ -18,6 +19,8 @@
     contentStorageKey?: string;
     // localStorage key for editable state persistence
     editableStorageKey?: string;
+    // Whether to show a Source/Visual toggle in the toolbar
+    showSourceToggle?: boolean;
     // CSS class for the editor wrapper
     class?: string;
     // CSS class for the editor itself
@@ -37,6 +40,7 @@
     enablePersistence = false,
     contentStorageKey = 'edra-content',
     editableStorageKey = 'edra-editable',
+    showSourceToggle = false,
     class: className = '',
     editorClass = '',
     placeholder,
@@ -120,6 +124,25 @@
       onContentChange?.(newContent);
     }
   }
+
+  let sourceMode = $state(false);
+  let sourceTextareaEl: HTMLTextAreaElement | undefined = $state();
+
+  function toggleSourceMode() {
+    if (!editor || editor.isDestroyed) return;
+
+    if (sourceMode) {
+      // Switching back to Visual mode — push textarea content into Tiptap
+      const raw = sourceTextareaEl?.value ?? '';
+      editor.commands.setContent(raw, false);
+      sourceMode = false;
+    } else {
+      // Switching to Source mode — capture current HTML into textarea
+      sourceMode = true;
+      // Use $effect-friendly pattern: the textarea will read editor.getHTML()
+      // when it mounts via its bind:value
+    }
+  }
 </script>
 
 {#if browser}
@@ -131,26 +154,59 @@
   >
     {#if editor && !editor.isDestroyed}
       {#if showToolBar}
-        <div transition:slide>
-          <EdraToolBar
-            class="ui:bg-secondary/50 ui:flex ui:w-full ui:items-center ui:overflow-x-auto ui:border-b ui:border-dashed ui:p-0.5"
-            {editor}
-          />
+        <div class="ui:flex ui:w-full ui:items-stretch">
+          <div transition:slide class="ui:flex-1 ui:min-w-0">
+            <EdraToolBar
+              class="ui:bg-secondary/50 ui:flex ui:w-full ui:items-center ui:overflow-x-auto ui:border-b ui:border-dashed ui:p-0.5"
+              {editor}
+            />
+          </div>
+          {#if showSourceToggle && editable}
+            <button
+              type="button"
+              onclick={toggleSourceMode}
+              title={sourceMode ? 'Visual mode' : 'Source mode'}
+              aria-label={sourceMode ? 'Switch to visual mode' : 'Switch to source mode'}
+              class={cn(
+                'ui:flex ui:shrink-0 ui:items-center ui:justify-center ui:gap-1.5 ui:px-3 ui:text-xs ui:font-medium ui:border-b ui:border-dashed ui:transition-colors',
+                sourceMode ? 'ui:bg-primary/10 ui:text-primary' : 'ui:text-muted-foreground ui:hover:bg-secondary/50'
+              )}
+            >
+              <Code size={14} />
+              {sourceMode ? 'Visual' : 'Source'}
+            </button>
+          {/if}
         </div>
       {/if}
-      <EdraBubbleMenu {editor} />
 
-      {#if editable}
-        <EdraDragHandleExtended {editor} />
+      {#if !sourceMode}
+        <EdraBubbleMenu {editor} />
+
+        {#if editable}
+          <EdraDragHandleExtended {editor} />
+        {/if}
       {/if}
     {/if}
-    <EdraEditor
-      class={cn('ui:relative ui:h-128 ui:overflow-auto ui:p-4', editorClass)}
-      bind:editor
-      {editable}
-      {content}
-      {onUpdate}
-      {placeholder}
-    />
+
+    {#if sourceMode}
+      <textarea
+        bind:this={sourceTextareaEl}
+        value={sourceMode && editor && !editor.isDestroyed ? editor.getHTML() : ''}
+        class={cn(
+          'ui:relative ui:h-128 ui:w-full ui:resize-none ui:overflow-auto ui:p-4 ui:font-mono ui:text-sm ui:leading-relaxed',
+          'ui:bg-background ui:text-foreground ui:outline-none',
+          editorClass
+        )}
+      ></textarea>
+    {:else}
+      <EdraEditor
+        class={cn('ui:relative ui:h-128 ui:overflow-auto ui:p-4', editorClass)}
+        bind:editor
+        {editable}
+        {content}
+        {onUpdate}
+        {placeholder}
+      />
+    {/if}
   </div>
 {/if}

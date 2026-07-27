@@ -65,6 +65,7 @@
   <div class="mt-5 h-[60vh]">
     <TextEditor
       {content}
+      showSourceToggle={true}
       onChange={(content) => onEditorChange(content)}
       onReady={bindEditorRoot}
       placeholder={$t('course.navItem.lessons.materials.tabs.note.placeholder')}
