@@ -24,6 +24,7 @@
 
   let { data, children } = $props();
 
+  // svelte-ignore state_referenced_locally
   setUploadLimitsContext(data.uploadLimits);
 
   const metaTags = $derived(merge(data.baseMetaTags, page.data.pageMetaTags));

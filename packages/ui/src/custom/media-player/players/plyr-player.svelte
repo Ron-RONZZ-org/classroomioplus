@@ -57,6 +57,7 @@
    * progress-bar `seek` listener (set at Plyr construction) and the playback
    * tracker in `attachSeekEnforcement`, which advances it as the user watches.
    */
+  // svelte-ignore state_referenced_locally
   let seekLockFurthestSeconds = options.seekPolicy?.initialFurthestSeconds ?? 0;
 
   /**

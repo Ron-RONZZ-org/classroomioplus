@@ -38,6 +38,7 @@
 
   // `points` is often bound to a plain store object property, which is not deeply
   // reactive — a local reactive owner keeps the zero-points warning live while typing.
+  // svelte-ignore state_referenced_locally
   let pointsValue = $state(points);
 
   $effect(() => {

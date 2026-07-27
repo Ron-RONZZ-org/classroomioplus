@@ -13,7 +13,7 @@
 
   const t = $derived(courseLandingTokens(variant));
 
-  const fallbackAvatar = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(instructor.name);
+  const fallbackAvatar = $derived('https://ui-avatars.com/api/?name=' + encodeURIComponent(instructor.name));
   const coursesLabel = $derived(
     instructor.coursesNo
       ? (labels?.instructorCoursesLabel?.(instructor.coursesNo) ?? `${instructor.coursesNo} courses on the platform`)

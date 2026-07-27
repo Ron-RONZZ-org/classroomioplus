@@ -125,11 +125,17 @@ test -f apps/dashboard/.env || cp apps/dashboard/.env.example apps/dashboard/.en
 pnpm --filter @cio/ui build                    # Tailwind CSS (fast, ~3s gen + 10s overhead)
 pnpm --filter @cio/utils build                 # TS (slow, ~40s — only if you changed utils)
 pnpm --filter @cio/db build                    # TS (~40s — only if schema/queries changed)
-pnpm --filter @cio/api build                   # Hono routes (skip unless API changed)
+pnpm --filter @cio/api build                   # Hono routes + rpc-types (needed at least once per worktree)
 
 # Then build the dashboard (verification)
 pnpm --filter @cio/dashboard build
-```
+
+> **Tip**: In a fresh worktree, `dist/` is missing for all workspace packages. If you
+> haven't modified a given package, copy its `dist/` from the parent checkout
+> instead of rebuilding — saves 30-60s per package:
+> ```bash
+> cp -r /path/to/parent/checkout/packages/<name>/dist packages/<name>/dist
+> ```
 
 **API changes:**
 
@@ -147,9 +153,9 @@ CI runs the full transitive build on a clean checkout. Locally it's wasted work:
 
 ### Known pre-existing build issues
 
-- **`@cio/core`**: TS error `Cannot find module '@cio/utils/errors'` — build utils first, or skip core unless you changed it.
-- **`@cio/db`**: TS error in `packages/db/src/queries/course-import/course-import.ts` — build may fail mid-way. If `dist/` is incomplete, copy from parent checkout: `cp -r /path/to/parent/packages/db/dist packages/db/dist`.
-- Neither error affects runtime (the broken modules aren't loaded in normal flow).
+At time of writing there are no known pre-existing build errors. If you encounter one,
+verify it still reproduces on the base branch before debugging — it may be a transient
+environment issue or already fixed upstream.
 
 ### Final checks
 
@@ -158,6 +164,43 @@ pnpm format:check
 ```
 
 Do not commit if any verification step fails. If a pre-existing issue blocks you, note it and verify only your changed packages.
+
+### Lightweight verification (warning-only / cosmetic / formatting changes)
+
+For changes that don't alter runtime behavior (Svelte 5 migration warnings, typo fixes,
+formatting-only, `svelte-ignore` annotations), the full build is wasteful. Use the dev
+server to get the same Svelte compiler warnings in ~60s instead of 1-7min:
+
+```bash
+export PATH="$HOME/.nvm/versions/node/v20.19.3/bin:$PATH"
+
+# Start the dev server in the background
+setsid pnpm --filter @cio/dashboard dev > /tmp/dashboard-dev.log 2>&1 &
+echo $! > /tmp/dashboard-dev.pid
+
+# Wait for compilation to settle (initial build + HMR)
+sleep 60
+
+# Check for Svelte compiler warnings in the output
+grep -E 'vite-plugin-svelte|state_referenced_locally|svelte_component_deprecated|element_invalid_self_closing' /tmp/dashboard-dev.log
+
+# Kill the server
+kill $(cat /tmp/dashboard-dev.pid) 2>/dev/null
+rm -f /tmp/dashboard-dev.pid
+```
+
+This catches the same `vite-plugin-svelte` warnings the production build emits, without
+spending minutes on transitive TS compilation. Run the production build only when you
+need to verify actual bundle output or runtime behavior.
+
+**Scope caveat**: The dev server catches Svelte compiler warnings identically to the
+production build (same `vite-plugin-svelte` compiler). It does NOT catch:
+  - TypeScript type errors that SvelteKit's production build enforces but Vite dev skips
+  - SvelteKit adapter output validation
+  - CSS minification or tree-shaking failures
+  - SSR/HMR edge cases that differ between dev and prod modes
+
+For logic or behavioral changes, run the full production build instead.
 
 ## Naming Convention
 
@@ -176,26 +219,14 @@ Do not commit if any verification step fails. If a pre-existing issue blocks you
 
 ## Worktree Node Modules
 
-Git worktrees do NOT share `node_modules` with the parent checkout. After entering a worktree:
+Git worktrees do NOT share `node_modules` with the parent checkout. After entering a worktree, install fresh:
 
-1. Check if the parent checkout at `/home/rongzhou/kodo/classroomioplus` has `node_modules` installed:
-   ```bash
-   ls /home/rongzhou/kodo/classroomioplus/node_modules/.pnpm/ | head -3
-   ```
-2. If not, install there first (takes ~1 min):
-   ```bash
-   cd /home/rongzhou/kodo/classroomioplus && pnpm install --frozen-lockfile
-   ```
-3. Symlink the worktree's `node_modules` to the parent's:
-   ```bash
-   ln -sf /home/rongzhou/kodo/classroomioplus/node_modules /home/rongzhou/.local/share/opencode/worktree/classroomioplus/<branch>/node_modules
-   ```
-4. Verify the symlink works:
-   ```bash
-   ls node_modules/@cio/ai-assistant  # should show a directory, not "No such file"
-   ```
+```bash
+export PATH="$HOME/.nvm/versions/node/v20.19.3/bin:$PATH"
+CI=true pnpm install --frozen-lockfile
+```
 
-pnpm uses content-addressable storage in `.pnpm-store`, so the symlink is safe — no double disk usage.
+**Do NOT symlink `node_modules` from the parent checkout** — pnpm rejects the symlink (`ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY`) and cannot resolve workspace packages correctly.
 
 ## Creating a New Route
 

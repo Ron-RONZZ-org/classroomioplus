@@ -23,6 +23,7 @@
       : 'LibreClassroom - One Platform for Customer, Partner, and Employee Training'
   );
 
+  const ThemeComponent = $derived(data.ThemeComponent);
   const authAction = $derived(
     $user.isLoggedIn
       ? {
@@ -64,8 +65,8 @@
 </svelte:head>
 
 {#if data.isOrgSite && data.org}
-  {#if data.ThemeComponent && landingPageProps}
-    <svelte:component this={data.ThemeComponent} {...landingPageProps} />
+  {#if ThemeComponent && landingPageProps}
+    <ThemeComponent {...landingPageProps} />
   {/if}
 {:else if hasSetupError}
   <Empty

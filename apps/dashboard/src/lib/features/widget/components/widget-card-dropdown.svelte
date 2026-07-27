@@ -16,6 +16,7 @@
   let { id, name }: Props = $props();
 
   let renameOpen = $state(false);
+  // svelte-ignore state_referenced_locally
   let draftName = $state(name);
 
   async function handleRename() {

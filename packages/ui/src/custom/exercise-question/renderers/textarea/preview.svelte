@@ -16,7 +16,7 @@
 
 <div class="ui:space-y-2">
   {#await loadEditor()}
-    <div class="ui:animate-pulse ui:rounded-md ui:bg-muted ui:h-40 ui:w-full" />
+    <div class="ui:animate-pulse ui:rounded-md ui:bg-muted ui:h-40 ui:w-full"></div>
   {:then { Editor }}
     <Editor {content} editable={false} showToolBar={false} editorClass="ui:h-40" />
   {/await}
