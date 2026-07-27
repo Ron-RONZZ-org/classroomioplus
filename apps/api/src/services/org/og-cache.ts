@@ -51,29 +51,34 @@ async function readCachedOrgSiteOgBuffer(siteName: string, etag: string): Promis
 }
 
 export async function persistOrgSiteOgImage(siteName: string, buffer: Buffer, etag: string): Promise<string | null> {
-  const config = getStorageConfig();
-  const publicUrl = getOrgSiteOgPublicUrl(siteName);
-  if (!publicUrl) {
-    return null;
-  }
-
-  const uploadResult = await uploadToS3({
-    Bucket: config.bucketMedia,
-    Key: getOrgSiteOgObjectKey(siteName),
-    Body: buffer,
-    ContentType: 'image/png',
-    CacheControl: 'public, max-age=3600, stale-while-revalidate=86400',
-    Metadata: {
-      [OG_ETAG_METADATA_KEY]: etag
+  try {
+    const config = getStorageConfig();
+    const publicUrl = getOrgSiteOgPublicUrl(siteName);
+    if (!publicUrl) {
+      return null;
     }
-  });
 
-  if (!uploadResult.success) {
-    console.error('persistOrgSiteOgImage error:', uploadResult.error);
+    const uploadResult = await uploadToS3({
+      Bucket: config.bucketMedia,
+      Key: getOrgSiteOgObjectKey(siteName),
+      Body: buffer,
+      ContentType: 'image/png',
+      CacheControl: 'public, max-age=3600, stale-while-revalidate=86400',
+      Metadata: {
+        [OG_ETAG_METADATA_KEY]: etag
+      }
+    });
+
+    if (!uploadResult.success) {
+      console.error('persistOrgSiteOgImage error:', uploadResult.error);
+      return null;
+    }
+
+    return publicUrl;
+  } catch (error) {
+    console.error('persistOrgSiteOgImage error:', error);
     return null;
   }
-
-  return publicUrl;
 }
 
 export async function getCachedOrgSiteOgBuffer(siteName: string, etag: string): Promise<Buffer | null> {

@@ -169,6 +169,44 @@ status() {
   fi
 }
 
+# ─── Helpers for .env management ──────────────────────────────────────────
+
+# Fill in MinIO defaults for any env var that is still empty ("").
+# Only overwrites `=""` — leaves user-configured values untouched.
+fill_minio_env() {
+  local file="$1"
+  local dirty=false
+
+  if grep -q '^OBJECT_STORAGE_ENDPOINT=""$' "$file" 2>/dev/null; then
+    sed -i 's|^OBJECT_STORAGE_ENDPOINT=""$|OBJECT_STORAGE_ENDPOINT="http://localhost:9000"|' "$file"
+    dirty=true
+  fi
+  if grep -q '^OBJECT_STORAGE_PUBLIC_ENDPOINT=""$' "$file" 2>/dev/null; then
+    sed -i 's|^OBJECT_STORAGE_PUBLIC_ENDPOINT=""$|OBJECT_STORAGE_PUBLIC_ENDPOINT="http://localhost:9000"|' "$file"
+    dirty=true
+  fi
+  if grep -q '^OBJECT_STORAGE_ACCESS_KEY_ID=""$' "$file" 2>/dev/null; then
+    sed -i 's|^OBJECT_STORAGE_ACCESS_KEY_ID=""$|OBJECT_STORAGE_ACCESS_KEY_ID="minioadmin"|' "$file"
+    dirty=true
+  fi
+  if grep -q '^OBJECT_STORAGE_SECRET_ACCESS_KEY=""$' "$file" 2>/dev/null; then
+    sed -i 's|^OBJECT_STORAGE_SECRET_ACCESS_KEY=""$|OBJECT_STORAGE_SECRET_ACCESS_KEY="minioadmin"|' "$file"
+    dirty=true
+  fi
+  if grep -q '^OBJECT_STORAGE_FORCE_PATH_STYLE=""$' "$file" 2>/dev/null; then
+    sed -i 's|^OBJECT_STORAGE_FORCE_PATH_STYLE=""$|OBJECT_STORAGE_FORCE_PATH_STYLE="true"|' "$file"
+    dirty=true
+  fi
+  if grep -q '^OBJECT_STORAGE_MEDIA_PUBLIC_BASE_URL=""$' "$file" 2>/dev/null; then
+    sed -i 's|^OBJECT_STORAGE_MEDIA_PUBLIC_BASE_URL=""$|OBJECT_STORAGE_MEDIA_PUBLIC_BASE_URL="http://localhost:9000/media"|' "$file"
+    dirty=true
+  fi
+
+  if [ "$dirty" = true ]; then
+    ok "Filled MinIO defaults in $(basename "$file")"
+  fi
+}
+
 # ─── Setup ────────────────────────────────────────────────────────────────
 
 setup_env() {
@@ -200,14 +238,14 @@ SMTP_PORT=""
 SMTP_USER=""
 SMTP_SENDER=""
 SMTP_PASSWORD=""
-MINIO_ROOT_USER=""
-MINIO_ROOT_PASSWORD=""
-OBJECT_STORAGE_ENDPOINT=""
-OBJECT_STORAGE_PUBLIC_ENDPOINT=""
-OBJECT_STORAGE_ACCESS_KEY_ID=""
-OBJECT_STORAGE_SECRET_ACCESS_KEY=""
-OBJECT_STORAGE_FORCE_PATH_STYLE=""
-OBJECT_STORAGE_MEDIA_PUBLIC_BASE_URL=""
+MINIO_ROOT_USER="${MINIO_ROOT_USER:-minioadmin}"
+MINIO_ROOT_PASSWORD="${MINIO_ROOT_PASSWORD:-minioadmin}"
+OBJECT_STORAGE_ENDPOINT="${OBJECT_STORAGE_ENDPOINT:-http://localhost:9000}"
+OBJECT_STORAGE_PUBLIC_ENDPOINT="${OBJECT_STORAGE_PUBLIC_ENDPOINT:-http://localhost:9000}"
+OBJECT_STORAGE_ACCESS_KEY_ID="${OBJECT_STORAGE_ACCESS_KEY_ID:-minioadmin}"
+OBJECT_STORAGE_SECRET_ACCESS_KEY="${OBJECT_STORAGE_SECRET_ACCESS_KEY:-minioadmin}"
+OBJECT_STORAGE_FORCE_PATH_STYLE="${OBJECT_STORAGE_FORCE_PATH_STYLE:-true}"
+OBJECT_STORAGE_MEDIA_PUBLIC_BASE_URL="${OBJECT_STORAGE_MEDIA_PUBLIC_BASE_URL:-http://localhost:9000/media}"
 APIEOF
     ok "Created apps/api/.env"
   else
@@ -275,6 +313,10 @@ DASHEOF
     cp "$api_env" "$jobs_env"
     ok "Created apps/jobs/.env (copied from api)"
   fi
+
+  # Fill in MinIO defaults for any vars still empty in api/.env and jobs/.env
+  fill_minio_env "$api_env"
+  fill_minio_env "$jobs_env"
 }
 
 ensure_infra() {
@@ -319,6 +361,17 @@ ensure_infra() {
     ok "Postgres and Redis are running"
   else
     ok "Postgres and Redis already running"
+  fi
+
+  # Object storage (MinIO) — needed for media uploads, OG images, video processing.
+  # The `--profile minio` flag activates the minio and minio-init services.
+  # minio-init auto-creates the required buckets (videos, documents, media).
+  if ! docker compose --profile minio -f "$REPO_ROOT/docker-compose.yaml" ps --status running minio 2>/dev/null | grep -q "minio"; then
+    info "Starting MinIO (object storage)..."
+    docker compose --profile minio -f "$REPO_ROOT/docker-compose.yaml" up -d minio minio-init
+    ok "MinIO is running"
+  else
+    ok "MinIO already running"
   fi
 }
 
