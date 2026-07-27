@@ -168,35 +168,36 @@ Shared packages live under `packages/` (`packages/db`, `packages/utils`, `packag
 
 ### Testing
 
-This monorepo has tests at several layers, though coverage is still maturing (tracked in [epic #16](https://github.com/Ron-RONZZ-org/classroomioplus/issues/16)).
+The monorepo has tests at three layers. See the [testing coverage epic](https://github.com/Ron-RONZZ-org/classroomioplus/issues/16) for history.
 
 ```bash
-# API service logic (vitest) — ~61 tests
+# ── Unit tests (vitest) ────────────────────────
+
+# API service logic — 123 tests
 pnpm --filter @cio/api test
 
-# Question type validation (vitest)
+# Dashboard utilities — migrated from jest → vitest
+pnpm --filter @cio/dashboard test
+
+# Question type validation, email rendering, course-app templates
 pnpm --filter @cio/question-types test
-
-# Email template rendering (vitest)
 pnpm --filter @cio/email test
-
-# Course-app template unit tests (vitest)
 pnpm --filter @cio/course-app test
 
-# Dashboard utility tests (vitest)
-pnpm --filter @cio/dashboard test
+# ── API integration tests (real Postgres) ──────
+# 14 tests covering auth, courses, org membership, smoke
+pnpm --filter @cio/api test:integration
+
+# ── Browser E2E smoke tests (Playwright) ──────
+# 7 tests: login, dashboard, courses, settings,
+# fork-specific (AI provider, SSO), logout
+# Requires both dev servers to be running:
+#   pnpm api:dev  (port 3002)
+#   pnpm dashboard:dev  (port 5173)
+pnpm --filter @cio/dashboard test:e2e
 ```
 
-**Dashboard unit tests** are currently broken (Jest config issue) — tracked in [#17](https://github.com/Ron-RONZZ-org/classroomioplus/issues/17).
-
-**E2E tests**: The repo has no browser E2E tests for the dashboard yet. A single Playwright spec exists for the course-app template at `packages/course-app/src/template/tests/course.spec.ts`:
-
-```bash
-cd packages/course-app/src/template
-pnpm test:e2e
-```
-
-See the [testing coverage epic](https://github.com/Ron-RONZZ-org/classroomioplus/issues/16) for the planned phased improvements.
+**Known limitations**: 8 bugs documented in [#34](https://github.com/Ron-RONZZ-org/classroomioplus/issues/34) (invite atomicity, case-sensitive email, stale session cache, etc.) remain unfixed. The course-app template has a separate Playwright spec at `packages/course-app/src/template/tests/course.spec.ts`.
 
 ### Enabling AI Features
 
