@@ -31,6 +31,15 @@
   z-index: 100;
 }
 
+/* Hide scrollbar for underline tabs (applied via data-slot on TabsPrimitive.List) */
+[data-slot='underline-tabs-list'] {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+[data-slot='underline-tabs-list']::-webkit-scrollbar {
+  display: none;
+}
+
 @utility z-app-bar-elevated {
   z-index: 150;
 }

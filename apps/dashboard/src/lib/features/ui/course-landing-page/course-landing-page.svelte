@@ -83,6 +83,7 @@
     })
   );
 
+  // svelte-ignore state_referenced_locally
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let ThemeComponent = $state<Component<any> | null>(themeComponent);
 
@@ -117,5 +118,7 @@
       <UploadWidget imageURL={courseData.logo} onchange={(newLogo) => (courseData.logo = newLogo)} />
     </div>
   {/if}
-  <svelte:component this={ThemeComponent} {...landingProps} />
+  {#if ThemeComponent}
+    <ThemeComponent {...landingProps} />
+  {/if}
 {/if}

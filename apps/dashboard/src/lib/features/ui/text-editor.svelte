@@ -64,11 +64,11 @@
     aria-hidden="true"
   >
     {#if showToolBar}
-      <div class="ui:h-9 ui:shrink-0 ui:border-b ui:border-dashed ui:bg-muted/50" />
+      <div class="ui:h-9 ui:shrink-0 ui:border-b ui:border-dashed ui:bg-muted/50"></div>
     {/if}
     <div
       class={cn('ui:relative ui:h-128 ui:w-full ui:overflow-auto ui:p-4 ui:animate-pulse ui:bg-muted/50', editorClass)}
-    />
+    ></div>
   </div>
 {:then { Editor }}
   <Editor
