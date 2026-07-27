@@ -9,6 +9,12 @@ pre-commit:
       fail_text: |
         ❌ Prettier formatting check failed!
         Please run 'pnpm format:changed' or 'pnpm format' to fix formatting issues and try again.
+    bash-syntax:
+      glob: 'scripts/*.sh'
+      run: bash -n {staged_files}
+      fail_text: |
+        ❌ Shell script syntax error detected.
+        Run 'bash -n scripts/<file>' to see the error, then fix it.
     ui-prefix:
       glob: 'packages/ui/src/**/*.{svelte,ts,tsx,js,jsx}'
       run: pnpm --filter @cio/ui prefix:check:staged
