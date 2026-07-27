@@ -148,9 +148,8 @@ All seeded accounts use password `123456`:
 
 ### Fork-specific coverage
 
-- **AI Provider settings** (`/org/{slug}/settings/ai-provider`): loaded without error
-- **SSO/Auth settings** (`/org/{slug}/settings/auth`): renders without crash in both cloud and self-hosted modes
-- License bypass is exercised in self-hosted mode (configure `PUBLIC_IS_SELFHOSTED=true` in `.env`)
+- **AI Provider settings** (`/org/{slug}/settings/ai-provider`): custom endpoint UI is a fork addition; verifies it loads without error.
+- **SSO settings** (`/org/{slug}/settings/auth`): verifies the page renders without a crash. The `isEnterprisePlan` guard is hardcoded to `true` in the fork, so SSO setup fields are always enabled (the "Enterprise plan" text in the UI is cosmetic only).
 
 ### Adding tests
 

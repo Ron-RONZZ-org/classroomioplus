@@ -110,12 +110,13 @@ test.describe('Smoke tests', () => {
     test.setTimeout(90_000);
     const slug = await loginViaApi(page);
 
-    // Verify the SSO settings page renders correctly (available in both
-    // cloud and self-hosted modes; plan gating is per-mode).
+    // Verify the SSO settings page renders without a crash.
+    // The fork hardcodes isEnterprisePlan to true, so SSO setup fields
+    // are always enabled (the "Enterprise plan" badge in the UI is
+    // cosmetic — the license system was removed in a6f747158).
     await page.goto(BASE_URL + `/org/${slug}/settings/auth`, { waitUntil: 'load' });
     await page.waitForLoadState('networkidle');
 
-    // Page should render without crashing (no 500 error)
     await expect(page.locator('body')).not.toBeEmpty();
   });
 
