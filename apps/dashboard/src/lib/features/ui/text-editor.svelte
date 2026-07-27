@@ -26,6 +26,7 @@
     content?: HTMLContent;
     showToolBar?: boolean;
     editable?: boolean;
+    showSourceToggle?: boolean;
     enablePersistence?: boolean;
     contentStorageKey?: string;
     editableStorageKey?: string;
@@ -40,6 +41,7 @@
     content = '',
     showToolBar = true,
     editable = true,
+    showSourceToggle = false,
     enablePersistence = false,
     contentStorageKey = 'edra-content',
     editableStorageKey = 'edra-editable',
@@ -73,6 +75,7 @@
     {content}
     {showToolBar}
     {editable}
+    {showSourceToggle}
     {enablePersistence}
     {contentStorageKey}
     {editableStorageKey}

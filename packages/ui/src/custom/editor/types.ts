@@ -27,6 +27,8 @@ export interface EditorProps {
   contentStorageKey?: string;
   // localStorage key for editable state persistence
   editableStorageKey?: string;
+  // Whether to show a Source/Visual toggle in the toolbar
+  showSourceToggle?: boolean;
   // CSS class for the editor wrapper
   class?: string;
   // CSS class for the editor itself
