@@ -318,6 +318,7 @@ start_full() {
   fi
   echo ""
   echo "   API:       http://localhost:3002"
+  echo "   API Docs:  http://localhost:3002/docs"
   echo "   Dashboard: http://localhost:5173"
   echo "   Login:     admin@test.com / 123456"
   echo ""
