@@ -11,6 +11,7 @@ export { default as CommunityIcon } from './community.svelte';
 export { default as ContentIcon } from './content.svelte';
 export { default as CourseIcon } from './course.svelte';
 export { default as DashboardIcon } from './dashboard.svelte';
+export { default as DownloadIcon } from './download.svelte';
 export { default as ExerciseIcon } from './exercise.svelte';
 export { default as ExploreIcon } from './explore.svelte';
 export { default as ExternalLinkIcon } from './external-link.svelte';

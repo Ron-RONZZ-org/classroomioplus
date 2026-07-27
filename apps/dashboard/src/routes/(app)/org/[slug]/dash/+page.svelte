@@ -10,7 +10,7 @@
   import { calDateDiff } from '$lib/utils/functions/date';
   import { currentOrgPath } from '$lib/utils/store/org';
 
-  import { CreateCourseButton } from '$features/course/components';
+  import { CreateCourseButton, ImportCourseButton } from '$features/course/components';
   import { UserAvatar } from '@cio/ui/custom/user-avatar';
   import { Progress } from '@cio/ui/base/progress';
   import { Button } from '@cio/ui/base/button';
@@ -45,6 +45,7 @@
       </Page.Title>
     </Page.HeaderContent>
     <Page.Action>
+      <ImportCourseButton variant="outline" isResponsive />
       <CreateCourseButton variant="outline" isResponsive />
 
       <VisitOrgSiteButton />
@@ -106,7 +107,10 @@
                 icon={BookIcon}
                 class="h-full"
               >
-                <CreateCourseButton variant="outline" />
+                <div class="flex items-center justify-center gap-2">
+                  <ImportCourseButton variant="outline" />
+                  <CreateCourseButton variant="outline" />
+                </div>
               </Empty>
             {:else}
               <ul class="ui:divide-border -mx-2 divide-y">

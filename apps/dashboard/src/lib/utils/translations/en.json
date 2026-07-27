@@ -1335,7 +1335,8 @@
     "upgrade_now": "Upgrade now",
     "upgrade_students": "{studentCount} of {studentLimit} students",
     "upgrade_left": "{count} left",
-    "cohorts": "Cohorts"
+    "cohorts": "Cohorts",
+    "import_export": "Import / Export"
   },
   "pricing": {
     "plan_names": {
@@ -1838,6 +1839,7 @@
     "heading": "Courses",
     "page_subtitle": "Where lessons turn into courses and courses turn into enrollments.",
     "heading_button": "Create Course",
+    "heading_import_button": "Import Course",
     "search_placeholder": "Find Course",
     "tag_filters": {
       "filter": "Filter",
@@ -1921,6 +1923,47 @@
       "error": {
         "failed_to_clone": "Failed to clone course"
       }
+    },
+    "import_export": {
+      "page_title": "Import / Export Courses",
+      "page_subtitle": "Export course structures for backup or migration, or import courses from a JSON file.",
+      "export_section_title": "Export Courses",
+      "export_section_description": "Select one or more courses to export as JSON files.",
+      "export_button": "Export Selected ({count})",
+      "export_all_button": "Export All",
+      "import_section_title": "Import Course",
+      "import_section_description": "Upload a JSON file exported from another LibreClassroom instance.",
+      "import_button": "Import",
+      "import_zone_label": "Drop course JSON file here or click to browse",
+      "import_zone_hint": "You can select multiple files at once — all will be imported as drafts.",
+      "import_processing": "Processing {current} of {total}…",
+      "import_done": "{count} course(s) imported as drafts.",
+      "drafts_title": "Import Drafts",
+      "drafts_empty": "No drafts yet. Upload a course export file above to get started.",
+      "drafts_status_draft": "Draft",
+      "drafts_status_published": "Published",
+      "drafts_status_archived": "Archived",
+      "drafts_published_link": "View course",
+      "preview_title": "Preview: {title}",
+      "preview_type": "Type",
+      "preview_locale": "Locale",
+      "preview_sections": "Sections ({count})",
+      "preview_lessons": "Lessons ({count})",
+      "preview_exercises": "Exercises ({count})",
+      "preview_tags": "Tags",
+      "preview_warnings": "Warnings ({count})",
+      "publish_button": "Publish Course",
+      "publish_success": "Course published! Redirecting…",
+      "publish_error": "Failed to publish course",
+      "delete_draft_button": "Delete Draft",
+      "delete_draft_confirm": "Delete this draft?",
+      "delete_draft_success": "Draft deleted",
+      "select_all": "Select all",
+      "deselect_all": "Deselect all",
+      "select_courses_placeholder": "Search courses…",
+      "no_courses_selected": "Select courses from the list above",
+      "success_export": "Course exported successfully",
+      "success_import": "Course imported as draft"
     }
   },
   "course": {
@@ -1994,7 +2037,8 @@
       "nav_landing_page": "Landing Page",
       "nav_settings": "Settings",
       "nav_ai_assistant": "Assistant",
-      "nav_ai_tutor": "AI Tutor"
+      "nav_ai_tutor": "AI Tutor",
+      "nav_export": "Export"
     },
     "sidebar": {
       "back_to_course": "Back to course",
@@ -3661,6 +3705,13 @@
         "delete_text": "Delete this course,this action cannot be undone",
         "save": "Save Changes"
       }
+    },
+    "export": {
+      "title": "Export Course",
+      "description": "Download the course structure as a JSON file for backup or migration.",
+      "button": "Export as JSON",
+      "success": "Course exported successfully",
+      "error": "Failed to export course"
     },
     "not_permitted": {
       "header": "No Permission",

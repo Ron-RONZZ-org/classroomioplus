@@ -14,6 +14,7 @@
     AttendanceIcon,
     CertificateIcon,
     ContentIcon,
+    DownloadIcon,
     HoverableItem,
     LandingPageIcon,
     MarksIcon,
@@ -190,6 +191,16 @@
         icon: getNavIcon(NAV_IDS.AI_ASSISTANT)
       },
       {
+        id: NAV_IDS.EXPORT,
+        title: $t('course.navItems.nav_export'),
+        url: getNavItemRoute(id, 'export'),
+        isActive: (path || page.url.pathname) === getNavItemRoute(id, 'export'),
+        show() {
+          return !isStudent;
+        },
+        icon: getNavIcon(NAV_IDS.EXPORT)
+      },
+      {
         id: NAV_IDS.SETTINGS,
         title: $t('course.navItems.nav_settings'),
         url: getNavItemRoute(id, 'settings'),
@@ -259,6 +270,8 @@
       return CertificateIcon;
     } else if (id === NAV_IDS.SETTINGS) {
       return SettingsIcon;
+    } else if (id === NAV_IDS.EXPORT) {
+      return DownloadIcon;
     } else if (id === NAV_IDS.AI_ASSISTANT) {
       return BotIcon;
     }

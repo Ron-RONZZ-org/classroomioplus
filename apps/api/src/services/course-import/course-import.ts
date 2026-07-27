@@ -22,9 +22,11 @@ import {
   updateLessonLanguageService
 } from '@cio/core/services/lesson-language';
 import {
+  archiveCourseImportDraft,
   createCourseImportDraft,
   getCourseImportDraftById,
   getCourseImportDraftByIdempotencyKey,
+  listCourseImportDrafts,
   updateCourseImportDraft
 } from '@cio/db/queries/course-import';
 import { getCourseById, isCourseSlugTaken, updateCourseSlug } from '@cio/db/queries/course';
@@ -587,6 +589,43 @@ export async function getCourseImportStructureService(orgId: string, courseId: s
     throw new AppError(
       error instanceof Error ? error.message : 'Failed to fetch course structure',
       ErrorCodes.COURSE_IMPORT_FETCH_FAILED,
+      500
+    );
+  }
+}
+
+export async function listCourseImportDraftsService(orgId: string) {
+  try {
+    return listCourseImportDrafts(orgId);
+  } catch (error) {
+    if (error instanceof AppError || error instanceof ZodError) {
+      throw error;
+    }
+
+    throw new AppError(
+      error instanceof Error ? error.message : 'Failed to list course import drafts',
+      ErrorCodes.COURSE_IMPORT_FETCH_FAILED,
+      500
+    );
+  }
+}
+
+export async function archiveCourseImportDraftService(orgId: string, draftId: string) {
+  try {
+    const draft = await archiveCourseImportDraft(orgId, draftId);
+    if (!draft) {
+      throw new AppError('Course import draft not found', ErrorCodes.COURSE_IMPORT_DRAFT_NOT_FOUND, 404);
+    }
+
+    return draft;
+  } catch (error) {
+    if (error instanceof AppError || error instanceof ZodError) {
+      throw error;
+    }
+
+    throw new AppError(
+      error instanceof Error ? error.message : 'Failed to archive course import draft',
+      ErrorCodes.COURSE_IMPORT_DELETE_FAILED,
       500
     );
   }

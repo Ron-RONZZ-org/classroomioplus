@@ -14,6 +14,7 @@
     CourseCardLoader,
     CourseListRow,
     CreateCourseButton,
+    ImportCourseButton,
     CopyCourseModal,
     NewCourseModal
   } from '$features/course/components';
@@ -126,7 +127,10 @@
   {:else if !courses.length}
     <Empty title={emptyTitle} description={emptyDescription} icon={LibraryBigIcon} variant="page">
       {#if !isLMS}
-        <CreateCourseButton isResponsive />
+        <div class="flex items-center justify-center gap-2">
+          <ImportCourseButton isResponsive />
+          <CreateCourseButton isResponsive />
+        </div>
       {:else if emptyAction}
         {@render emptyAction()}
       {/if}

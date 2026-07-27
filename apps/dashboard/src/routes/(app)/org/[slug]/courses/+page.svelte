@@ -1,6 +1,7 @@
 <script lang="ts">
   import CoursesPage from '$features/course/pages/courses.svelte';
   import CreateCourseButton from '$features/course/components/create-course-button.svelte';
+  import ImportCourseButton from '$features/course/components/import-course-button.svelte';
   import CourseFilterPopover from '$features/course/components/course-filter-popover.svelte';
   import { courseMetaDeta } from '$features/course/utils/store';
   import {
@@ -213,7 +214,10 @@
       <Page.Subtitle>{$t('courses.page_subtitle')}</Page.Subtitle>
     </Page.HeaderContent>
     <Page.Action>
-      <CreateCourseButton isResponsive />
+      <div class="flex items-center gap-2">
+        <ImportCourseButton isResponsive />
+        <CreateCourseButton isResponsive />
+      </div>
     </Page.Action>
   </Page.Header>
   <Page.Body>

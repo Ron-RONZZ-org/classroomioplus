@@ -9,10 +9,12 @@ import {
   ZCourseImportDraftUpdate
 } from '@cio/utils/validation/course-import';
 import {
+  archiveCourseImportDraftService,
   createCourseImportDraftFromCourseService,
   createCourseImportDraftService,
   getCourseImportDraftService,
   getCourseImportStructureService,
+  listCourseImportDraftsService,
   publishCourseImportDraftService,
   publishCourseImportDraftToExistingCourseService,
   updateCourseImportDraftTagsService,
@@ -27,6 +29,40 @@ import { orgAdminOrAutomationKeyMiddleware } from '@api/middlewares/org-admin-or
 import { zValidator } from '@hono/zod-validator';
 
 export const courseImportRouter = new Hono()
+  .get(
+    '/drafts',
+    authOrAutomationKeyMiddleware,
+    orgAdminOrAutomationKeyMiddleware(['course_import:draft:read']),
+    async (c) => {
+      try {
+        const orgId = c.get('orgId')!;
+
+        const drafts = await listCourseImportDraftsService(orgId);
+
+        return c.json({ success: true, data: drafts }, 200);
+      } catch (error) {
+        return handleError(c, error, 'Failed to list course import drafts');
+      }
+    }
+  )
+  .delete(
+    '/drafts/:draftId',
+    authOrAutomationKeyMiddleware,
+    orgAdminOrAutomationKeyMiddleware(['course_import:draft:update']),
+    zValidator('param', ZCourseImportDraftGetParam),
+    async (c) => {
+      try {
+        const orgId = c.get('orgId')!;
+        const { draftId } = c.req.valid('param');
+
+        const draft = await archiveCourseImportDraftService(orgId, draftId);
+
+        return c.json({ success: true, data: draft }, 200);
+      } catch (error) {
+        return handleError(c, error, 'Failed to delete course import draft');
+      }
+    }
+  )
   .get(
     '/courses/:courseId/structure',
     authOrAutomationKeyMiddleware,

@@ -5,6 +5,7 @@ import {
   CommunityIcon,
   CourseIcon,
   DashboardIcon,
+  DownloadIcon,
   GoalIcon,
   HomeIcon,
   LandingPageIcon,
@@ -12,6 +13,7 @@ import {
   SettingsIcon,
   SetupIcon,
   TagIcon,
+  UploadIcon,
   ZapIcon
 } from '@cio/ui/custom/moving-icons';
 
@@ -148,6 +150,14 @@ export const baseNavConfig: NavItemConfig[] = [
     path: '/widgets',
     icon: LandingPageIcon,
     matchPattern: '^(/org/[^/]+/widgets(/.*)?|/widgets/[^/]+(/.*)?)$'
+  },
+  {
+    group: 'content',
+    titleKey: 'org_navigation.import_export',
+    path: '/import-export',
+    icon: DownloadIcon,
+    requiresAdmin: true,
+    matchPattern: '^/org/[^/]+/import-export(/.*)?$'
   },
   {
     group: 'people',
