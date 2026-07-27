@@ -13,7 +13,16 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-PATH="$HOME/.npm-global/bin:$HOME/.nvm/versions/node/v20.19.3/bin:$PATH"
+# Use nvm-managed Node.js (matching .nvmrc) if available, otherwise fall back to PATH.
+# The hardcoded v20.19.3 is the .nvmrc version — adjust if you update .nvmrc.
+NVM_NODE_DIR="$HOME/.nvm/versions/node/$(cat "$REPO_ROOT/.nvmrc" 2>/dev/null || echo 'v20.19.3')"
+if [ -x "$NVM_NODE_DIR/bin/node" ]; then
+  PATH="$HOME/.npm-global/bin:$NVM_NODE_DIR/bin:$PATH"
+else
+  # Fall back to any nvm-managed node, or system node on PATH
+  # All versions ^20.19.3 are compatible; exact .nvmrc install not required.
+  PATH="$HOME/.npm-global/bin:$PATH"
+fi
 
 API_PID_FILE="/tmp/cio-api.pid"
 DASHBOARD_PID_FILE="/tmp/cio-dashboard.pid"
@@ -266,6 +275,9 @@ start_full() {
     fi
   done
 
+  # Clean stale log files so a previous sudo run doesn't leave root-owned files blocking redirects
+  rm -f "$API_LOG" "$DASHBOARD_LOG" "$JOBS_LOG"
+
   if [ "$light" = "true" ]; then
     info "Starting API server only (no background workers)..."
     rm -f "$API_PID_FILE"
@@ -290,11 +302,20 @@ start_full() {
   echo ""
   info "Waiting for servers to be ready..."
 
-  wait_for_ready "http://127.0.0.1:3002/" "API" 30 "$API_LOG"
-  wait_for_ready "http://127.0.0.1:5173/" "Dashboard" 90 "$DASHBOARD_LOG"
+  local api_ok=false dashboard_ok=false
+  if wait_for_ready "http://127.0.0.1:3002/" "API" 30 "$API_LOG"; then
+    api_ok=true
+  fi
+  if wait_for_ready "http://127.0.0.1:5173/" "Dashboard" 90 "$DASHBOARD_LOG"; then
+    dashboard_ok=true
+  fi
 
   echo ""
-  ok "Dev environment is running!"
+  if [ "$api_ok" = true ] && [ "$dashboard_ok" = true ]; then
+    ok "Dev environment is running!"
+  else
+    warn "Some services did not start (check logs above)."
+  fi
   echo ""
   echo "   API:       http://localhost:3002"
   echo "   Dashboard: http://localhost:5173"
