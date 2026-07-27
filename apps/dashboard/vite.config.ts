@@ -59,7 +59,11 @@ export default ({ mode }) => {
     },
     build: {
       sourcemap: true,
-      target: 'es2020'
+      target: 'es2020',
+      cssMinify: 'lightningcss',
+      rollupOptions: {
+        cache: true
+      }
     },
     ssr: {
       // svelte-motion uses directory imports without `/index.js`; Node ESM fails unless bundled for SSR.

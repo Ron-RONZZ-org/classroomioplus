@@ -330,6 +330,21 @@ ensure_build() {
   ok "Shared packages built"
 }
 
+check_node_modules() {
+  # Detects dangling pnpm symlinks (broken node_modules symlinks that would
+  # cause cryptic "Cannot find module" at dev time) and auto-repairs them.
+  # The doctor script exits 0 (clean), 1 (broken → fixed), or 2 (broken).
+  node scripts/doctor.mjs --fix 2>&1
+  local rc=$?
+  if [ "$rc" -eq 0 ]; then
+    return 0
+  elif [ "$rc" -eq 1 ]; then
+    ok "node_modules repaired"
+  else
+    warn "node_modules may have broken symlinks — build step may fail"
+  fi
+}
+
 ensure_db() {
   info "Ensuring database is up-to-date..."
   pnpm --filter @cio/db db:setup:seed
@@ -365,6 +380,8 @@ start_full() {
   ensure_infra
   echo ""
   setup_env
+  echo ""
+  check_node_modules
   echo ""
   ensure_build
   echo ""
