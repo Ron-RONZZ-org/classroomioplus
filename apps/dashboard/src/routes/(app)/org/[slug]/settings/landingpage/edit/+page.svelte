@@ -8,7 +8,13 @@
   import { currentOrg, currentOrgPath } from '$lib/utils/store/org';
   import { orgApi } from '$features/org/api/org.svelte';
   import { landingPageSettings, landingPageEditorSelection } from '$features/settings/utils/store';
-  import { buildOrgLandingPageProps, normalizeLandingPageSettings } from '$features/org/utils/landing-page';
+  import {
+    normalizeLandingPageSettings,
+    mapPublicCoursesToLandingPageCourses,
+    buildOrgLandingPageLabels
+  } from '$features/org/utils/landing-page';
+  type OrgLandingPageProps = import('@cio/ui/custom/org-landing-page/types').OrgLandingPageProps;
+  import type { OrgLandingPageJson } from '$lib/utils/types/org';
   import { landingPageThemeComponents } from '$features/org/utils/landing-page-components';
   import { landingPageThemes } from '$features/org/utils/landing-page';
   import LandingpageEditor from '$features/settings/pages/landingpage-editor.svelte';
@@ -73,10 +79,6 @@
 
     return savedLandingPageSettings.theme;
   });
-  const previewLandingPageSettings = $derived({
-    ...$landingPageSettings,
-    theme: previewTheme
-  });
 
   const authAction = $derived(
     $user.isLoggedIn
@@ -94,16 +96,24 @@
 
   const coursesLoaded = $derived(!previewSiteName || orgApi.publicCoursesLoadedSiteName === previewSiteName);
 
-  const previewProps = $derived.by(() =>
-    buildOrgLandingPageProps(
-      $currentOrg,
-      previewLandingPageSettings,
-      orgApi.publicCourses,
-      orgApi.hasMorePublicCourses,
-      authAction,
-      { coursesLoaded }
-    )
-  );
+  // $landingPageSettings is already normalized (set from normalizeLandingPageSettings in
+  // the init $effect below). We construct previewProps directly instead of calling
+  // buildOrgLandingPageProps to avoid its redundant normalizeLandingPageSettings call,
+  // which runs a 120-line legacy migration on every keystroke in the editor.
+  const previewCourses = $derived(mapPublicCoursesToLandingPageCourses(orgApi.publicCourses));
+  const previewLabels = $derived(buildOrgLandingPageLabels());
+
+  const previewProps: OrgLandingPageProps = $derived({
+    orgName: $currentOrg.name,
+    logoUrl: $currentOrg.avatarUrl || undefined,
+    authAction,
+    ...($landingPageSettings as OrgLandingPageJson),
+    theme: previewTheme,
+    courses: previewCourses,
+    hasMoreCourses: orgApi.hasMorePublicCourses,
+    coursesLoaded,
+    labels: previewLabels
+  });
 
   const ThemeComponent = $derived(landingPageThemeComponents[previewTheme] ?? landingPageThemeComponents.minimal);
 

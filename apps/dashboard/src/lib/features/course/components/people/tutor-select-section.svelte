@@ -27,7 +27,7 @@
       <div>
         {#if selectedTutors.length > 0}
           <div class="flex flex-wrap gap-1">
-            {#each selectedTutors as tutor}
+            {#each selectedTutors as tutor (tutor.id)}
               <Badge variant="secondary" class="flex items-center gap-1">
                 {tutor.text}
                 <Button
@@ -52,7 +52,7 @@
       </div>
     </Select.Trigger>
     <Select.Content>
-      {#each tutors as tutor}
+      {#each tutors as tutor (tutor.id)}
         <Select.Item value={tutor.id.toString()}>
           {tutor.text}
         </Select.Item>

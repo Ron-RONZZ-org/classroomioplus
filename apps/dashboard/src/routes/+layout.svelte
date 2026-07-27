@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { onMount } from 'svelte';
+  import { onMount, untrack } from 'svelte';
 
   import { Snackbar } from '$features/ui';
   import { appInitApi } from '$features/app/init.svelte';
@@ -32,9 +32,7 @@
     console.log('Layout', data);
 
     const sessionUser = data?.locals?.user;
-    setupAnalytics(
-      sessionUser ? { id: sessionUser.id, email: sessionUser.email, name: sessionUser.name } : undefined
-    );
+    setupAnalytics(sessionUser ? { id: sessionUser.id, email: sessionUser.email, name: sessionUser.name } : undefined);
 
     if (data?.locals?.user) {
       user.set({
@@ -67,28 +65,38 @@
   });
 
   const session = authClient.useSession();
-  const isSessionReady = $derived(!$session.isPending && !$session.isRefetching && $session.data);
   const appOrgParams = $derived(resolveAppOrgParams(data, page.url.pathname, page.params.slug));
+
+  // Tracks whether setupApp has been called for the current session.
+  // Plain boolean — deliberately NOT $state, so setting it doesn't cause
+  // reactive cascading effects.
+  let appInitAttempted = false;
 
   /*
     Auth + org context for the whole dashboard.
 
-    setupApp runs once per session to load /account. After that, org context can
-    still change when a logged-in user navigates to a different tenant subdomain
-    or opens another /org/[slug] on the app host — without another setupApp run.
-    syncOrgContext re-pins currentOrg from the URL + cached account data.
+    Uses untrack() around appInitApi calls so this effect only re-runs when
+    $session.data or appOrgParams changes — NOT when appInitApi internals
+    (loading/initialized) change during the setup process. This prevents
+    the effect from re-firing on every Better Auth background session poll
+    (which toggles isPending/isRefetching) and on every setupApp loading
+    state transition, avoiding reactive cascades.
   */
   $effect(() => {
-    if (!isSessionReady || appInitApi.loading) {
-      return;
-    }
+    const sessionData = $session.data;
+    const params = appOrgParams;
 
-    if (!appInitApi.isInitializedAndReady) {
-      appInitApi.setupApp($session.data as App.Locals, appOrgParams);
-      return;
-    }
+    untrack(() => {
+      if (!sessionData) return;
 
-    void appInitApi.syncOrgContext(appOrgParams);
+      if (!appInitAttempted) {
+        appInitAttempted = true;
+        appInitApi.setupApp(sessionData as App.Locals, params);
+        return;
+      }
+
+      void appInitApi.syncOrgContext(params);
+    });
   });
 </script>
 

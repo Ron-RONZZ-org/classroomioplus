@@ -328,7 +328,7 @@
             <Spinner class="size-6" />
           </div>
         {:else if highlightedCourses.length > 0}
-          {#each highlightedCourses as course}
+          {#each highlightedCourses as course (course.id)}
             {@const courseProgress = getStudentCourseProgressPercent(course)}
             {@const totalItems = getCourseTotalItems(course)}
             {@const completedItems = getCourseCompletedItems(course)}

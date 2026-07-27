@@ -46,7 +46,7 @@
             >
               {$t('course.navItem.marks.student')}
             </Table.Head>
-            {#each exercises as exercise}
+            {#each exercises as exercise (exercise.id)}
               <Table.Head
                 class="min-w-[100px] border-r border-gray-200 bg-white px-2 py-3 text-center text-sm font-semibold last:border-r-0 dark:border-neutral-700 dark:bg-neutral-900"
               >
@@ -61,7 +61,7 @@
           </Table.Row>
         </Table.Header>
         <Table.Body>
-          {#each students as student}
+          {#each students as student (student.id)}
             {@const marks = studentMarksByExerciseId[student.id]}
             {@const avg = calculateStudentAverage(marks, exercises)}
             <Table.Row class="ui:border-b ui:border-gray-100 dark:ui:border-neutral-800">
@@ -81,7 +81,7 @@
                   </div>
                 </div>
               </Table.Cell>
-              {#each exercises as exercise}
+              {#each exercises as exercise (exercise.id)}
                 {@const pointsStr = marks?.[exercise.id]}
                 {@const pct = gradePercent(pointsStr, exercise)}
                 <Table.Cell

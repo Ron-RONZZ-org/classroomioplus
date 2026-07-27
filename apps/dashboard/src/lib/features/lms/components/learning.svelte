@@ -60,7 +60,7 @@
   >
     {#if highlightedCourses.length > 0}
       <div class="flex h-full w-full flex-col justify-start overflow-y-auto">
-        {#each highlightedCourses as course}
+        {#each highlightedCourses as course (course.id)}
           <div class="p-5">
             <span class="flex flex-col items-start gap-3 pb-5 lg:flex-row">
               <img
