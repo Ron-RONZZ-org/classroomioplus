@@ -92,20 +92,72 @@ Before committing or opening/updating a PR, run the build checks that match the 
 export PATH="$HOME/.nvm/versions/node/v20.19.3/bin:$PATH"
 ```
 
-- **Dashboard changes** (`apps/dashboard/**`, or shared packages consumed by the dashboard):
+### Efficiency principle
 
-  ```bash
-  test -f apps/dashboard/.env || cp apps/dashboard/.env.example apps/dashboard/.env
-  pnpm --filter @cio/dashboard^... build && pnpm --filter @cio/dashboard build
-  ```
+**Do NOT run the full transitive build (`^...`) for every change.** That command (used in CI) rebuilds **every dependency from scratch** — 8+ TypeScript packages, 3-5 minutes, and it often fails on pre-existing TS errors in `@cio/core`/`@cio/db` that have nothing to do with your change.
 
-- **API changes** (`apps/api/**`, or shared packages consumed by the API):
+Locally, all dependencies' `dist/` is already up to date from `pnpm install` or a prior full build. Only rebuild what you actually changed, in dependency order.
 
-  ```bash
-  pnpm --filter @cio/api^... build && pnpm --filter @cio/api build
-  ```
+### Dependency order (leaf → root)
 
-Also run `pnpm format:check` (see Translation, Formatting, and Git Workflow above). Do not commit if any verification step fails.
+```
+@cio/utils ──► @cio/core ──► @cio/db ──► @cio/api ──► @cio/dashboard
+    │                              │
+    ├── @cio/email                 └── @cio/ai-assistant
+    ├── @cio/analytics
+    ├── @cio/certificates
+    └── @cio/question-types
+                                    ┌── @cio/ui (Tailwind only, fast)
+                                    └── @cio/dashboard (SvelteKit)
+```
+
+### Fast path (for local verification — preferred)
+
+Build only the packages you changed, then the consuming app. Pipeline already means the dashboard/API build can itself serve as the final compiler pass:
+
+**Dashboard changes:**
+
+```bash
+test -f apps/dashboard/.env || cp apps/dashboard/.env.example apps/dashboard/.env
+
+# Build changed packages first (skip unchanged ones — dist/ is already up to date)
+# Examples:
+pnpm --filter @cio/ui build                    # Tailwind CSS (fast, ~3s gen + 10s overhead)
+pnpm --filter @cio/utils build                 # TS (slow, ~40s — only if you changed utils)
+pnpm --filter @cio/db build                    # TS (~40s — only if schema/queries changed)
+pnpm --filter @cio/api build                   # Hono routes (skip unless API changed)
+
+# Then build the dashboard (verification)
+pnpm --filter @cio/dashboard build
+```
+
+**API changes:**
+
+```bash
+pnpm --filter @cio/utils build                 # if utils changed
+pnpm --filter @cio/email build                 # if email templates changed
+pnpm --filter @cio/api build                   # always needed for API changes
+```
+
+### Why no full transitive build?
+
+Some agents reach for `pnpm --filter @cio/dashboard^... build` (the CI command) for "more confidence." Don't. The dashboard build (`pnpm --filter @cio/dashboard build`) already type-checks **every package in the dependency graph** — Vite resolves types transitively from leaf packages up through the app. A broken type in `@cio/utils` surfaces as a dashboard build error without running a separate `rimraf dist && tsc` on every intermediate package.
+
+CI runs the full transitive build on a clean checkout. Locally it's wasted work: 3-5 minutes, 8+ sequential TS compilations, and often blocked by pre-existing `@cio/core`/`@cio/db` TS errors that have nothing to do with your change.
+
+### Known pre-existing build issues
+
+- **`@cio/core`**: TS error `Cannot find module '@cio/utils/errors'` — build utils first, or skip core unless you changed it.
+- **`@cio/db`**: TS error in `packages/db/src/queries/course-import/course-import.ts` — build may fail mid-way. If `dist/` is incomplete, copy from parent checkout: `cp -r /path/to/parent/packages/db/dist packages/db/dist`.
+- Neither error affects runtime (the broken modules aren't loaded in normal flow).
+
+### Final checks
+
+```bash
+pnpm format:check
+```
+
+Do not commit if any verification step fails. If a pre-existing issue blocks you, note it and verify only your changed packages.
 
 ## Naming Convention
 
