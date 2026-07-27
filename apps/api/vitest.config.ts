@@ -27,6 +27,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    exclude: ['src/__tests__/integration/**', '**/node_modules/**', '**/dist/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
