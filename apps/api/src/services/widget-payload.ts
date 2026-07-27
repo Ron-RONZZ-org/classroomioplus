@@ -13,8 +13,6 @@ import {
 } from '@cio/utils/validation/widget';
 import type { TWidget } from '@db/types';
 import * as csstree from 'css-tree';
-import { env } from '@cio/core/config/env';
-
 const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
 const DEFAULT_EMBED_CDN_BASE_URL = EMBED_PUBLIC_BASE_URL;
 const DEFAULT_LOCAL_EMBED_BASE_URL = 'http://localhost:5180';

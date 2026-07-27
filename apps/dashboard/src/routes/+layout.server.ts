@@ -6,6 +6,7 @@ import { env as publicEnv } from '$env/dynamic/public';
 import { getBaseMetaTags } from '$lib/utils/functions/metaTags.server';
 import { getOrgSiteInfo } from '$features/app/layout-setup';
 import { getUploadLimits } from '$lib/utils/config/upload-limits';
+import { resolveOrgSiteOgWarmUrl } from '$lib/utils/functions/org-site-og-url';
 
 export const ssr = true;
 

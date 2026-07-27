@@ -90,6 +90,7 @@ Since this is a fork with our commits on top of upstream, see [AGENTS.md](AGENTS
 - **[Node.js](https://nodejs.org/)** (Version: >=20.19.3)
 - **[pnpm](https://pnpm.io/installation)** (v10)
 - **[Docker](https://docs.docker.com/engine/install/)** — runs Postgres + Redis
+  - **Ubuntu**: `sudo apt-get install docker-compose-v2` for `docker compose` (v2) support
 
 ### Project Structure
 
@@ -104,30 +105,66 @@ Shared packages live under `packages/` (`packages/db`, `packages/utils`, `packag
 
 ### Local Setup
 
-1. Install dependencies:
+1. **Install dependencies:**
 
    ```bash
    pnpm i
    ```
 
-2. Set up `.env` files — see upstream's [README.md](https://github.com/classroomio/classroomio#getting-started) for detailed instructions. Each app reads its own `.env` in `apps/api/`, `apps/dashboard/`, and `apps/jobs/`.
+2. **Create `.env` files:**
 
-3. Start local infrastructure:
+   The project root needs a minimal `.env` for Docker Compose (it validates ALL variable references, even for services you're not starting). The API, dashboard, and jobs each read their own `.env`.
+
+   ```bash
+   # Generate a shared secret key (use the same value everywhere)
+   SERVER_KEY=$(openssl rand -hex 32)
+
+   # Root .env — required for Docker Compose to parse the compose file
+   echo "BETTER_AUTH_SECRET=$SERVER_KEY" > .env
+   echo "PRIVATE_SERVER_KEY=$SERVER_KEY" >> .env
+
+   # API
+   cp apps/api/.env.example apps/api/.env
+   # Edit apps/api/.env — fill in DATABASE_URL, REDIS_URL, PUBLIC_SERVER_URL,
+   # TRUSTED_ORIGINS, and paste the SERVER_KEY as BETTER_AUTH_SECRET
+
+   # Dashboard
+   # Edit apps/dashboard/.env — set:
+   #   PUBLIC_SERVER_URL=http://localhost:3002
+   #   PRIVATE_SERVER_URL=http://localhost:3002
+   #   PRIVATE_SERVER_KEY=<same SERVER_KEY value>
+   #   PUBLIC_IS_SELFHOSTED=true
+
+   # Jobs (copy from API — same DATABASE_URL and REDIS_URL)
+   cp apps/api/.env apps/jobs/.env
+
+   # DB scripts
+   cp packages/db/.env.example packages/db/.env
+   ```
+
+   The two `PRIVATE_SERVER_KEY` values (root `.env` and `apps/dashboard/.env`) **must match**. Generate once, paste twice.
+
+3. **Build shared packages** (workspace packages are imported from `dist/`):
+
+   ```bash
+   pnpm turbo run build --filter=@cio/api^... --filter=@cio/dashboard^...
+   ```
+
+4. **Start local infrastructure:**
 
    ```bash
    docker compose -f docker-compose.yaml up -d postgres redis
-   cp packages/db/.env.example packages/db/.env
    pnpm --filter @cio/db db:setup:seed
    ```
 
-4. Run the apps (in separate terminals):
+5. **Run the apps** (in separate terminals):
 
    ```bash
-   pnpm api:dev      # API on http://localhost:3002
+   pnpm api:dev        # API on http://localhost:3002
    pnpm dashboard:dev  # Dashboard on http://localhost:5173
    ```
 
-5. Login: `admin@test.com` / `123456`
+6. **Login:** `admin@test.com` / `123456`
 
 ### Testing
 

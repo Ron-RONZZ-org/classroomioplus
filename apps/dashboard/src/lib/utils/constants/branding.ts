@@ -1,4 +1,4 @@
-import { env as publicEnv } from '$env/static/public';
+import { env as publicEnv } from '$env/dynamic/public';
 
 /**
  * Branding configuration for self-hosted instances.
