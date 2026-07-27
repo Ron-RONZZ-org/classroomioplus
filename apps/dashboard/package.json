@@ -13,8 +13,9 @@
     "format": "prettier --write .",
     "start": "node build/index.js",
     "prepare": "svelte-kit sync",
-    "test": "jest",
-    "test:watch": "pnpm run test --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test --config e2e/playwright.config.ts",
     "ci": "cp .env.example .env && vite build && vite preview",
     "translate": "node ./scripts/translate.cjs"
   },
@@ -93,6 +94,7 @@
     "@cio/tsconfig": "workspace:*",
     "@eslint/compat": "^1.4.0",
     "@eslint/js": "^9.36.0",
+    "@playwright/test": "^1.57.0",
     "@rollup/plugin-replace": "^6.0.2",
     "@sveltejs/adapter-cloudflare": "^7.2.8",
     "@sveltejs/kit": "^2.5.27",
@@ -129,6 +131,7 @@
     "typescript": "^5.5.0",
     "typescript-eslint": "^8.44.1",
     "vite": "^5.4.4",
+    "vitest": "^1.2.2",
     "wrangler": "4.21.2"
   },
   "type": "module",

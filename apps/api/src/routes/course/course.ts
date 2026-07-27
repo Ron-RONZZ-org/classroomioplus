@@ -337,8 +337,12 @@ export const courseRouter = new Hono()
           };
         }
 
-        const result = await updateCourse(courseId, courseData);
-
+        // Replace tags BEFORE updating the course so that tag validation
+        // (FK checks, admin permission) can fail without leaving the course
+        // in a partially-updated state. Bug #4: previously the course was
+        // updated first, so a tag failure would commit the course change
+        // with no rollback.
+        let tags: Awaited<ReturnType<typeof replaceCourseTags>> | undefined;
         if (tagIds !== undefined) {
           const orgId = c.req.header('cio-org-id');
           if (!orgId) {
@@ -353,24 +357,15 @@ export const courseRouter = new Hono()
           }
 
           const user = c.get('user')!;
-          const tags = await replaceCourseTags(orgId, courseId, { tagIds }, { updatedByUserId: user.id });
-
-          return c.json(
-            {
-              success: true,
-              data: {
-                ...result,
-                tags
-              }
-            },
-            200
-          );
+          tags = await replaceCourseTags(orgId, courseId, { tagIds }, { updatedByUserId: user.id });
         }
+
+        const result = await updateCourse(courseId, courseData);
 
         return c.json(
           {
             success: true,
-            data: result
+            data: tags !== undefined ? { ...result, tags } : result
           },
           200
         );

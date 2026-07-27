@@ -162,6 +162,7 @@ describe('mapZodErrorsToTranslations generic parameter coverage', () => {
     code: z.core.$ZodIssue['code'];
     issue: Partial<z.core.$ZodIssue> & Record<string, unknown>;
     expectedParams: Record<string, unknown>;
+    useMessageAsKey?: boolean;
   }> = [
     {
       code: 'invalid_type',
@@ -201,13 +202,13 @@ describe('mapZodErrorsToTranslations generic parameter coverage', () => {
     {
       code: 'invalid_format',
       issue: {
-        validation: 'email',
-        regex: /@/,
+        format: 'email',
+        pattern: '@',
         path: ['field'],
         origin: 'zod',
         message: 'Field must be a valid email address'
       },
-      expectedParams: { validation: 'email', regex: /@/ }
+      expectedParams: { validation: 'email', pattern: '@' }
     },
     {
       code: 'not_multiple_of',
@@ -258,42 +259,54 @@ describe('mapZodErrorsToTranslations generic parameter coverage', () => {
     {
       code: 'custom',
       issue: { params: { reason: 'Invalid' }, message: 'Custom message', path: ['field'], origin: 'zod' },
-      expectedParams: { params: JSON.stringify({ reason: 'Invalid' }), message: 'Custom message' }
+      expectedParams: { params: JSON.stringify({ reason: 'Invalid' }), message: 'Custom message' },
+      // custom errors use t.get(issue.message) directly, not the generic key path
+      useMessageAsKey: true
     }
   ];
 
-  it.each(cases)('passes expected params to generic translation for %s', ({ code, issue, expectedParams }) => {
-    mockGet.mockImplementation((key, params = {}) =>
-      key === `validations.generic.${code}`
-        ? renderTemplate(
-            enTranslations.validations.generic[code as keyof typeof enTranslations.validations.generic],
-            params as Record<string, unknown>
-          )
-        : null
-    );
+  it.each(cases)(
+    'passes expected params to generic translation for %s',
+    ({ code, issue, expectedParams, useMessageAsKey }) => {
+      mockGet.mockImplementation((key, params = {}) =>
+        key === `validations.generic.${code}`
+          ? renderTemplate(
+              enTranslations.validations.generic[code as keyof typeof enTranslations.validations.generic],
+              params as Record<string, unknown>
+            )
+          : null
+      );
 
-    const error = createError({
-      code,
-      ...issue
-    } as z.core.$ZodIssue);
-
-    const result = mapZodErrorsToTranslations(error);
-    const call = mockGet.mock.calls.find(([calledKey]) => calledKey === `validations.generic.${code}`);
-
-    expect(call?.[0]).toBe(`validations.generic.${code}`);
-    expect(call?.[1]).toEqual(
-      expect.objectContaining({
-        field: 'field',
+      const error = createError({
         code,
-        ...expectedParams
-      })
-    );
+        ...issue
+      } as z.core.$ZodIssue);
 
-    const renderedMessage = renderTemplate(
-      enTranslations.validations.generic[code as keyof typeof enTranslations.validations.generic],
-      (call?.[1] ?? {}) as Record<string, unknown>
-    );
+      const result = mapZodErrorsToTranslations(error);
 
-    expect(result).toEqual({ field: renderedMessage });
-  });
+      // custom errors use t.get(issue.message) directly instead of the generic key path
+      if (useMessageAsKey) {
+        expect(result).toEqual({ field: issue.message });
+        return;
+      }
+
+      const call = mockGet.mock.calls.find(([calledKey]) => calledKey === `validations.generic.${code}`);
+
+      expect(call?.[0]).toBe(`validations.generic.${code}`);
+      expect(call?.[1]).toEqual(
+        expect.objectContaining({
+          field: 'field',
+          code,
+          ...expectedParams
+        })
+      );
+
+      const renderedMessage = renderTemplate(
+        enTranslations.validations.generic[code as keyof typeof enTranslations.validations.generic],
+        (call?.[1] ?? {}) as Record<string, unknown>
+      );
+
+      expect(result).toEqual({ field: renderedMessage });
+    }
+  );
 });

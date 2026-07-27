@@ -29,14 +29,18 @@ If a commit conflicts, fix it during the rebase — same as any kernel-style pat
 | 1 | Fork infrastructure | `AGENTS.md`, `scripts/`, `docker-compose.yaml` |
 | 2 | Self-hosting defaults (license server, analytics guards) | `apps/api/src/services/license.ts`, dashboard analytics files |
 | 3 | Custom AI provider support | `packages/ai-assistant/src/providers/index.ts` |
+| 4 | Testing: API unit test infra fix + dashboard jest→vitest migration | `apps/dashboard/vitest.config.ts`, `apps/dashboard/package.json`, validation tests |
+| 5 | Testing: API integration tests (real Postgres) | `apps/api/src/__tests__/integration/`, `apps/api/vitest.integration.config.ts` |
+| 6 | Testing: Playwright E2E smoke tests for dashboard | `apps/dashboard/e2e/` |
 
 ## Scope — What We Patch
 
 Our patches are limited to:
-- **License server**: skip the `enterprise-api.classroomio.dev` phone-home on self-hosted
+- **License server**: removed entirely (`apps/api/src/services/license.ts`). No external phone-home, no plan gating. `isEnterprisePlan` store hardcoded to `true`.
 - **Analytics guards**: prevent Umami, Posthog, Senja from loading on self-hosted instances
 - **Custom AI endpoint**: `OPENAI_BASE_URL` and `OPENAI_MODEL` env vars for the OpenAI provider
 - **Plan enforcement**: bypass token caps on self-hosted (you bring your own API key)
+- **Testing infrastructure**: jest→vitest migration, API integration tests (real Postgres), Playwright E2E smoke tests
 
 ## What We Do NOT Change (Upstream Compatibility Guarantee)
 

@@ -119,3 +119,40 @@ You can find other repos related to classroomio here:
 
 - Help Docs: <https://github.com/rotimi-best/classroomio.com/docs>
 - ClassroomIO.com: <https://github.com/rotimi-best/classroomio.com>
+
+## E2E Tests
+
+Browser-level smoke tests using Playwright are in [`e2e/`](./e2e/).
+
+### Prerequisites
+
+- API dev server running on `http://localhost:3002`
+- Dashboard dev server running on `http://localhost:5173`
+- Seeded database (see `packages/db/README.md`)
+
+### Running
+
+```bash
+# Both servers must already be running — the test config does NOT
+# auto-start them (use webServer if you want that in CI).
+pnpm --filter @cio/dashboard test:e2e
+```
+
+### Test accounts
+
+All seeded accounts use password `123456`:
+| Account | Email | Org |
+|---------|-------|-----|
+| Admin (default) | `admin@test.com` | Udemy Test (`udemy-test`) |
+| Enterprise admin | `enterprise@test.com` | Coursera Test |
+
+### Fork-specific coverage
+
+- **AI Provider settings** (`/org/{slug}/settings/ai-provider`): custom endpoint UI is a fork addition; verifies it loads without error.
+- **SSO settings** (`/org/{slug}/settings/auth`): verifies the page renders without a crash. The `isEnterprisePlan` guard is hardcoded to `true` in the fork, so SSO setup fields are always enabled.
+
+### Adding tests
+
+Create `.spec.ts` files in `e2e/`. The playwright config auto-discovers them.
+Use `page.evaluate()` for authentication to bypass CSP restrictions on inline
+event handlers.
