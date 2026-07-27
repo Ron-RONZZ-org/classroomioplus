@@ -62,6 +62,9 @@ company/
 .claude/skills
 .claude/scheduled_tasks.lock
 
+# OpenCode worktree plugin auto-generated config
+**/worktree.jsonc
+
 # Local db-agent playground (not committed)
 apps/db-agent
 
