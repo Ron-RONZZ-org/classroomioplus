@@ -68,6 +68,23 @@ Here is what you need to be able to run Cal.com.
 - [Docker](https://docs.docker.com/engine/install/) (for local database if needed)
 - [NPM](https://www.npmjs.com/)
 
+#### Linux: File watcher limit
+
+Vite + Tailwind CSS + TypeScript watch mode need many inotify watchers.
+The kernel default (8192) is too low — Vite crashes with `ENOSPC: System
+limit for number of file watchers reached`.
+
+Raise it (run once per session, or make permanent):
+
+```bash
+# One-shot (lasts until reboot)
+sudo bash -c 'echo 524288 > /proc/sys/fs/inotify/max_user_watches'
+
+# Permanent
+echo 'fs.inotify.max_user_watches=524288' | sudo tee /etc/sysctl.d/99-inotify.conf
+sudo sysctl -p /etc/sysctl.d/99-inotify.conf
+```
+
 ## Development
 
 ### Setup
@@ -126,8 +143,8 @@ Browser-level smoke tests using Playwright are in [`e2e/`](./e2e/).
 
 ### Prerequisites
 
-- API dev server running on `http://localhost:3002`
-- Dashboard dev server running on `http://localhost:5173`
+- API dev server running on `http://localhost:6035`
+- Dashboard dev server running on `http://localhost:6036`
 - Seeded database (see `packages/db/README.md`)
 
 ### Running

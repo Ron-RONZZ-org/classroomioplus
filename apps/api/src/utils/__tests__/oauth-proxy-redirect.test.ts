@@ -22,9 +22,9 @@ describe('stripBackendPortFromHost', () => {
   });
 
   it('keeps non-backend ports such as local dev', () => {
-    process.env.PRIVATE_SERVER_URL = 'http://localhost:3002';
+    process.env.PRIVATE_SERVER_URL = 'http://localhost:6035';
 
-    expect(stripBackendPortFromHost('localhost:5173')).toBe('localhost:5173');
+    expect(stripBackendPortFromHost('localhost:6036')).toBe('localhost:6036');
   });
 });
 

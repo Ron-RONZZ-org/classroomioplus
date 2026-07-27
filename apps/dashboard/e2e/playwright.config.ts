@@ -9,7 +9,7 @@ export default defineConfig({
   workers: 1,
   reporter: process.env.CI ? 'github' : 'list',
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'http://localhost:5173',
+    baseURL: process.env.E2E_BASE_URL || 'http://localhost:6036',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     // Increase default timeout for SvelteKit SSR pages (~30-60s per page)

@@ -4,7 +4,7 @@ import type { Page } from '@playwright/test';
 const EMAIL = 'admin@test.com';
 const PASSWORD = '123456';
 const ORG_SLUG = 'udemy-test';
-const BASE_URL = 'http://localhost:5173';
+const BASE_URL = 'http://localhost:6036';
 
 /**
  * Log in via direct API call (bypasses CSP blocking inline event handlers).

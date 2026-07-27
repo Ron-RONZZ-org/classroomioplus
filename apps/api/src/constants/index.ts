@@ -2,7 +2,7 @@ import { env } from '@cio/core/config/env';
 
 export * from './rate-limiter';
 
-export const API_PORT = env.PORT ? parseInt(env.PORT) : 3002;
+export const API_PORT = env.PORT ? parseInt(env.PORT) : 6035;
 export const API_SERVER_URL = env.PUBLIC_SERVER_URL || `http://localhost:${API_PORT}`;
 // Auto-detect trusted origins from env vars the self-hoster already sets,
 // instead of hardcoding upstream domains. In order of precedence:
@@ -10,7 +10,7 @@ export const API_SERVER_URL = env.PUBLIC_SERVER_URL || `http://localhost:${API_P
 //   2. PUBLIC_SERVER_URL — the API URL the self-hoster configured
 //   3. Localhost defaults — always allow local dev
 // DASHBOARD_ORIGIN is appended separately at the end.
-const autoDetectedOrigins = ['http://localhost:5173', 'http://localhost:5180'];
+const autoDetectedOrigins = ['http://localhost:6036', 'http://localhost:5180'];
 
 if (env.PUBLIC_SERVER_URL) {
   try {
