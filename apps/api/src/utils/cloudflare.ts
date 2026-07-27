@@ -25,6 +25,12 @@ export const getCloudflarePdfBuffer = async (html: string, styles?: string) => {
     );
 
     console.log('PDF response status:', pdfResponse.status);
+
+    if (!pdfResponse.ok) {
+      const errorBody = await pdfResponse.text().catch(() => 'Unknown error');
+      throw new Error(`Cloudflare PDF API returned ${pdfResponse.status}: ${errorBody.slice(0, 200)}`);
+    }
+
     const arrayBuffer = await pdfResponse.arrayBuffer();
     return Buffer.from(arrayBuffer);
   } catch (error) {
@@ -66,8 +72,13 @@ export const getCloudflarePngBuffer = async (
     );
 
     console.log('PNG response status:', response.status);
-    const arrayBuffer = await response.arrayBuffer();
 
+    if (!response.ok) {
+      const errorBody = await response.text().catch(() => 'Unknown error');
+      throw new Error(`Cloudflare screenshot API returned ${response.status}: ${errorBody.slice(0, 200)}`);
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
     return Buffer.from(arrayBuffer);
   } catch (error) {
     console.error('Error generating PNG:', error);
