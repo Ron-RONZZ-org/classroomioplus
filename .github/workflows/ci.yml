@@ -163,6 +163,12 @@ jobs:
         # API deps were already built above (dashboard transitively depends
         # on @cio/api).  Turbo skips them from cache — this is near-instant.
         run: pnpm turbo run build --filter=@cio/api^... --cache-dir=.turbo
+      - name: Build dashboard
+        # Dashboard itself (not just its deps). Vite production build.
+        run: pnpm --filter @cio/dashboard build
+      - name: Build jobs worker
+        # BullMQ worker — not in any dashboard dependency chain.
+        run: pnpm --filter @cio/jobs-worker build
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
