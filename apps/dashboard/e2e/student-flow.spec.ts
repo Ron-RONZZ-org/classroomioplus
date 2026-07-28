@@ -82,4 +82,46 @@ test.describe('Student LMS', () => {
     await navigateAndSettle(page, BASE_URL + '/lms/mylearning');
     await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
   });
+
+  test('TC-STU-04: Student certificates and cohorts pages load', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    await login(page, STUDENT_EMAIL, PASSWORD);
+    await page.waitForTimeout(3000);
+
+    await navigateAndSettle(page, BASE_URL + '/lms/certificates');
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
+
+    await navigateAndSettle(page, BASE_URL + '/lms/cohorts');
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
+  });
+
+  test('TC-STU-05: Student community and exercises pages load', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    await login(page, STUDENT_EMAIL, PASSWORD);
+    await page.waitForTimeout(3000);
+
+    await navigateAndSettle(page, BASE_URL + '/lms/community');
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
+
+    await navigateAndSettle(page, BASE_URL + '/lms/exercises');
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
+  });
+
+  test('TC-STU-06: Student settings pages load', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    await login(page, STUDENT_EMAIL, PASSWORD);
+    await page.waitForTimeout(3000);
+
+    await navigateAndSettle(page, BASE_URL + '/lms/settings');
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
+
+    await navigateAndSettle(page, BASE_URL + '/lms/settings/notifications');
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
+
+    await navigateAndSettle(page, BASE_URL + '/lms/settings/integrations');
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
+  });
 });
