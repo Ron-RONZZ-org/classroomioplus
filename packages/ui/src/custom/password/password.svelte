@@ -60,18 +60,26 @@
       <Tooltip.Root>
         <Tooltip.Trigger>
           {#snippet child({ props })}
-            <InputGroup.Button
+            <button
               {...props}
+              data-slot="input-group-button"
+              type="button"
               onclick={() => (showPassword = !showPassword)}
               aria-label={ariaLabel}
               {disabled}
+              class={cn(
+                'ui:inline-flex ui:items-center ui:justify-center ui:shrink-0 ui:rounded-[calc(var(--radius)-5px)] ui:text-sm ui:font-medium ui:outline-hidden ui:transition-all ui:select-none ui:cursor-pointer ui:bg-transparent ui:hover:bg-accent ui:hover:text-accent-foreground ui:size-6 ui:p-0 ui:has-[>svg]:p-0',
+                'ui:disabled:pointer-events-none ui:disabled:cursor-not-allowed ui:disabled:opacity-50',
+                'ui:focus-visible:border-ring ui:focus-visible:ring-ring/50 ui:focus-visible:ring-[3px]',
+                'ui:[&_svg]:shrink-0 ui:[&_svg]:size-3.5'
+              )}
             >
               {#if showPassword}
                 <EyeOffIcon />
               {:else}
                 <EyeIcon />
               {/if}
-            </InputGroup.Button>
+            </button>
           {/snippet}
         </Tooltip.Trigger>
         <Tooltip.Content>{tooltipText}</Tooltip.Content>
