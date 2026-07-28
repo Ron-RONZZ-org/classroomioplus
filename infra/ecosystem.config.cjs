@@ -33,14 +33,16 @@ const totalGB = os.totalmem() / 1024 / 1024 / 1024;
 const caps = {
   api:
     process.env.CIO_API_MEM ||
-    (totalGB >= 14 ? '2G' : totalGB >= 7 ? '1G' : totalGB >= 3.5 ? '450M' : /* 2 GB fallback */ '256M'),
+    (totalGB >= 14 ? '2048M' : totalGB >= 7 ? '1024M' : totalGB >= 3.5 ? '450M' : /* 2 GB fallback */ '256M'),
   apiHeap: +(process.env.CIO_API_HEAP || (totalGB >= 14 ? 1536 : totalGB >= 7 ? 768 : totalGB >= 3.5 ? 384 : 192)),
   dash:
-    process.env.CIO_DASHBOARD_MEM || (totalGB >= 14 ? '2G' : totalGB >= 7 ? '1G' : totalGB >= 3.5 ? '450M' : '256M'),
+    process.env.CIO_DASHBOARD_MEM ||
+    (totalGB >= 14 ? '2048M' : totalGB >= 7 ? '1024M' : totalGB >= 3.5 ? '450M' : '256M'),
   dashHeap: +(
     process.env.CIO_DASHBOARD_HEAP || (totalGB >= 14 ? 1536 : totalGB >= 7 ? 768 : totalGB >= 3.5 ? 384 : 192)
   ),
-  jobs: process.env.CIO_JOBS_MEM || (totalGB >= 14 ? '3G' : totalGB >= 7 ? '1.5G' : totalGB >= 3.5 ? '600M' : '384M'),
+  jobs:
+    process.env.CIO_JOBS_MEM || (totalGB >= 14 ? '3072M' : totalGB >= 7 ? '1536M' : totalGB >= 3.5 ? '600M' : '384M'),
   jobsHeap: +(process.env.CIO_JOBS_HEAP || (totalGB >= 14 ? 2048 : totalGB >= 7 ? 1024 : totalGB >= 3.5 ? 384 : 256))
 };
 
