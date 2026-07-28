@@ -38,5 +38,9 @@ jobs:
           node-version: '20'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - name: Check formatting
-        run: npx prettier --check .
+      - name: Check formatting (changed files only)
+        # Use the same script as the pre-commit hook — only checks files
+        # changed in this branch vs the base, not the entire codebase.
+        # This avoids failing on pre-existing formatting issues in upstream
+        # files that are not touched by this PR.
+        run: pnpm format:changed --check
