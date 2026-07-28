@@ -144,13 +144,10 @@ else
   try_or_prompt "PM2" 'sudo npm install -g pm2' && DEPS_OK=true
 fi
 
-# PostgreSQL — check native first, then Docker
+# PostgreSQL — check port availability, any deployment method
 PG_OK=false
-if command -v psql &>/dev/null && pg_isready -h 127.0.0.1 &>/dev/null 2>&1; then
-  log "  Postgres: running (native)"
-  PG_OK=true
-elif docker ps --filter name=cio-postgres --format '{{.Names}}' 2>/dev/null | grep -q cio-postgres; then
-  log "  Postgres: running (Docker container cio-postgres)"
+if pg_isready -h 127.0.0.1 &>/dev/null 2>&1; then
+  log "  Postgres: responding on 127.0.0.1:5432"
   PG_OK=true
 else
   PG_CMD='docker run -d --name cio-postgres \
@@ -169,13 +166,10 @@ else
   fi
 fi
 
-# Redis — check native first, then Docker
+# Redis — check port availability, any deployment method
 REDIS_OK=false
 if redis-cli ping &>/dev/null 2>&1; then
-  log "  Redis:    running"
-  REDIS_OK=true
-elif docker ps --filter name=cio-redis --format '{{.Names}}' 2>/dev/null | grep -q cio-redis; then
-  log "  Redis:    running (Docker container cio-redis)"
+  log "  Redis:    responding on 127.0.0.1:6379"
   REDIS_OK=true
 else
   REDIS_CMD='docker run -d --name cio-redis \
