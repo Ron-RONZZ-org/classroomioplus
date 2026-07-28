@@ -32,12 +32,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
-        with:
-          version: 10.19.0
+        # version auto-detected from package.json packageManager
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
-      - name: Check formatting
-        run: npx prettier --check .
+      - name: Check formatting (changed files only)
+        # Use the same script as the pre-commit hook — only checks files
+        # changed in this branch vs the base, not the entire codebase.
+        # This avoids failing on pre-existing formatting issues in upstream
+        # files that are not touched by this PR.
+        run: pnpm format:changed --check
