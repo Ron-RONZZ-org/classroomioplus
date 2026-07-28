@@ -388,42 +388,14 @@ EOF
       log "  MinIO:    buckets ready (videos, documents, media)"
     fi
 
-  # ── Docker fallback ─────────────────────────────────────────────────
-  elif command -v docker &>/dev/null; then
-    if docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
-      log "  MinIO:    already running via Docker (container cio-minio)"
-    else
-      start_minio_docker() {
-        docker volume inspect cio-minio-data &>/dev/null || docker volume create cio-minio-data >/dev/null
-        docker run -d --name cio-minio \
-          -p 127.0.0.1:9000:9000 \
-          -p 127.0.0.1:9001:9001 \
-          -e "MINIO_ROOT_USER=$MINIO_U" \
-          -e "MINIO_ROOT_PASSWORD=$MINIO_P" \
-          -v cio-minio-data:/data \
-          --restart unless-stopped \
-          minio/minio:latest server /data --console-address ":9001" >/dev/null 2>&1
-      }
-      if try_or_prompt "MinIO (Docker)" "start_minio_docker"; then
-        log "  MinIO:    started (API :9000, console :9001)"
-        sleep 3
-        docker run --rm --network host \
-          -e "MINIO_ROOT_USER=$MINIO_U" \
-          -e "MINIO_ROOT_PASSWORD=$MINIO_P" \
-          minio/mc:latest \
-          sh -c "mc alias set local http://127.0.0.1:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD \
-            && mc mb local/videos --ignore-existing \
-            && mc mb local/documents --ignore-existing \
-            && mc mb local/media --ignore-existing \
-            && mc anonymous set download local/media" >/dev/null 2>&1 || true
-        log "  MinIO:    buckets ready (videos, documents, media)"
-      else
-        err "  Without object storage, uploads, media, and OG images will not work."
-        exit 1
-      fi
-    fi
+  # ── Detect existing Docker MinIO (port conflict safety check) ──────
+  elif docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
+    warn "  MinIO:    existing Docker container 'cio-minio' detected — will not start native binary"
+    warn "  Stop it with 'docker rm -f cio-minio' to switch to native PM2"
+
   else
-    err "  No way to run MinIO: neither native binary nor Docker available."
+    err "  No way to run MinIO: binary download failed and no Docker container exists."
+    err "  Fix: sudo wget -q https://dl.min.io/server/minio/release/linux-$(uname -m | sed 's/aarch64/arm64/;s/x86_64/amd64/')/minio -O /usr/local/bin/minio && sudo chmod +x /usr/local/bin/minio"
     err "  Without object storage, uploads, media, and OG images will not work."
     exit 1
   fi
