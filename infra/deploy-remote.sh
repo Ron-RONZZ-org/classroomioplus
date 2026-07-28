@@ -303,7 +303,7 @@ STORAGE_ENDPOINT=$(grep -E '^OBJECT_STORAGE_ENDPOINT=' apps/api/.env 2>/dev/null
 if [ -n "$STORAGE_ENDPOINT" ] && ! is_local_endpoint "$STORAGE_ENDPOINT"; then
   log "  Object storage: external endpoint ($STORAGE_ENDPOINT) — skipping local MinIO"
 else
-  # Local MinIO needed — provision or start
+  # Local MinIO needed — provision credentials first
   MINIO_U=$(grep -E '^OBJECT_STORAGE_ACCESS_KEY_ID=' apps/api/.env 2>/dev/null | cut -d= -f2-)
   MINIO_P=$(grep -E '^OBJECT_STORAGE_SECRET_ACCESS_KEY=' apps/api/.env 2>/dev/null | cut -d= -f2-)
 
@@ -325,40 +325,107 @@ EOF
     log "  Credentials written to apps/api/.env and infra/minio.env"
   fi
 
-  if docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
-    log "  MinIO:    already running (container cio-minio)"
-  else
-    log "  MinIO:    starting (Docker)..."
-    # try_or_prompt eval's the action string; define a function for it.
-    start_minio() {
-      docker volume inspect cio-minio-data &>/dev/null || docker volume create cio-minio-data >/dev/null
-      docker run -d --name cio-minio \
-        -p 127.0.0.1:9000:9000 \
-        -p 127.0.0.1:9001:9001 \
-        -e "MINIO_ROOT_USER=$MINIO_U" \
-        -e "MINIO_ROOT_PASSWORD=$MINIO_P" \
-        -v cio-minio-data:/data \
-        --restart unless-stopped \
-        minio/minio:latest server /data --console-address ":9001" >/dev/null 2>&1
-    }
-    if try_or_prompt "MinIO (Docker)" "start_minio"; then
-      log "  MinIO:    started (API :9000, console :9001)"
-      # Create required buckets (idempotent)
-      sleep 3
-      docker run --rm --network host \
-        -e MINIO_ROOT_USER="$MINIO_U" \
-        -e MINIO_ROOT_PASSWORD="$MINIO_P" \
-        minio/mc:latest \
-        sh -c "mc alias set local http://127.0.0.1:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD \
-          && mc mb local/videos --ignore-existing \
-          && mc mb local/documents --ignore-existing \
-          && mc mb local/media --ignore-existing \
-          && mc anonymous set download local/media" >/dev/null 2>&1 || true
-      log "  MinIO:    buckets ready (videos, documents, media)"
+  # ── Try native MinIO first (Go binary + PM2) ──────────────────────────
+  MINIO_BIN="/usr/local/bin/minio"
+  MINIO_DATA_DIR="${APP_DIR}/data/minio"
+  MINIO_OK=false
+
+  # Helper: download MinIO binary for current architecture
+  download_minio() {
+    local arch
+    case "$(uname -m)" in
+      aarch64|arm64) arch="arm64" ;;
+      x86_64|amd64) arch="amd64" ;;
+      *) err "  Unsupported architecture: $(uname -m)"; return 1 ;;
+    esac
+    wget -q "https://dl.min.io/server/minio/release/linux-${arch}/minio" -O /tmp/minio && \
+    sudo mv /tmp/minio "$MINIO_BIN" && \
+    sudo chmod +x "$MINIO_BIN"
+  }
+
+  # Helper: download mc client for bucket init
+  download_mc() {
+    local arch
+    case "$(uname -m)" in
+      aarch64|arm64) arch="arm64" ;;
+      x86_64|amd64) arch="amd64" ;;
+      *) return 1 ;;
+    esac
+    wget -q "https://dl.min.io/client/mc/release/linux-${arch}/mc" -O /tmp/mc && \
+    sudo mv /tmp/mc /usr/local/bin/mc && \
+    sudo chmod +x /usr/local/bin/mc
+  }
+
+  if command -v minio &>/dev/null; then
+    log "  MinIO:    binary found at $(which minio)"
+    MINIO_OK=true
+  elif try_or_prompt "MinIO native binary" "download_minio"; then
+    MINIO_OK=true
+  fi
+
+  if [ "$MINIO_OK" = true ]; then
+    mkdir -p "$MINIO_DATA_DIR"
+    if pm2 describe cio-minio &>/dev/null 2>&1; then
+      log "  MinIO:    already running via PM2 (cio-minio)"
     else
-      err "  Without object storage, uploads, media, and OG images will not work."
-      exit 1
+      log "  MinIO:    starting via PM2..."
+      MINIO_ROOT_USER="$MINIO_U" MINIO_ROOT_PASSWORD="$MINIO_P" \
+        pm2 start "$MINIO_BIN" --name cio-minio --interpreter none -- \
+          server "$MINIO_DATA_DIR" --console-address ":9001" >/dev/null 2>&1
+      pm2 save
+      log "  MinIO:    started (API :9000, console :9001)"
     fi
+    # Create buckets via mc
+    command -v mc &>/dev/null || download_mc
+    if command -v mc &>/dev/null; then
+      # mc uses a global config file; set alias each run
+      sleep 3
+      mc alias set local "http://127.0.0.1:9000" "$MINIO_U" "$MINIO_P" >/dev/null 2>&1
+      mc mb local/videos --ignore-existing >/dev/null 2>&1
+      mc mb local/documents --ignore-existing >/dev/null 2>&1
+      mc mb local/media --ignore-existing >/dev/null 2>&1
+      mc anonymous set download local/media >/dev/null 2>&1
+      log "  MinIO:    buckets ready (videos, documents, media)"
+    fi
+
+  # ── Docker fallback ─────────────────────────────────────────────────
+  elif command -v docker &>/dev/null; then
+    if docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
+      log "  MinIO:    already running via Docker (container cio-minio)"
+    else
+      start_minio_docker() {
+        docker volume inspect cio-minio-data &>/dev/null || docker volume create cio-minio-data >/dev/null
+        docker run -d --name cio-minio \
+          -p 127.0.0.1:9000:9000 \
+          -p 127.0.0.1:9001:9001 \
+          -e "MINIO_ROOT_USER=$MINIO_U" \
+          -e "MINIO_ROOT_PASSWORD=$MINIO_P" \
+          -v cio-minio-data:/data \
+          --restart unless-stopped \
+          minio/minio:latest server /data --console-address ":9001" >/dev/null 2>&1
+      }
+      if try_or_prompt "MinIO (Docker)" "start_minio_docker"; then
+        log "  MinIO:    started (API :9000, console :9001)"
+        sleep 3
+        docker run --rm --network host \
+          -e "MINIO_ROOT_USER=$MINIO_U" \
+          -e "MINIO_ROOT_PASSWORD=$MINIO_P" \
+          minio/mc:latest \
+          sh -c "mc alias set local http://127.0.0.1:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD \
+            && mc mb local/videos --ignore-existing \
+            && mc mb local/documents --ignore-existing \
+            && mc mb local/media --ignore-existing \
+            && mc anonymous set download local/media" >/dev/null 2>&1 || true
+        log "  MinIO:    buckets ready (videos, documents, media)"
+      else
+        err "  Without object storage, uploads, media, and OG images will not work."
+        exit 1
+      fi
+    fi
+  else
+    err "  No way to run MinIO: neither native binary nor Docker available."
+    err "  Without object storage, uploads, media, and OG images will not work."
+    exit 1
   fi
 fi
 
