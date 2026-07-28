@@ -1,0 +1,43 @@
+# Quick Check — runs automatically on every PR and push to main.
+#
+# This is the ONLY automatic workflow.  It is intentionally minimal:
+# a format check only.  Everything else (unit tests, integration,
+# builds, E2E) is judgment-based — agents evaluate the change scope
+# and trigger the appropriate CI via workflow_dispatch (see CI Pipeline).
+#
+# ~10 second runtime, zero external dependencies.
+
+name: Quick Check
+
+on:
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Check formatting
+        run: npx prettier --check .
