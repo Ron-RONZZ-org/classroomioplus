@@ -169,6 +169,22 @@ jobs:
         # API deps were already built above (dashboard transitively depends
         # on @cio/api).  Turbo skips them from cache — this is near-instant.
         run: pnpm turbo run build --filter=@cio/api^... --cache-dir=.turbo
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: classroomio-build
+          path: |
+            apps/api/dist/
+            apps/dashboard/build/
+            apps/jobs/dist/
+            packages/*/dist/
+            infra/
+            pnpm-lock.yaml
+            package.json
+            pnpm-workspace.yaml
+            .nvmrc
+            patches/
+          retention-days: 7
 
   # ── E2E (full stack Playwright) ────────────────────────────────────
   e2e:
