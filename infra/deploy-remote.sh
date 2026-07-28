@@ -328,33 +328,37 @@ EOF
   if docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
     log "  MinIO:    already running (container cio-minio)"
   else
-    log "  MinIO:    starting..."
-    docker volume inspect cio-minio-data &>/dev/null || docker volume create cio-minio-data >/dev/null
-    docker run -d --name cio-minio \
-      -p 127.0.0.1:9000:9000 \
-      -p 127.0.0.1:9001:9001 \
-      -e MINIO_ROOT_USER="$MINIO_U" \
-      -e MINIO_ROOT_PASSWORD="$MINIO_P" \
-      -v cio-minio-data:/data \
-      --restart unless-stopped \
-      minio/minio:latest server /data --console-address ":9001" 2>/dev/null || {
-      err "  MinIO container failed to start. Check: docker logs cio-minio"
+    log "  MinIO:    starting (Docker)..."
+    # try_or_prompt eval's the action string; define a function for it.
+    start_minio() {
+      docker volume inspect cio-minio-data &>/dev/null || docker volume create cio-minio-data >/dev/null
+      docker run -d --name cio-minio \
+        -p 127.0.0.1:9000:9000 \
+        -p 127.0.0.1:9001:9001 \
+        -e "MINIO_ROOT_USER=$MINIO_U" \
+        -e "MINIO_ROOT_PASSWORD=$MINIO_P" \
+        -v cio-minio-data:/data \
+        --restart unless-stopped \
+        minio/minio:latest server /data --console-address ":9001" >/dev/null 2>&1
+    }
+    if try_or_prompt "MinIO (Docker)" "start_minio"; then
+      log "  MinIO:    started (API :9000, console :9001)"
+      # Create required buckets (idempotent)
+      sleep 3
+      docker run --rm --network host \
+        -e MINIO_ROOT_USER="$MINIO_U" \
+        -e MINIO_ROOT_PASSWORD="$MINIO_P" \
+        minio/mc:latest \
+        sh -c "mc alias set local http://127.0.0.1:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD \
+          && mc mb local/videos --ignore-existing \
+          && mc mb local/documents --ignore-existing \
+          && mc mb local/media --ignore-existing \
+          && mc anonymous set download local/media" >/dev/null 2>&1 || true
+      log "  MinIO:    buckets ready (videos, documents, media)"
+    else
       err "  Without object storage, uploads, media, and OG images will not work."
       exit 1
-    }
-    log "  MinIO:    started (API :9000, console :9001)"
-    # Create required buckets (idempotent)
-    sleep 3
-    docker run --rm --network host \
-      -e MINIO_ROOT_USER="$MINIO_U" \
-      -e MINIO_ROOT_PASSWORD="$MINIO_P" \
-      minio/mc:latest \
-      sh -c "mc alias set local http://127.0.0.1:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD \
-        && mc mb local/videos --ignore-existing \
-        && mc mb local/documents --ignore-existing \
-        && mc mb local/media --ignore-existing \
-        && mc anonymous set download local/media" >/dev/null 2>&1 || true
-    log "  MinIO:    buckets ready (videos, documents, media)"
+    fi
   fi
 fi
 
