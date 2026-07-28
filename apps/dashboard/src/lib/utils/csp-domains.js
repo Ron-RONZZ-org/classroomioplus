@@ -12,7 +12,13 @@ export function getCspDomains(_isSelfHosted, _serverUrl) {
     connectSrc: [],
     frameSrc: [],
     fontSrc: [],
-    mediaSrc: [],
+    mediaSrc: [
+      // External image hosts used by the app in self-hosted mode
+      'https://images.unsplash.com',
+      'https://api.dicebear.com',
+      'https://cdn4.iconfinder.com',
+      'https://assets.cdn.clsrio.com'
+    ],
     apiOrigin: null
   };
 }
