@@ -1,0 +1,290 @@
+# CI Pipeline
+#
+# Triggers:
+#   - Manual (workflow_dispatch) — agents choose scope based on change
+#   - Push to main — build-only auto-run to guarantee main is deployable
+#
+# Usage (manual):
+#   gh workflow run ci.yml -f scope=unit
+#   gh workflow run ci.yml -f scope=build
+#   gh workflow run ci.yml -f scope=unit,build
+#   gh workflow run ci.yml -f scope=e2e
+#
+# See AGENTS.md § CI Responsibility for guidance on what to run when.
+
+name: CI Pipeline
+
+on:
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Comma-separated: unit, integration, build, e2e'
+        required: true
+        default: 'unit'
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/PULL_REQUEST_TEMPLATE.md'
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # ── Validation ──────────────────────────────────────────────────────
+  validate:
+    name: Validate scope
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check scope
+        run: |
+          # On push to main there is no scope input — that's fine (build runs).
+          if [ "${{ github.event_name }}" = "push" ]; then
+            echo "Push to main — skipping scope validation"
+            exit 0
+          fi
+          SCOPE="${{ github.event.inputs.scope }}"
+          if [ -z "$SCOPE" ]; then
+            echo "Error: scope is empty. Valid scopes: unit, integration, build, e2e"
+            exit 1
+          fi
+          VALID="unit integration build e2e"
+          for item in $(echo "$SCOPE" | tr ',' ' '); do
+            found=0
+            for v in $VALID; do
+              [ "$item" = "$v" ] && found=1
+            done
+            [ "$found" = "0" ] && echo "Unknown scope: '$item' (valid: $VALID, lowercase, comma-separated)" && exit 1
+          done
+          echo "Scope: $SCOPE"
+
+  # ── Unit tests (API + dashboard) ───────────────────────────────────
+  unit-tests:
+    name: Unit Tests
+    needs: [validate]
+    if: contains(github.event.inputs.scope, 'unit')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: cp apps/dashboard/.env.example apps/dashboard/.env
+      - name: API unit tests
+        run: pnpm --filter @cio/api test
+      - name: Dashboard unit tests
+        run: pnpm --filter @cio/dashboard test
+
+  # ── Integration tests (API with Postgres + Redis) ──────────────────
+  integration:
+    name: Integration Tests
+    needs: [validate]
+    if: contains(github.event.inputs.scope, 'integration')
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: classroomio
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Create test database
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres \
+            -c 'CREATE DATABASE classroomio_test'
+      - name: Run migrations
+        run: pnpm --filter @cio/db db:migrate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/classroomio_test
+      - name: Run API integration tests
+        run: pnpm --filter @cio/api test:integration
+
+  # ── Build check (dashboard + API) ──────────────────────────────────
+  build:
+    name: Build
+    needs: [validate]
+    # Run on manual trigger with scope=build, OR automatically on push to main
+    if: >
+      contains(github.event.inputs.scope, 'build') ||
+      github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: cp apps/dashboard/.env.example apps/dashboard/.env
+      # Turbo cache — keyed by commit SHA with fallback to latest.
+      # When the lockfile hasn't changed, most cache hits are local, so
+      # only changed packages + their dependents are rebuilt (~30-90s).
+      - name: Cache turbo build
+        uses: actions/cache@v4
+        with:
+          path: .turbo
+          key: ${{ runner.os }}-turbo-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-turbo-
+      - name: Build dashboard + deps
+        run: pnpm turbo run build --filter=@cio/dashboard^... --cache-dir=.turbo
+      - name: Build API
+        # API deps were already built above (dashboard transitively depends
+        # on @cio/api).  Turbo skips them from cache — this is near-instant.
+        run: pnpm turbo run build --filter=@cio/api^... --cache-dir=.turbo
+
+  # ── E2E (full stack Playwright) ────────────────────────────────────
+  e2e:
+    name: E2E
+    needs: [validate]
+    if: contains(github.event.inputs.scope, 'e2e')
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: classroomio
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Seed database
+        run: pnpm --filter @cio/db db:setup:seed
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/classroomio
+      - name: Build API
+        run: pnpm --filter @cio/api^... build && pnpm --filter @cio/api build
+      - name: Build dashboard
+        run: pnpm --filter @cio/dashboard^... build && pnpm --filter @cio/dashboard build
+        env:
+          PUBLIC_IS_SELFHOSTED: 'true'
+      - name: Start API server
+        run: |
+          setsid node apps/api/dist/index.js > /tmp/api.log 2>&1 &
+          echo $! > /tmp/api.pid
+        env:
+          PORT: 3081
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/classroomio
+          REDIS_URL: redis://localhost:6379
+          BETTER_AUTH_SECRET: e5afc4ba370cf45e484ea91fb554eb64a4d86294d5f771a3ef659b3ab67ba2e9
+          PRIVATE_SERVER_KEY: e5afc4ba370cf45e484ea91fb554eb64a4d86294d5f771a3ef659b3ab67ba2e9
+          PUBLIC_SERVER_URL: http://localhost:3081
+          NODE_ENV: production
+          SMTP_HOST: ''
+          SMTP_PORT: ''
+          OBJECT_STORAGE_ENDPOINT: ''
+      - name: Wait for API
+        run: |
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3081/ > /dev/null 2>&1 && echo "API ready" && exit 0
+            sleep 2
+          done
+          echo "API failed to start"; cat /tmp/api.log; exit 1
+      - name: Start dashboard server
+        run: |
+          setsid node apps/dashboard/build/index.js > /tmp/dashboard.log 2>&1 &
+          echo $! > /tmp/dashboard.pid
+        env:
+          PORT: 6036
+          ORIGIN: http://localhost:6036
+          PRIVATE_SERVER_URL: http://localhost:3081
+          PRIVATE_SERVER_KEY: e5afc4ba370cf45e484ea91fb554eb64a4d86294d5f771a3ef659b3ab67ba2e9
+          NODE_ENV: production
+      - name: Wait for dashboard
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://localhost:6036/ 2>/dev/null || true)
+            if [ -n "$code" ] && [ "$code" != "000" ]; then
+              echo "Dashboard ready (HTTP $code)"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Dashboard failed to start"; cat /tmp/dashboard.log; exit 1
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+        working-directory: apps/dashboard
+      - name: Run E2E tests
+        run: pnpm --filter @cio/dashboard test:e2e
+        env:
+          E2E_BASE_URL: http://localhost:6036
+          E2E_API_URL: http://localhost:3081
+      - name: Upload report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: apps/dashboard/e2e/test-results/
+          retention-days: 7
+      - name: Upload logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs
+          path: |
+            /tmp/api.log
+            /tmp/dashboard.log
+          retention-days: 7
+      - name: Stop servers
+        if: always()
+        run: |
+          kill $(cat /tmp/api.pid) 2>/dev/null || true
+          kill $(cat /tmp/dashboard.pid) 2>/dev/null || true

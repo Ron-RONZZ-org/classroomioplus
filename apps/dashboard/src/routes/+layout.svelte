@@ -1,5 +1,7 @@
 <script lang="ts">
   import { page } from '$app/state';
+  import { goto } from '$app/navigation';
+  import { resolve } from '$app/paths';
   import { onMount, untrack } from 'svelte';
 
   import { Snackbar } from '$features/ui';
@@ -7,7 +9,7 @@
   import PendingInviteModal from '$features/lms/components/pending-invite-modal.svelte';
   import { resolveAppOrgParams } from '$features/app/resolve-app-org-params';
   import { setupAnalytics } from '$lib/utils/functions/appSetup';
-  import { globalStore } from '$lib/utils/store/app';
+  import { globalStore, isOrgStudent } from '$lib/utils/store/app';
   import { currentOrg, mergeAccountOrgFromServer } from '$lib/utils/store/org';
   import { get } from 'svelte/store';
   import { user } from '$lib/utils/store/user';
@@ -98,6 +100,27 @@
 
       void appInitApi.syncOrgContext(params);
     });
+  });
+
+  /*
+    Student redirect guard — runs after the app is initialized and ready.
+
+    routeUserToNextPage is called inside setupApp → applyAccountData, but
+    there are edge cases where this chain doesn't complete (e.g., the
+    onMount in +page.svelte calls setupApp with SSR locals before the
+    session effect fires, and the session effect finds isInitializedAndReady
+    already true).  This effect catches those cases by running once after
+    isInitializedAndReady becomes true.
+  */
+  let redirectGuarded = false;
+  $effect(() => {
+    if (!appInitApi.isInitializedAndReady || redirectGuarded) return;
+    redirectGuarded = true;
+
+    const isStudent = get(isOrgStudent);
+    if (isStudent) {
+      goto(resolve('/lms', {}));
+    }
   });
 </script>
 

@@ -149,7 +149,7 @@ pnpm --filter @cio/api build                   # always needed for API changes
 
 Some agents reach for `pnpm --filter @cio/dashboard^... build` (the CI command) for "more confidence." Don't. The dashboard build (`pnpm --filter @cio/dashboard build`) already type-checks **every package in the dependency graph** — Vite resolves types transitively from leaf packages up through the app. A broken type in `@cio/utils` surfaces as a dashboard build error without running a separate `rimraf dist && tsc` on every intermediate package.
 
-CI runs the full transitive build on a clean checkout. Locally it's wasted work: 3-5 minutes, 8+ sequential TS compilations, and often blocked by pre-existing `@cio/core`/`@cio/db` TS errors that have nothing to do with your change.
+If you absolutely need the full transitive build (e.g. you changed a shared interface and want to verify every consumer still compiles), trigger `ci.yml` with `scope=build` — it runs on GitHub, not locally.  Locally the full transitive build is wasted work: 3-5 minutes, 8+ sequential TS compilations, and often blocked by pre-existing `@cio/core`/`@cio/db` TS errors that have nothing to do with your change.
 
 ### Known pre-existing build issues
 
@@ -164,6 +164,57 @@ pnpm format:check
 ```
 
 Do not commit if any verification step fails. If a pre-existing issue blocks you, note it and verify only your changed packages.
+
+## CI Responsibility (judgment-based, NOT automatic)
+
+**This is a judgment-based CI.**  Nothing runs automatically (except a ~10s format check).  You evaluate the change scope and decide which checks are worth the compute.  A 20-line CSS change does not need integration tests or a full build.
+
+The dividing line is **time**:
+- **<30s** (format, single-package unit test): fine to run locally.
+- **>30s** (full build, integration tests, E2E): delegate to CI via `gh workflow run ci.yml -f scope=...`.
+
+### Available workflows
+
+| Workflow | Trigger | What it runs | When to use |
+|----------|---------|-------------|-------------|
+| `check.yml` | Automatic on PR + push | Format only (~10s) | Always-on safety net; no action needed |
+| `ci.yml` | Manual (`workflow_dispatch`) | Varies by `scope` input (see below) | You decide |
+
+### Triggering CI
+
+From CLI (preferred):
+```bash
+gh workflow run ci.yml -f scope=unit              # unit tests only
+gh workflow run ci.yml -f scope=integration       # integration tests (needs DB)
+gh workflow run ci.yml -f scope=build             # full transitive build
+gh workflow run ci.yml -f scope=e2e               # full stack Playwright
+gh workflow run ci.yml -f scope=unit,build        # unit + build
+gh workflow run ci.yml -f scope=unit,integration,build,e2e  # everything
+```
+
+Or via GitHub UI: Actions → CI Pipeline → "Run workflow" → select scope.
+
+### What to run when
+
+| Change scope | Run | Why |
+|-------------|-----|-----|
+| Typo fix, docs, translation | Nothing (format check is enough) | Zero risk of breakage |
+| Utility function in `@cio/utils` | `unit` | Pure logic; unit tests cover it |
+| Svelte component | `unit` | Dashboard unit tests exercise components |
+| API route or service | `unit` or `integration` | Unit tests cover logic; integration covers real DB |
+| Package dependency or config | `build` | Verify the dependency chain still compiles |
+| Cross-cutting change (touches 3+ packages) | `unit,build` | Verify nothing is broken |
+| Feature merge (UI + API + DB) | `e2e` | Full stack regression check |
+
+### Run locally before committing
+
+Always do these before `git commit`; they are fast and catch the most common issues:
+
+```bash
+pnpm format:changed          # format changed files (~5s)
+pnpm --filter <pkg> test     # your package's unit tests (~30s)
+pnpm --filter <pkg> build    # your package's build (see Fast path above)
+```
 
 ### Lightweight verification (warning-only / cosmetic / formatting changes)
 
