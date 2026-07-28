@@ -1,131 +1,144 @@
-import { test, expect } from '@playwright/test';
-import type { Page } from '@playwright/test';
-
-const EMAIL = 'admin@test.com';
-const PASSWORD = '123456';
-const ORG_SLUG = 'udemy-test';
-const BASE_URL = 'http://localhost:6036';
-
 /**
- * Log in via direct API call (bypasses CSP blocking inline event handlers).
+ * Smoke tests — verify that core pages render with expected content.
  *
- * Why page.evaluate() instead of form submit:
- * The SvelteKit SSR renders inline `onsubmit` handlers which the CSP
- * ('unsafe-hashes' without 'unsafe-inline') blocks. Calling the Better Auth
- * API directly via fetch + credentials: 'include' sets the session cookies
- * without relying on event handler execution.
+ * Tests log in through the actual form (not API) so GUI login bugs
+ * are caught.  Each login uses a fresh browser context (Playwright
+ * default) to avoid stale session state.
+ *
+ * NOTE: Vite dev compiles Svelte modules lazily, making the first
+ * page navigation to a new route slow (10-30s).  These tests are
+ * designed to run against a dev server.  For CI, use `vite build`
+ * + `vite preview` or set E2E_BASE_URL to a production deployment.
  */
-async function loginViaApi(page: Page): Promise<string> {
-  // Navigate to the app first so cookies are set for the right origin.
-  // Use a retry: the first navigation sometimes races with Vite HMR.
-  try {
-    await page.goto(BASE_URL + '/login', { waitUntil: 'load', timeout: 15000 });
-  } catch {
-    // Retry once if frame was detached
-    await page.waitForTimeout(2000);
-    await page.goto(BASE_URL + '/login', { waitUntil: 'load', timeout: 15000 });
-  }
-  await page.waitForTimeout(1500);
+import { test, expect } from '@playwright/test';
+import {
+  BASE_URL,
+  ADMIN_EMAIL,
+  PASSWORD,
+  ORG_SLUG,
+  login,
+  setupErrorTracking,
+  expectCollectorEmpty,
+  type ErrorCollector
+} from './helpers';
 
-  // Call the Better Auth sign-in endpoint directly
-  const result = await page.evaluate(
-    async ({ email, password }) => {
-      try {
-        const res = await fetch('http://localhost:3002/api/auth/sign-in/email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          credentials: 'include',
-          body: JSON.stringify({ email, password })
-        });
-
-        const data = await res.json();
-        return { ok: res.ok, status: res.status, hasToken: !!data.token };
-      } catch (e) {
-        return { error: (e as Error).message };
-      }
-    },
-    { email: EMAIL, password: PASSWORD }
-  );
-
-  expect(result.ok, `Login failed: ${JSON.stringify(result)}`).toBe(true);
-
-  // Navigate to org dashboard to finalize the session
-  await page.goto(BASE_URL + `/org/${ORG_SLUG}/dash`, { waitUntil: 'load', timeout: 15000 });
+/** Navigate and wait for SvelteKit hydration.
+ *
+ * Uses `domcontentloaded` (fast, only waits for HTML parse) instead of
+ * `load` (which blocks on images, fonts, and other slow external assets).
+ * After the HTML is parsed, waits for the SvelteKit session API call to
+ * confirm JS hydration is complete, then allows a settling window.
+ */
+async function navigateAndSettle(page, url: string, timeout = 90000) {
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
+  await Promise.race([
+    page
+      .waitForResponse((r) => r.url().includes('/api/auth/get-session') && r.status() === 200, { timeout })
+      .catch(() => {}),
+    page.waitForTimeout(15000)
+  ]);
   await page.waitForTimeout(2000);
-
-  return ORG_SLUG;
 }
 
-test.describe('Smoke tests', () => {
-  test('TC-01: Login with demo credentials', async ({ page }) => {
+test.describe('Login', () => {
+  let err: ErrorCollector;
+
+  test.beforeEach(({ page }) => {
+    err = setupErrorTracking(page);
+  });
+
+  test.afterEach(() => {
+    expectCollectorEmpty(err);
+  });
+
+  test('TC-01: Login form renders and accepts credentials', async ({ page }) => {
     test.setTimeout(120_000);
-    const slug = await loginViaApi(page);
-    expect(slug).toBe(ORG_SLUG);
 
-    // Confirm the page has meaningful content (not an empty body)
-    await expect(page.locator('body')).not.toBeEmpty();
+    await page.goto(BASE_URL + '/login', { waitUntil: 'load', timeout: 30000 });
+    await page.waitForResponse((r) => r.url().includes('/api/auth/get-session') && r.status() === 200, {
+      timeout: 30000
+    });
+    await page.waitForTimeout(2000);
+
+    // Verify form fields
+    await expect(page.locator('#email')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('button[type="submit"]')).toBeVisible();
+
+    // Fill and submit valid credentials
+    await page.locator('#email').fill(ADMIN_EMAIL);
+    await page.locator('#password').fill(PASSWORD);
+
+    await Promise.all([
+      page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30000 }),
+      page.locator('button[type="submit"]').click()
+    ]);
+
+    // Successful login → redirect to /
+    expect(page.url()).toBe(BASE_URL + '/');
+    await expect(page.getByText('Udemy Test').first()).toBeVisible({ timeout: 15000 });
   });
 
-  test('TC-02: Org dashboard loads after login', async ({ page }) => {
-    test.setTimeout(90_000);
-    const slug = await loginViaApi(page);
+  test('TC-02: Invalid credentials show error', async ({ page }) => {
+    test.setTimeout(120_000);
 
-    await page.goto(BASE_URL + `/org/${slug}/dash`, { waitUntil: 'load' });
-    await page.waitForLoadState('networkidle');
+    await page.goto(BASE_URL + '/login', { waitUntil: 'load', timeout: 30000 });
+    await page.waitForResponse((r) => r.url().includes('/api/auth/get-session') && r.status() === 200, {
+      timeout: 30000
+    });
+    await page.waitForTimeout(2000);
 
-    await expect(page.locator('body')).not.toBeEmpty();
+    await page.locator('#email').fill('bad@user.com');
+    await page.locator('#password').fill('wrong-password');
+    await page.locator('button[type="submit"]').click();
+    await page.waitForTimeout(5000);
+
+    // Should stay on login page
+    expect(page.url()).toContain('/login');
+  });
+});
+
+test.describe('Authenticated pages', () => {
+  let err: ErrorCollector;
+
+  test.beforeEach(async ({ page }) => {
+    err = setupErrorTracking(page);
+    await login(page, ADMIN_EMAIL, PASSWORD);
   });
 
-  test('TC-03: Course list is accessible', async ({ page }) => {
-    test.setTimeout(90_000);
-    const slug = await loginViaApi(page);
-
-    await page.goto(BASE_URL + `/org/${slug}/courses`, { waitUntil: 'load' });
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('body')).not.toBeEmpty();
+  test.afterEach(() => {
+    expectCollectorEmpty(err);
   });
 
-  test('TC-04: Org settings page is accessible', async ({ page }) => {
-    test.setTimeout(90_000);
-    const slug = await loginViaApi(page);
+  test('TC-03: Dashboard and course list', async ({ page }) => {
+    test.setTimeout(180_000);
 
-    await page.goto(BASE_URL + `/org/${slug}/settings`, { waitUntil: 'load' });
-    await page.waitForLoadState('networkidle');
+    // Dashboard
+    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/dash`);
+    await expect(page.getByRole('button', { name: /Create Course/i })).toBeVisible({ timeout: 20000 });
 
-    await expect(page.locator('body')).not.toBeEmpty();
+    // Course list (navigate within same session)
+    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/courses`);
+    await expect(page.getByText('Modern Web Development')).toBeVisible({ timeout: 20000 });
   });
 
-  test('TC-05: Fork-specific — AI provider settings load without error', async ({ page }) => {
-    test.setTimeout(90_000);
-    const slug = await loginViaApi(page);
+  test('TC-04: Fork-specific settings pages', async ({ page }) => {
+    test.setTimeout(180_000);
 
-    await page.goto(BASE_URL + `/org/${slug}/settings/ai-provider`, { waitUntil: 'load' });
-    await page.waitForLoadState('networkidle');
+    // AI provider
+    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/settings/ai-provider`);
+    let title = await page.title();
+    expect(title).toContain('AI Provider');
 
-    await expect(page.locator('body')).not.toBeEmpty();
+    // SSO settings
+    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/settings/auth`);
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
   });
 
-  test('TC-06: Fork-specific — SSO settings page renders', async ({ page }) => {
-    test.setTimeout(90_000);
-    const slug = await loginViaApi(page);
+  test('TC-05: Logout', async ({ page }) => {
+    test.setTimeout(60_000);
 
-    // Verify the SSO settings page renders without a crash.
-    // The fork hardcodes isEnterprisePlan to true, so SSO setup fields
-    // are always enabled (the "Enterprise plan" badge in the UI is
-    // cosmetic — the license system was removed in a6f747158).
-    await page.goto(BASE_URL + `/org/${slug}/settings/auth`, { waitUntil: 'load' });
-    await page.waitForLoadState('networkidle');
-
-    await expect(page.locator('body')).not.toBeEmpty();
-  });
-
-  test('TC-07: Logout redirects to login page', async ({ page }) => {
-    test.setTimeout(90_000);
-    await loginViaApi(page);
-
-    await page.goto(BASE_URL + '/logout', { waitUntil: 'load' });
-    // The logout function calls SvelteKit's goto('/login'), wait for it
-    await page.waitForURL('**/login**', { timeout: 15000 });
+    await page.goto(BASE_URL + '/logout', { waitUntil: 'load', timeout: 30000 });
+    await page.waitForURL('**/login**', { timeout: 20000 });
+    expect(page.url()).toContain('/login');
   });
 });
