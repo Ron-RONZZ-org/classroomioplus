@@ -14,6 +14,13 @@ const csp = getCspDomains(isSelfHosted, process.env.PUBLIC_SERVER_URL);
 /** @type {import('@sveltejs/kit').Config} */
 const config = {
   preprocess: [vitePreprocess({})],
+  vitePlugin: {
+    inspector: {
+      toggleKeyCombo: 'alt-x',
+      holdMode: false,
+      showToggleButton: 'always'
+    }
+  },
   kit: {
     // Default: Node server (Render, Docker). Opt into Cloudflare Pages only when CI_ENVIRONMENT=cloudflare.
     adapter: IS_CLOUDFLARE ? adapterCloudflare() : adapterNode(),

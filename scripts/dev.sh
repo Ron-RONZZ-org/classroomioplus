@@ -74,8 +74,8 @@ check_root_cache_dirs() {
 check_root_cache_dirs
 
 # ─── Ports ───────────────────────────────────────────────────────────────
-API_PORT=6035
-DASHBOARD_PORT=6036
+API_PORT="${CIO_API_PORT:-6035}"
+DASHBOARD_PORT="${CIO_DASHBOARD_PORT:-6036}"
 API_URL="http://127.0.0.1:$API_PORT"
 DASHBOARD_URL="http://127.0.0.1:$DASHBOARD_PORT"
 API_READY_TIMEOUT=60
@@ -417,12 +417,24 @@ start_full() {
   # Check port availability before starting
   local port_conflict=false
   if port_in_use "$API_PORT"; then
-    err "Port $API_PORT is already in use. Run '$0 stop' first or check what's using it."
+    err "Port $API_PORT is already in use (PID $(ss -tlnp 'sport = :'"$API_PORT" 2>/dev/null | grep -oP 'pid=\K[0-9]+' | head -1))."
+    err ""
+    err "  This may be another developer testing on the same machine."
+    err "  To stop your own session:  $0 stop"
+    err "  To use alternative ports:  $0 --api-port 6045 --dashboard-port 6046"
+    err "  Or set env vars:           CIO_API_PORT=6045 CIO_DASHBOARD_PORT=6046 $0"
+    err ""
     ss -tlnp "sport = :$API_PORT" 2>/dev/null | head -3
     port_conflict=true
   fi
   if port_in_use "$DASHBOARD_PORT"; then
-    err "Port $DASHBOARD_PORT is already in use. Run '$0 stop' first or check what's using it."
+    err "Port $DASHBOARD_PORT is already in use (PID $(ss -tlnp 'sport = :'"$DASHBOARD_PORT" 2>/dev/null | grep -oP 'pid=\K[0-9]+' | head -1))."
+    err ""
+    err "  This may be another developer testing on the same machine."
+    err "  To stop your own session:  $0 stop"
+    err "  To use alternative ports:  $0 --api-port 6045 --dashboard-port 6046"
+    err "  Or set env vars:           CIO_API_PORT=6045 CIO_DASHBOARD_PORT=6046 $0"
+    err ""
     ss -tlnp "sport = :$DASHBOARD_PORT" 2>/dev/null | head -3
     port_conflict=true
   fi
@@ -494,6 +506,31 @@ start_full() {
 
 # ─── Main ──────────────────────────────────────────────────────────────────
 
+# ─── CLI option parsing ──────────────────────────────────────────────────
+# Parse --api-port and --dashboard-port before subcommand dispatch.
+ARGS=()
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --api-port)
+      shift
+      API_PORT="${1:?--api-port requires a port number}"
+      API_URL="http://127.0.0.1:$API_PORT"
+      shift
+      ;;
+    --dashboard-port)
+      shift
+      DASHBOARD_PORT="${1:?--dashboard-port requires a port number}"
+      DASHBOARD_URL="http://127.0.0.1:$DASHBOARD_PORT"
+      shift
+      ;;
+    *)
+      ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+set -- "${ARGS[@]}"
+
 case "${1:-}" in
   stop)
     stop
@@ -505,13 +542,17 @@ case "${1:-}" in
     start_full true
     ;;
   -h|--help)
-    echo "Usage: $0 [stop|status|--light|--help]"
+    echo "Usage: $0 [stop|status|--light|--help] [--api-port PORT] [--dashboard-port PORT]"
     echo ""
     echo "Start full dev environment (API + workers + dashboard):"
     echo "  $0"
     echo ""
     echo "Start API-only (no background workers) + dashboard:"
     echo "  $0 --light"
+    echo ""
+    echo "Use alternative ports (e.g. if another developer is testing):"
+    echo "  $0 --api-port 6045 --dashboard-port 6046"
+    echo "  CIO_API_PORT=6045 CIO_DASHBOARD_PORT=6046 $0"
     echo ""
     echo "Stop all dev servers:"
     echo "  $0 stop"
@@ -527,7 +568,7 @@ case "${1:-}" in
     ;;
   *)
     err "Unknown command: $1"
-    echo "Usage: $0 [stop|status|--light|--help]"
+    echo "Usage: $0 [stop|status|--light|--help] [--api-port PORT] [--dashboard-port PORT]"
     exit 1
     ;;
 esac

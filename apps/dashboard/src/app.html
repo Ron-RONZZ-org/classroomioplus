@@ -10,7 +10,29 @@
     <!-- External (not inline) so it passes the app's nonce-based CSP; runs before
          the app bundle to set the color mode and avoid a flash of the wrong theme. -->
     <script src="/theme-init.js"></script>
-
+    <script>
+      // Dev-only: Ctrl+Shift+C copies the Svelte Inspector's current file path
+      (() => {
+        let lastPath = '';
+        const obs = new MutationObserver(() => {
+          const el = document.getElementById('svelte-inspector-overlay');
+          if (el?.textContent) {
+            const idx = el.textContent.indexOf('>');
+            lastPath = idx >= 0 ? el.textContent.slice(idx + 1).trim() : el.textContent.trim();
+          } else {
+            lastPath = '';
+          }
+        });
+        obs.observe(document.documentElement, { childList: true, subtree: true });
+        document.addEventListener('keydown', (e) => {
+          if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'y' || e.key === 'Y') && lastPath) {
+            e.preventDefault();
+            e.stopPropagation();
+            navigator.clipboard.writeText(lastPath).catch(() => {});
+          }
+        });
+      })();
+    </script>
     %sveltekit.head%
   </head>
 
