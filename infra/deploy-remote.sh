@@ -284,65 +284,78 @@ log "[4] Running database setup (schema migrations)"
   rm -f /tmp/cio-db-setup.env
 )
 
-# ── 5. MinIO (Docker) ───────────────────────────────────────────────────────
-log "[5] Ensuring MinIO is running"
-# MinIO is REQUIRED — without it, all uploads, media, and OG images fail.
-# It's the only service that still runs in Docker.
+# ── 5. Object storage ─────────────────────────────────────────────────────
+log "[5] Ensuring object storage is available"
+# The app needs an S3-compatible store for uploads, media, and OG images.
+# If the user has configured external S3 (R2, AWS, B2), we skip MinIO and
+# trust their config. Otherwise, we provision local MinIO in Docker.
 
-# Read credentials from .env, or provision fresh ones if missing
-MINIO_U=$(grep -E '^OBJECT_STORAGE_ACCESS_KEY_ID=' apps/api/.env 2>/dev/null | cut -d= -f2-)
-MINIO_P=$(grep -E '^OBJECT_STORAGE_SECRET_ACCESS_KEY=' apps/api/.env 2>/dev/null | cut -d= -f2-)
+is_local_endpoint() {
+  local val="$1"
+  case "$val" in
+    "" | *localhost* | *127.0.0.1* | *0.0.0.0* | *::1*) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
-if [ -z "$MINIO_U" ] || [ -z "$MINIO_P" ]; then
-  log "  MinIO credentials not in apps/api/.env — provisioning fresh ones..."
-  MINIO_U="cio-$(openssl rand -hex 16)"
-  MINIO_P=$(openssl rand -hex 32)
-  # Persist to .env so future runs reuse them
-  upsert_env() { local k="$1" v="$2"; grep -q "^${k}=" apps/api/.env && sed -i "s|^${k}=.*|${k}=${v}|" apps/api/.env || echo "${k}=${v}" >> apps/api/.env; }
-  upsert_env MINIO_ROOT_USER "$MINIO_U"
-  upsert_env MINIO_ROOT_PASSWORD "$MINIO_P"
-  upsert_env OBJECT_STORAGE_ACCESS_KEY_ID "$MINIO_U"
-  upsert_env OBJECT_STORAGE_SECRET_ACCESS_KEY "$MINIO_P"
-  # Keep minio.env in sync (minio-compose.yaml may use it if present)
-  cat > infra/minio.env <<EOF
+STORAGE_ENDPOINT=$(grep -E '^OBJECT_STORAGE_ENDPOINT=' apps/api/.env 2>/dev/null | cut -d= -f2-)
+
+if [ -n "$STORAGE_ENDPOINT" ] && ! is_local_endpoint "$STORAGE_ENDPOINT"; then
+  log "  Object storage: external endpoint ($STORAGE_ENDPOINT) — skipping local MinIO"
+else
+  # Local MinIO needed — provision or start
+  MINIO_U=$(grep -E '^OBJECT_STORAGE_ACCESS_KEY_ID=' apps/api/.env 2>/dev/null | cut -d= -f2-)
+  MINIO_P=$(grep -E '^OBJECT_STORAGE_SECRET_ACCESS_KEY=' apps/api/.env 2>/dev/null | cut -d= -f2-)
+
+  if [ -z "$MINIO_U" ] || [ -z "$MINIO_P" ]; then
+    log "  MinIO credentials not in apps/api/.env — provisioning fresh ones..."
+    MINIO_U="cio-$(openssl rand -hex 16)"
+    MINIO_P=$(openssl rand -hex 32)
+    upsert_env() { local k="$1" v="$2"; grep -q "^${k}=" apps/api/.env && sed -i "s|^${k}=.*|${k}=${v}|" apps/api/.env || echo "${k}=${v}" >> apps/api/.env; }
+    upsert_env MINIO_ROOT_USER "$MINIO_U"
+    upsert_env MINIO_ROOT_PASSWORD "$MINIO_P"
+    upsert_env OBJECT_STORAGE_ACCESS_KEY_ID "$MINIO_U"
+    upsert_env OBJECT_STORAGE_SECRET_ACCESS_KEY "$MINIO_P"
+    cat > infra/minio.env <<EOF
 MINIO_ROOT_USER=${MINIO_U}
 MINIO_ROOT_PASSWORD=${MINIO_P}
 MINIO_MEM_LIMIT=256m
 EOF
-  chmod 600 infra/minio.env
-  log "  Credentials written to apps/api/.env and infra/minio.env"
-fi
+    chmod 600 infra/minio.env
+    log "  Credentials written to apps/api/.env and infra/minio.env"
+  fi
 
-if docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
-  log "  MinIO:    already running (container cio-minio)"
-else
-  log "  MinIO:    starting..."
-  docker volume inspect cio-minio-data &>/dev/null || docker volume create cio-minio-data >/dev/null
-  docker run -d --name cio-minio \
-    -p 127.0.0.1:9000:9000 \
-    -p 127.0.0.1:9001:9001 \
-    -e MINIO_ROOT_USER="$MINIO_U" \
-    -e MINIO_ROOT_PASSWORD="$MINIO_P" \
-    -v cio-minio-data:/data \
-    --restart unless-stopped \
-    minio/minio:latest server /data --console-address ":9001" 2>/dev/null || {
-    err "  MinIO container failed to start. Check: docker logs cio-minio"
-    err "  Without MinIO, uploads, media, and OG images will not work."
-    exit 1
-  }
-  log "  MinIO:    started (API :9000, console :9001)"
-  # Create required buckets (idempotent)
-  sleep 3
-  docker run --rm --network host \
-    -e MINIO_ROOT_USER="$MINIO_U" \
-    -e MINIO_ROOT_PASSWORD="$MINIO_P" \
-    minio/mc:latest \
-    sh -c "mc alias set local http://127.0.0.1:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD \
-      && mc mb local/videos --ignore-existing \
-      && mc mb local/documents --ignore-existing \
-      && mc mb local/media --ignore-existing \
-      && mc anonymous set download local/media" >/dev/null 2>&1 || true
-  log "  MinIO:    buckets ready (videos, documents, media)"
+  if docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
+    log "  MinIO:    already running (container cio-minio)"
+  else
+    log "  MinIO:    starting..."
+    docker volume inspect cio-minio-data &>/dev/null || docker volume create cio-minio-data >/dev/null
+    docker run -d --name cio-minio \
+      -p 127.0.0.1:9000:9000 \
+      -p 127.0.0.1:9001:9001 \
+      -e MINIO_ROOT_USER="$MINIO_U" \
+      -e MINIO_ROOT_PASSWORD="$MINIO_P" \
+      -v cio-minio-data:/data \
+      --restart unless-stopped \
+      minio/minio:latest server /data --console-address ":9001" 2>/dev/null || {
+      err "  MinIO container failed to start. Check: docker logs cio-minio"
+      err "  Without object storage, uploads, media, and OG images will not work."
+      exit 1
+    }
+    log "  MinIO:    started (API :9000, console :9001)"
+    # Create required buckets (idempotent)
+    sleep 3
+    docker run --rm --network host \
+      -e MINIO_ROOT_USER="$MINIO_U" \
+      -e MINIO_ROOT_PASSWORD="$MINIO_P" \
+      minio/mc:latest \
+      sh -c "mc alias set local http://127.0.0.1:9000 \$MINIO_ROOT_USER \$MINIO_ROOT_PASSWORD \
+        && mc mb local/videos --ignore-existing \
+        && mc mb local/documents --ignore-existing \
+        && mc mb local/media --ignore-existing \
+        && mc anonymous set download local/media" >/dev/null 2>&1 || true
+    log "  MinIO:    buckets ready (videos, documents, media)"
+  fi
 fi
 
 # ── 6. PM2 reload ───────────────────────────────────────────────────────────
