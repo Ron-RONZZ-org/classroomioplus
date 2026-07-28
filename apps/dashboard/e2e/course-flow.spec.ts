@@ -17,19 +17,9 @@ import {
   login,
   setupErrorTracking,
   expectCollectorEmpty,
+  navigateAndSettle,
   type ErrorCollector
 } from './helpers';
-
-async function navigateAndSettle(page, url: string, timeout = 90000) {
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
-  await Promise.race([
-    page
-      .waitForResponse((r) => r.url().includes('/api/auth/get-session') && r.status() === 200, { timeout })
-      .catch(() => {}),
-    page.waitForTimeout(15000)
-  ]);
-  await page.waitForTimeout(2000);
-}
 
 const TEST_COURSE_TITLE = `E2E Test Course ${Date.now()}`;
 const TEST_COURSE_DESC = 'Created by automated E2E test — delete me';

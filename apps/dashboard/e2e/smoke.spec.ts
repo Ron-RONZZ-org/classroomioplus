@@ -13,32 +13,17 @@
 import { test, expect } from '@playwright/test';
 import {
   BASE_URL,
+  API_URL,
   ADMIN_EMAIL,
   PASSWORD,
   ORG_SLUG,
   login,
   setupErrorTracking,
   expectCollectorEmpty,
+  navigateAndSettle,
+  benchNavigate,
   type ErrorCollector
 } from './helpers';
-
-/** Navigate and wait for SvelteKit hydration.
- *
- * Uses `domcontentloaded` (fast, only waits for HTML parse) instead of
- * `load` (which blocks on images, fonts, and other slow external assets).
- * After the HTML is parsed, waits for the SvelteKit session API call to
- * confirm JS hydration is complete, then allows a settling window.
- */
-async function navigateAndSettle(page, url: string, timeout = 90000) {
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
-  await Promise.race([
-    page
-      .waitForResponse((r) => r.url().includes('/api/auth/get-session') && r.status() === 200, { timeout })
-      .catch(() => {}),
-    page.waitForTimeout(15000)
-  ]);
-  await page.waitForTimeout(2000);
-}
 
 test.describe('Login', () => {
   let err: ErrorCollector;
@@ -113,11 +98,11 @@ test.describe('Authenticated pages', () => {
     test.setTimeout(180_000);
 
     // Dashboard
-    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/dash`);
+    await benchNavigate(page, BASE_URL + `/org/${ORG_SLUG}/dash`, 'Dashboard');
     await expect(page.getByRole('button', { name: /Create Course/i })).toBeVisible({ timeout: 20000 });
 
     // Course list (navigate within same session)
-    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/courses`);
+    await benchNavigate(page, BASE_URL + `/org/${ORG_SLUG}/courses`, 'Course list');
     await expect(page.getByText('Modern Web Development')).toBeVisible({ timeout: 20000 });
   });
 
@@ -125,12 +110,12 @@ test.describe('Authenticated pages', () => {
     test.setTimeout(180_000);
 
     // AI provider
-    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/settings/ai-provider`);
+    await benchNavigate(page, BASE_URL + `/org/${ORG_SLUG}/settings/ai-provider`, 'AI Provider settings');
     let title = await page.title();
     expect(title).toContain('AI Provider');
 
     // SSO settings
-    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/settings/auth`);
+    await benchNavigate(page, BASE_URL + `/org/${ORG_SLUG}/settings/auth`, 'SSO settings');
     await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
   });
 
@@ -140,5 +125,37 @@ test.describe('Authenticated pages', () => {
     await page.goto(BASE_URL + '/logout', { waitUntil: 'load', timeout: 30000 });
     await page.waitForURL('**/login**', { timeout: 20000 });
     expect(page.url()).toContain('/login');
+  });
+});
+
+test.describe('API health', () => {
+  test('TC-06: API root responds', async ({ page }) => {
+    test.setTimeout(30_000);
+
+    const response = await page.request.get(API_URL + '/');
+    expect(response.status()).toBe(200);
+    console.log(`  API root: ${response.status()} (${response.statusText()})`);
+  });
+});
+
+test.describe('Public pages (no auth)', () => {
+  let err: ErrorCollector;
+
+  test.beforeEach(({ page }) => {
+    err = setupErrorTracking(page);
+  });
+
+  test.afterEach(() => {
+    expectCollectorEmpty(err);
+  });
+
+  test('TC-07: Public org landing page and course catalog', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    await benchNavigate(page, BASE_URL + `/org/${ORG_SLUG}`, 'Public org landing');
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
+
+    await benchNavigate(page, BASE_URL + `/org/${ORG_SLUG}/courses`, 'Public course catalog');
+    await expect(page.getByText('Modern Web Development')).toBeVisible({ timeout: 20000 });
   });
 });

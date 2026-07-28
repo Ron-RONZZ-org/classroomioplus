@@ -21,20 +21,9 @@ import {
   login,
   setupErrorTracking,
   expectCollectorEmpty,
+  navigateAndSettle,
   type ErrorCollector
 } from './helpers';
-
-/** Navigate and wait for the page to become interactive */
-async function navigateAndSettle(page, url: string, timeout = 90000) {
-  await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
-  await Promise.race([
-    page
-      .waitForResponse((r) => r.url().includes('/api/auth/get-session') && r.status() === 200, { timeout })
-      .catch(() => {}),
-    page.waitForTimeout(15000)
-  ]);
-  await page.waitForTimeout(2000);
-}
 
 test.describe('Student LMS', () => {
   let err: ErrorCollector;

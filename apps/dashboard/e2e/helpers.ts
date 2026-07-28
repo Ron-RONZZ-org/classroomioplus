@@ -132,3 +132,44 @@ export async function expectNonEmpty(page: Page, selector: string, timeout = 100
   await expect(loc).not.toBeEmpty({ timeout });
   return loc;
 }
+
+// ── Benchmark / timing ─────────────────────────────────────────────
+
+/** Set to `true` (via `E2E_BENCHMARK=true`) to log page-navigation timing. */
+export const E2E_BENCHMARK = process.env.E2E_BENCHMARK === 'true';
+
+/**
+ * Navigate to a URL and wait for SvelteKit hydration to complete.
+ *
+ * After the HTML parse, waits for the `/api/auth/get-session` response
+ * as evidence that JS has hydrated and the app is interactive.
+ *
+ * Returns the elapsed time in milliseconds.
+ */
+export async function navigateAndSettle(page: Page, url: string, timeout = 90000): Promise<number> {
+  const start = performance.now();
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
+  await Promise.race([
+    page
+      .waitForResponse((r) => r.url().includes('/api/auth/get-session') && r.status() === 200, { timeout })
+      .catch(() => {}),
+    page.waitForTimeout(15000)
+  ]);
+  await page.waitForTimeout(2000);
+  return performance.now() - start;
+}
+
+/**
+ * Like {@link navigateAndSettle} but logs elapsed time when
+ * `E2E_BENCHMARK=true` is set.
+ *
+ * The benchmark flag is a soft signal (no assertions) — useful for
+ * trend analysis without failing on Vite dev server variance.
+ */
+export async function benchNavigate(page: Page, url: string, label: string, timeout = 90000): Promise<number> {
+  const elapsed = await navigateAndSettle(page, url, timeout);
+  if (E2E_BENCHMARK) {
+    console.log(`  [BENCHMARK] ${label}: ${elapsed.toFixed(0)}ms`);
+  }
+  return elapsed;
+}
