@@ -96,7 +96,7 @@
   };
 
   $effect(() => {
-    if (!$currentOrg) return;
+    if (!$currentOrg.id) return;
 
     orgApi.getOrgTeam();
   });

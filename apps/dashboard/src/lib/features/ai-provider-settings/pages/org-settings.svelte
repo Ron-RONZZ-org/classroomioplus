@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import * as Page from '@cio/ui/base/page';
   import { Button } from '@cio/ui/base/button';
   import * as Select from '@cio/ui/base/select';
   import * as Field from '@cio/ui/base/field';
   import { Input } from '@cio/ui/base/input';
+  import { currentOrg } from '$lib/utils/store/org';
   import { t } from '$lib/utils/functions/translations';
   import { aiProviderApi } from '../api/ai-provider.svelte';
   import type { OrgAiProviderSettings } from '../utils/types';
@@ -36,10 +36,18 @@
   /** Whether the selected provider supports custom baseURL / model. */
   const showCustomFields = $derived(provider === 'openai' || provider === 'deepseek');
 
-  onMount(async () => {
-    await aiProviderApi.fetchSettings();
-    applySettings(aiProviderApi.settings);
-    initialized = true;
+  // Guard: only fetch settings once the org context is available.
+  // The API client reads currentOrg.id for the cio-org-id header;
+  // calling fetchSettings before org init causes ORG_ID_REQUIRED errors.
+  let initialisedOnce = false;
+  $effect(() => {
+    if (!$currentOrg.id || initialisedOnce) return;
+    initialisedOnce = true;
+
+    aiProviderApi.fetchSettings().then(() => {
+      applySettings(aiProviderApi.settings);
+      initialized = true;
+    });
   });
 
   async function handleSave() {
