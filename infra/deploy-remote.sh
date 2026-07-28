@@ -42,7 +42,8 @@ while [[ $# -gt 0 ]]; do
     -h|--help)
       echo "Usage: $0 [--build] [--yes]"
       echo "  --build  Build TypeScript on the VPS (default: skip, expect rsynced artifacts)"
-      echo "  --yes    Non-interactive mode — skip all prompts, fail on missing deps"
+      echo "  --yes    Auto-install missing dependencies (no prompts). In CI (no TTY"
+      echo "           and no --yes), fail with explicit fix instructions instead."
       exit 0
       ;;
     *) echo "Error: Unknown option: $1"; exit 1 ;;
@@ -54,7 +55,7 @@ log()  { printf '\e[32m[deploy]\e[0m %s\n' "$*"; }
 warn() { printf '\e[33m[deploy]\e[0m %s\n' "$*" >&2; }
 err()  { printf '\e[31m[deploy]\e[0m %s\n' "$*" >&2; }
 
-# Detect if running interactively (SSH terminal) vs CI.
+# Detect if running interactively (SSH terminal) vs CI (no TTY).
 IS_INTERACTIVE=false
 [ -t 0 ] && IS_INTERACTIVE=true
 
@@ -75,63 +76,72 @@ log ""
 log "── Dependency check ─────────────────────────────────────"
 DEPS_OK=true
 
-# In --yes (non-interactive) mode: never install, print error + fix hint, fail.
-# In interactive mode: prompt [Y/n] to auto-install.
+# Three modes, determined by (--yes flag, TTY presence):
+#   ┌─────────────────────┬───────────┬──────────────────────────┐
+#   │ Mode                │ --yes?    │ TTY?                     │
+#   ├─────────────────────┼───────────┼──────────────────────────┤
+#   │ Interactive         │ no        │ yes  → prompt [Y/n]     │
+#   │ Auto (--yes)        │ yes       │ any  → auto-install      │
+#   │ CI (no TTY)         │ no        │ no   → error + fix hint  │
+#   └─────────────────────┴───────────┴──────────────────────────┘
 
-check_cmd() {
-  local name="$1" cmd="$2" version_cmd="${3:-$2 --version 2>/dev/null | head -1}"
-  if command -v "$cmd" &>/dev/null; then
-    local ver
-    ver=$(eval "$version_cmd" 2>/dev/null || echo "present")
-    log "  $name: $ver"
-    return 0
-  fi
-  # Not found — behavior differs by mode
-  if [ "$ASSUME_YES" = true ] || [ "$IS_INTERACTIVE" = false ]; then
-    err "  $name: NOT FOUND (required)"
-  else
-    warn "  $name: not found"
-  fi
-  DEPS_OK=false
-  return 1
-}
+# should_auto: true in --yes mode (user pre-approved everything)
+SHOULD_AUTO=false
+[ "$ASSUME_YES" = true ] && SHOULD_AUTO=true
 
-try_install() {
-  local name="$1" install_cmd="$2"
-  if [ "$ASSUME_YES" = true ] || [ "$IS_INTERACTIVE" = false ]; then
-    # Non-interactive mode: print error with fix hint, don't install
-    err "  Fix: $install_cmd"
+# should_prompt: true only when interactive AND no --yes
+SHOULD_PROMPT=false
+[ "$IS_INTERACTIVE" = true ] && [ "$ASSUME_YES" = false ] && SHOULD_PROMPT=true
+
+# Helper: attempt action if prompt accepted or --yes is set.
+# Returns 0 if action ran (or wasn't needed), 1 if skipped.
+try_or_prompt() {
+  local label="$1"   # human-readable name for messages
+  local action="$2"  # shell command to run
+
+  if [ "$SHOULD_AUTO" = true ]; then
+    log "  $label: installing..."
+    eval "$action" && return 0
+    err "  $label: auto-install failed"
     return 1
   fi
-  if confirm "  Install $name?"; then
-    eval "$install_cmd" && log "  $name: installed" && return 0
-    warn "  $name: installation failed — continuing anyway"
-    return 1
+
+  if [ "$SHOULD_PROMPT" = true ]; then
+    if confirm "  Install/start $label?"; then
+      eval "$action" && return 0
+      warn "  $label: installation failed — continuing anyway"
+      return 1
+    fi
+    return 1  # user declined
   fi
+
+  # CI mode (no TTY, no --yes): cannot prompt, cannot auto-install.
+  err "  $label: needed but unavailable"
+  err "  Fix it and re-run, or pass --yes to auto-install."
   return 1
 }
 
 # Node
-if check_cmd "Node" node "node -v | head -1"; then
+if command -v node &>/dev/null; then
   NODE_VER=$(node -v)
   EXPECTED=$(cat "$APP_DIR/.nvmrc" 2>/dev/null || echo "v20.19.3")
-  log "         (repo expects $EXPECTED)"
+  log "  Node:     $NODE_VER (repo expects $EXPECTED)"
 else
-  try_install "Node 20" 'curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash - && sudo apt-get install -y nodejs' && DEPS_OK=true
+  try_or_prompt "Node 20" 'curl -fsSL https://deb.nodesource.com/setup_20.x | sudo bash - && sudo apt-get install -y nodejs' && DEPS_OK=true
 fi
 
 # pnpm
-if check_cmd "pnpm" pnpm "pnpm -v | head -1"; then
-  :
+if command -v pnpm &>/dev/null; then
+  log "  pnpm:     $(pnpm -v)"
 else
-  try_install "pnpm" 'sudo npm install -g pnpm@10.19.0' && DEPS_OK=true
+  try_or_prompt "pnpm" 'sudo npm install -g pnpm@10.19.0' && DEPS_OK=true
 fi
 
 # PM2
-if check_cmd "PM2" pm2 "pm2 --version | head -1"; then
-  :
+if command -v pm2 &>/dev/null; then
+  log "  PM2:      $(pm2 --version)"
 else
-  try_install "PM2" 'sudo npm install -g pm2' && DEPS_OK=true
+  try_or_prompt "PM2" 'sudo npm install -g pm2' && DEPS_OK=true
 fi
 
 # PostgreSQL — check native first, then Docker
@@ -142,25 +152,20 @@ if command -v psql &>/dev/null && pg_isready -h 127.0.0.1 &>/dev/null 2>&1; then
 elif docker ps --filter name=cio-postgres --format '{{.Names}}' 2>/dev/null | grep -q cio-postgres; then
   log "  Postgres: running (Docker container cio-postgres)"
   PG_OK=true
-elif [ "$ASSUME_YES" = true ] || [ "$IS_INTERACTIVE" = false ]; then
-  err "  Postgres: NOT RUNNING (required)"
-  err "  Fix: docker run -d --name cio-postgres -e POSTGRES_DB=classroomio -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 127.0.0.1:5432:5432 postgres:16-alpine"
-  DEPS_OK=false
 else
-  warn "  Postgres: not running"
-  if confirm "  Start Postgres 16 in Docker? (persistent volume)"; then
-    docker run -d --name cio-postgres \
-      -e POSTGRES_DB=classroomio \
-      -e POSTGRES_USER=postgres \
-      -e POSTGRES_PASSWORD=postgres \
-      -p 127.0.0.1:5432:5432 \
-      --restart unless-stopped \
-      postgres:16-alpine 2>/dev/null
-    log "  Postgres: started (user=postgres, password=postgres, db=classroomio)"
+  PG_CMD='docker run -d --name cio-postgres \
+    -e POSTGRES_DB=classroomio \
+    -e POSTGRES_USER=postgres \
+    -e POSTGRES_PASSWORD=postgres \
+    -p 127.0.0.1:5432:5432 \
+    --restart unless-stopped \
+    postgres:16-alpine 2>/dev/null'
+  if try_or_prompt "Postgres 16 (Docker)" "$PG_CMD"; then
+    PG_OK=true
+    # Update .env if DATABASE_URL is still empty
     if grep -q '^DATABASE_URL=""$' apps/api/.env 2>/dev/null; then
       sed -i 's|^DATABASE_URL=""$|DATABASE_URL="postgresql://postgres:postgres@127.0.0.1:5432/classroomio"|' apps/api/.env
     fi
-    PG_OK=true
   fi
 fi
 
@@ -172,55 +177,41 @@ if redis-cli ping &>/dev/null 2>&1; then
 elif docker ps --filter name=cio-redis --format '{{.Names}}' 2>/dev/null | grep -q cio-redis; then
   log "  Redis:    running (Docker container cio-redis)"
   REDIS_OK=true
-elif [ "$ASSUME_YES" = true ] || [ "$IS_INTERACTIVE" = false ]; then
-  err "  Redis: NOT RUNNING (required)"
-  err "  Fix: docker run -d --name cio-redis -p 127.0.0.1:6379:6379 redis:7-alpine"
-  DEPS_OK=false
 else
-  warn "  Redis:    not running"
-  if confirm "  Start Redis 7 in Docker? (persistent volume)"; then
-    docker run -d --name cio-redis \
-      -p 127.0.0.1:6379:6379 \
-      --restart unless-stopped \
-      redis:7-alpine 2>/dev/null
-    log "  Redis:    started"
+  REDIS_CMD='docker run -d --name cio-redis \
+    -p 127.0.0.1:6379:6379 \
+    --restart unless-stopped \
+    redis:7-alpine 2>/dev/null'
+  if try_or_prompt "Redis 7 (Docker)" "$REDIS_CMD"; then
+    REDIS_OK=true
     if grep -q '^REDIS_URL=""$' apps/api/.env 2>/dev/null; then
       sed -i 's|^REDIS_URL=""$|REDIS_URL="redis://127.0.0.1:6379"|' apps/api/.env
     fi
-    REDIS_OK=true
   fi
 fi
 
-# Docker (needed for MinIO only)
+# Docker (needed for MinIO)
 if command -v docker &>/dev/null; then
   log "  Docker:   $(docker --version 2>/dev/null | cut -d' ' -f3 | tr -d ',')"
 else
-  warn "  Docker:   not found (needed for MinIO object storage)"
-  warn "  Fix: curl -fsSL https://get.docker.com | sh"
+  err "  Docker:   not found (REQUIRED for MinIO object storage)"
+  err "  Fix: curl -fsSL https://get.docker.com | sh"
+  DEPS_OK=false
 fi
 
 # ffmpeg (optional — jobs worker media processing)
 if command -v ffmpeg &>/dev/null; then
   log "  ffmpeg:   $(ffmpeg -version 2>/dev/null | head -1 | cut -d' ' -f1-3)"
 else
-  warn "  ffmpeg:   not found (media worker optional — thumbnails, transcoding)"
-  try_install "ffmpeg" "sudo apt-get install -y ffmpeg"
+  try_or_prompt "ffmpeg" 'sudo apt-get install -y ffmpeg'
 fi
 
 echo ""
 
 # Fail if critical deps are missing
-if [ "$PG_OK" = false ]; then
-  err "FATAL: Postgres is not running. Cannot run database migrations."
-  DEPS_OK=false
-fi
-if [ "$REDIS_OK" = false ]; then
-  err "FATAL: Redis is not running. The jobs worker and session store require it."
-  DEPS_OK=false
-fi
-if [ "$DEPS_OK" = false ]; then
-  exit 1
-fi
+[ "$PG_OK" = true ] || { err "FATAL: Postgres is not running."; DEPS_OK=false; }
+[ "$REDIS_OK" = true ] || { err "FATAL: Redis is not running."; DEPS_OK=false; }
+[ "$DEPS_OK" = true ] || { err "Fix missing dependencies and re-run."; exit 1; }
 
 # ── 0b. .env validation ────────────────────────────────────────────────────
 log "── .env validation ─────────────────────────────────────"
@@ -295,19 +286,37 @@ log "[4] Running database setup (schema migrations)"
 
 # ── 5. MinIO (Docker) ───────────────────────────────────────────────────────
 log "[5] Ensuring MinIO is running"
-# MinIO is the only service that still runs in Docker. We start it directly
-# with docker run (no compose file needed).
+# MinIO is REQUIRED — without it, all uploads, media, and OG images fail.
+# It's the only service that still runs in Docker.
+
+# Read credentials from .env, or provision fresh ones if missing
 MINIO_U=$(grep -E '^OBJECT_STORAGE_ACCESS_KEY_ID=' apps/api/.env 2>/dev/null | cut -d= -f2-)
 MINIO_P=$(grep -E '^OBJECT_STORAGE_SECRET_ACCESS_KEY=' apps/api/.env 2>/dev/null | cut -d= -f2-)
 
 if [ -z "$MINIO_U" ] || [ -z "$MINIO_P" ]; then
-  warn "  MinIO credentials not in apps/api/.env (OBJECT_STORAGE_ACCESS_KEY_ID / _SECRET_ACCESS_KEY)"
-  warn "  Skipping MinIO setup — uploads and media will fail until configured"
-elif docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
+  log "  MinIO credentials not in apps/api/.env — provisioning fresh ones..."
+  MINIO_U="cio-$(openssl rand -hex 16)"
+  MINIO_P=$(openssl rand -hex 32)
+  # Persist to .env so future runs reuse them
+  upsert_env() { local k="$1" v="$2"; grep -q "^${k}=" apps/api/.env && sed -i "s|^${k}=.*|${k}=${v}|" apps/api/.env || echo "${k}=${v}" >> apps/api/.env; }
+  upsert_env MINIO_ROOT_USER "$MINIO_U"
+  upsert_env MINIO_ROOT_PASSWORD "$MINIO_P"
+  upsert_env OBJECT_STORAGE_ACCESS_KEY_ID "$MINIO_U"
+  upsert_env OBJECT_STORAGE_SECRET_ACCESS_KEY "$MINIO_P"
+  # Keep minio.env in sync (minio-compose.yaml may use it if present)
+  cat > infra/minio.env <<EOF
+MINIO_ROOT_USER=${MINIO_U}
+MINIO_ROOT_PASSWORD=${MINIO_P}
+MINIO_MEM_LIMIT=256m
+EOF
+  chmod 600 infra/minio.env
+  log "  Credentials written to apps/api/.env and infra/minio.env"
+fi
+
+if docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
   log "  MinIO:    already running (container cio-minio)"
 else
   log "  MinIO:    starting..."
-  # Ensure Docker volume exists
   docker volume inspect cio-minio-data &>/dev/null || docker volume create cio-minio-data >/dev/null
   docker run -d --name cio-minio \
     -p 127.0.0.1:9000:9000 \
@@ -316,9 +325,13 @@ else
     -e MINIO_ROOT_PASSWORD="$MINIO_P" \
     -v cio-minio-data:/data \
     --restart unless-stopped \
-    minio/minio:latest server /data --console-address ":9001" 2>/dev/null
+    minio/minio:latest server /data --console-address ":9001" 2>/dev/null || {
+    err "  MinIO container failed to start. Check: docker logs cio-minio"
+    err "  Without MinIO, uploads, media, and OG images will not work."
+    exit 1
+  }
   log "  MinIO:    started (API :9000, console :9001)"
-  # Create required buckets
+  # Create required buckets (idempotent)
   sleep 3
   docker run --rm --network host \
     -e MINIO_ROOT_USER="$MINIO_U" \
@@ -329,7 +342,7 @@ else
       && mc mb local/documents --ignore-existing \
       && mc mb local/media --ignore-existing \
       && mc anonymous set download local/media" >/dev/null 2>&1 || true
-  log "  MinIO:    buckets created (videos, documents, media)"
+  log "  MinIO:    buckets ready (videos, documents, media)"
 fi
 
 # ── 6. PM2 reload ───────────────────────────────────────────────────────────
