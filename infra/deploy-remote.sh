@@ -388,10 +388,9 @@ EOF
       log "  MinIO:    buckets ready (videos, documents, media)"
     fi
 
-  # ── Detect existing Docker MinIO (port conflict safety check) ──────
+  # ── Existing Docker MinIO detected — use as-is ─────────────────────
   elif docker ps --filter name=cio-minio --format '{{.Names}}' 2>/dev/null | grep -q cio-minio; then
-    warn "  MinIO:    existing Docker container 'cio-minio' detected — will not start native binary"
-    warn "  Stop it with 'docker rm -f cio-minio' to switch to native PM2"
+    log "  MinIO:    already running via Docker (container cio-minio)"
 
   else
     err "  No way to run MinIO: binary download failed and no Docker container exists."
