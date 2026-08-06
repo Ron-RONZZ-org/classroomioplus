@@ -20,6 +20,12 @@ export interface TChangeEmailForm {
   callbackURL?: string;
 }
 
+export interface TChangePasswordForm {
+  currentPassword: string;
+  newPassword: string;
+  confirmPassword: string;
+}
+
 export class ProfileApi extends BaseApiWithErrors {
   private validateForm(fields: TProfileUpdateForm): boolean {
     const validationData = {
@@ -165,6 +171,47 @@ export class ProfileApi extends BaseApiWithErrors {
       const message = error instanceof Error ? error.message : `${error}`;
 
       this.errors.email = message;
+      snackbar.error(`${t.get('snackbar.update_failed')}: ${message}`);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  /**
+   * Change the account password via Better Auth's email/password plugin.
+   * Requires the current password; a success also revokes other sessions
+   * so a leaked session can't outlive the rotation.
+   */
+  async changePassword(fields: TChangePasswordForm) {
+    if (fields.newPassword !== fields.confirmPassword) {
+      this.errors.confirmPassword = t.get('settings.profile.password.change_password.confirm_mismatch');
+      return;
+    }
+
+    if (fields.newPassword.length < 8) {
+      this.errors.newPassword = t.get('validations.generic.too_small', { minimum: '8' });
+      return;
+    }
+
+    try {
+      this.isLoading = true;
+      this.errors = {};
+      this.success = false;
+
+      const { error } = await authClient.changePassword({
+        currentPassword: fields.currentPassword,
+        newPassword: fields.newPassword,
+        revokeOtherSessions: true
+      });
+
+      if (error) throw new Error(error.message);
+
+      this.success = true;
+      snackbar.success('snackbar.profile.password_changed');
+    } catch (error) {
+      console.error(error);
+      const message = error instanceof Error ? error.message : `${error}`;
+      this.errors.currentPassword = message;
       snackbar.error(`${t.get('snackbar.update_failed')}: ${message}`);
     } finally {
       this.isLoading = false;

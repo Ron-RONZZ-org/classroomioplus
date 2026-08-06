@@ -454,6 +454,9 @@
         "post_created": "Сообщение успешно создано",
         "post_updated": "Сообщение успешно обновлено"
       }
+    },
+    "profile": {
+      "password_changed": "Password changed"
     }
   },
   "explore": {
@@ -3460,7 +3463,21 @@
         "accepted": "Принято:",
         "validation_error": "Размер файла превышает максимальный предел:"
       },
-      "page_subtitle": "Ваше имя, эл. почта и то, как вы отображаетесь в ClassroomIO."
+      "page_subtitle": "Ваше имя, эл. почта и то, как вы отображаетесь в ClassroomIO.",
+      "password": {
+        "change_password": {
+          "heading": "Change Password",
+          "page_subtitle": "Update your password to keep your account secure.",
+          "current_password": "Current Password",
+          "new_password": "New Password",
+          "confirm_password": "Confirm New Password",
+          "update": "Update Password",
+          "cancel": "Cancel",
+          "change": "Change Password",
+          "success": "Your password has been updated.",
+          "confirm_mismatch": "New password and confirmation do not match."
+        }
+      }
     },
     "tabs": {
       "profile_tab": "Профиль",

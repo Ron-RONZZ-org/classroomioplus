@@ -454,6 +454,9 @@
         "post_created": "Publicación creada exitosamente",
         "post_updated": "Publicación actualizada exitosamente"
       }
+    },
+    "profile": {
+      "password_changed": "Password changed"
     }
   },
   "explore": {
@@ -3460,7 +3463,21 @@
         "accepted": "Aceptado:",
         "validation_error": "El tamaño del archivo excede el límite máximo:"
       },
-      "page_subtitle": "Tu nombre, correo electrónico y cómo apareces donde trabajas en ClassroomIO."
+      "page_subtitle": "Tu nombre, correo electrónico y cómo apareces donde trabajas en ClassroomIO.",
+      "password": {
+        "change_password": {
+          "heading": "Change Password",
+          "page_subtitle": "Update your password to keep your account secure.",
+          "current_password": "Current Password",
+          "new_password": "New Password",
+          "confirm_password": "Confirm New Password",
+          "update": "Update Password",
+          "cancel": "Cancel",
+          "change": "Change Password",
+          "success": "Your password has been updated.",
+          "confirm_mismatch": "New password and confirmation do not match."
+        }
+      }
     },
     "tabs": {
       "profile_tab": "Perfil",

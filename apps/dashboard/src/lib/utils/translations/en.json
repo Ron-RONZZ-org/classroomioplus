@@ -435,7 +435,21 @@
       },
       "heading": "Profile",
       "update_profile": "Update Profile",
-      "logout": "Log out"
+      "logout": "Log out",
+      "password": {
+        "change_password": {
+          "heading": "Change Password",
+          "page_subtitle": "Update your password to keep your account secure.",
+          "current_password": "Current Password",
+          "new_password": "New Password",
+          "confirm_password": "Confirm New Password",
+          "update": "Update Password",
+          "cancel": "Cancel",
+          "change": "Change Password",
+          "success": "Your password has been updated.",
+          "confirm_mismatch": "New password and confirmation do not match."
+        }
+      }
     },
     "notifications": {
       "heading": "Notifications",
@@ -4430,6 +4444,9 @@
           "cohort_newsfeed_comment_not_found": "That comment could not be found."
         }
       }
+    },
+    "profile": {
+      "password_changed": "Password changed"
     }
   },
   "specialization": {
