@@ -454,6 +454,9 @@
         "post_created": "Bài viết được tạo thành công",
         "post_updated": "Đã cập nhật bài đăng thành công"
       }
+    },
+    "profile": {
+      "password_changed": "Password changed"
     }
   },
   "explore": {
@@ -3460,7 +3463,21 @@
         "accepted": "Đã chấp nhận:",
         "validation_error": "Kích thước tệp vượt quá giới hạn tối đa:"
       },
-      "page_subtitle": "Tên, email và cách bạn xuất hiện ở mọi nơi bạn làm việc trong ClassroomIO."
+      "page_subtitle": "Tên, email và cách bạn xuất hiện ở mọi nơi bạn làm việc trong ClassroomIO.",
+      "password": {
+        "change_password": {
+          "heading": "Change Password",
+          "page_subtitle": "Update your password to keep your account secure.",
+          "current_password": "Current Password",
+          "new_password": "New Password",
+          "confirm_password": "Confirm New Password",
+          "update": "Update Password",
+          "cancel": "Cancel",
+          "change": "Change Password",
+          "success": "Your password has been updated.",
+          "confirm_mismatch": "New password and confirmation do not match."
+        }
+      }
     },
     "tabs": {
       "profile_tab": "Hồ sơ",
