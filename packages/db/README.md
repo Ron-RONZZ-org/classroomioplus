@@ -129,13 +129,9 @@ pnpm seed --organizations --organization-members --organization-plan
 
 ### Demo accounts
 
-| Email                            | Password | Role    | Plan          |
-| -------------------------------- | -------- | ------- | ------------- |
-| `admin@test.com`                 | `123456` | Admin   | Basic (free)  |
-| `student@test.com`               | `123456` | Student | Basic (free)  |
-| `enterprise@test.com`            | `123456` | Admin   | Enterprise    |
-| `enterprise-student@test.com`    | `123456` | Student | Enterprise    |
-| `early-adopter@test.com`         | `123456` | Admin   | Early Adopter |
-| `early-adopter-student@test.com` | `123456` | Student | Early Adopter |
+| Email            | Password | Role    | Plan        |
+| ---------------- | -------- | ------- | ----------- |
+| `admin@test.com` | `123456` | Admin   | Enterprise  |
+| `student@test.com` | `123456` | Student | Enterprise |
 
-Mock user credentials are defined in `users.json`. The demo accounts above use the password `123456`.
+Mock user credentials are defined in `users.json`. The demo accounts above use the password `123456`. Self-hosted mode assigns the `ENTERPRISE` plan to the seeded org (mirroring onboarding).

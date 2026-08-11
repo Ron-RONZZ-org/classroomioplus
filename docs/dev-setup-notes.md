@@ -135,8 +135,7 @@ enough — developing costs nothing.
 Seeded accounts use password **`123456`** (verified against the seed's bcrypt hashes):
 
 - `admin@test.com` / `123456`  (admin — "Elon Gates")
-- `enterprise@test.com`, `early-adopter@test.com`, and the `*-student@test.com`
-  accounts — also `123456`
+- `student@test.com` / `123456`  (student)
 
 > `test@test.com`'s seed hash doesn't match common passwords — use `admin@test.com`.
 

@@ -806,13 +806,11 @@ Do not use `pnpm dev` (it trips turbo's concurrency cap). Build shared package `
 
 For multi-tenant testing during development, you can still demonstrate org isolation by visiting each org's public catalog via the `?org=<siteName>` query param (simulates subdomain routing). See `docs/feature-audit.md` §5 for the full feature map.
 
-### Seeded tenants (good for multi-tenant testing)
-The seed (`packages/db/src/utils/seed/organizationmember.ts`) creates **three independent organizations**, each with its own admin + student. All accounts use password `123456`:
+### Seeded tenant (single org)
+The seed (`packages/db/src/scripts/seed.ts`) creates **one organization** with an admin + student. All accounts use password `123456`:
 
 | Org (siteName) | Admin | Student | Example courses |
 |---|---|---|---|
 | Udemy Test (`udemy-test`) | `admin@test.com` | `student@test.com` | Modern Web Development with React; Getting started with MVC; Data Science with Python and Pandas |
-| Coursera Test (`coursera-test`) | `enterprise@test.com` | `enterprise-student@test.com` | SOC 2 Security Basics; HIPAA Awareness 2026 |
-| Skillshare Test (`skillshare-test`) | `early-adopter@test.com` | `early-adopter-student@test.com` | Product Management Fundamentals |
 
-In cloud mode you can demonstrate tenant isolation on the single local instance by visiting each org's public catalog via the `?org=<siteName>` param, e.g. `http://localhost:5173/?org=coursera-test` vs `?org=udemy-test` vs `?org=skillshare-test` — each renders its own branded catalog and courses. (Note: a user enrolled in courses across orgs becomes a member of multiple tenants, so after login the dashboard may open whichever org that user most recently used.)
+The org also gets a `selfhosted` `ENTERPRISE` plan row, mirroring what onboarding assigns. (`test@test.com` is seeded too — used by E2E flows.)
