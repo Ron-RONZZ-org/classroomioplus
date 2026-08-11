@@ -526,13 +526,6 @@ Tie everything together by running through a complete teacher → student loop:
 |---|---|---|---|
 | Admin | `admin@test.com` | `123456` | Udemy Test (`udemy-test`) |
 | Student | `student@test.com` | `123456` | Udemy Test (`udemy-test`) |
-| Admin | `enterprise@test.com` | `123456` | Coursera Test (`coursera-test`) |
-| Student | `enterprise-student@test.com` | `123456` | Coursera Test (`coursera-test`) |
-| Admin | `early-adopter@test.com` | `123456` | Skillshare Test (`skillshare-test`) |
-| Student | `early-adopter-student@test.com` | `123456` | Skillshare Test (`skillshare-test`) |
-
-To visit a specific org's public catalog: `http://localhost:5173/?org=<siteName>`
-(e.g. `?org=coursera-test`).
 
 ---
 
