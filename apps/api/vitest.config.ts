@@ -19,6 +19,8 @@ export default defineConfig({
       alias('utils'),
       alias('db'),
       alias('ai-assistant'),
+      alias('question-types'),
+      alias('email'),
       alias('jobs'),
       // TypeScript path alias used inside @cio/db
       { find: /^@db\b/, replacement: path.resolve(__dirname, '../../packages/db/src') }

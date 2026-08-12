@@ -22,6 +22,7 @@ export default defineConfig({
       alias('analytics'),
       alias('certificates'),
       alias('email'),
+      alias('question-types'),
       alias('jobs'),
       // TypeScript path alias used inside @cio/db
       { find: /^@db\b/, replacement: DB_SRC }
