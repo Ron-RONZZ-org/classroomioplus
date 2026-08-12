@@ -1,126 +1,112 @@
-import { AIProvider, type AIProviderConfig, type OrgAiProviderSettings } from '@cio/ai-assistant';
+import {
+  AIProvider,
+  DEFAULT_PROVIDER_PROFILES,
+  type AiProviderProfile,
+  type AIProviderConfig
+} from '@cio/ai-assistant';
 import { getProviderConfigForProvider } from '@cio/ai-assistant/providers';
 import { getOrgAiProviderSettings, updateOrgAiProviderSettings } from '@cio/db/queries/agent';
 
 import { AppError } from '@api/utils/errors';
 
-/**
- * Resolves the effective AI provider config for an org.
- *
- * Merge order (later overrides):
- *   env-var defaults  →  org-level settings (settings.aiProvider)
- *
- * When no org override is set, returns env-var-based config.
- */
-export async function getResolvedOrgAiProvider(orgId: string): Promise<OrgAiProviderSettings | null> {
-  const orgOverride = await getOrgAiProviderSettings(orgId);
-  return orgOverride ?? null;
+export interface ResolvedOrgAiProvider {
+  /** Effective profiles: persisted org profiles, or the built-in defaults when none are stored. */
+  profiles: AiProviderProfile[];
+  /** True when the returned profiles are the computed defaults (nothing persisted yet). */
+  isDefault: boolean;
+}
+
+/** Strips empty strings and normalizes profile fields for storage. */
+function normalizeProfile(profile: AiProviderProfile): AiProviderProfile {
+  return {
+    ...profile,
+    baseURL: profile.baseURL?.trim() || undefined,
+    apiKey: profile.apiKey?.trim() || undefined,
+    model: profile.model?.trim() || undefined
+  };
 }
 
 /**
- * Updates the org-level AI provider settings.
+ * Resolves the effective AI provider profiles for an org.
+ *
+ * Returns the persisted profiles when set, otherwise the built-in default
+ * profiles (the previously hardcoded constants, now a modifiable default
+ * state). Env vars still supply API keys when a profile has none.
+ */
+export async function getResolvedOrgAiProvider(orgId: string): Promise<ResolvedOrgAiProvider> {
+  const stored = await getOrgAiProviderSettings(orgId);
+
+  if (stored?.profiles?.length) {
+    return { profiles: stored.profiles, isDefault: false };
+  }
+
+  return { profiles: DEFAULT_PROVIDER_PROFILES, isDefault: true };
+}
+
+/**
+ * Updates the org-level AI provider profiles.
+ *
+ * Accepts either a full replacement (`{ profiles }`) or a reset
+ * (`{ reset: true }`) that clears the stored profiles so the system falls
+ * back to the built-in defaults + env vars.
  */
 export async function updateOrgAiProviderService(
   orgId: string,
-  patch: Partial<OrgAiProviderSettings>
-): Promise<OrgAiProviderSettings> {
-  // When provider is an empty string, the caller wants to clear the override.
-  // Pass null to the DB layer so it removes the aiProvider key entirely.
-  const providerVal = patch.provider as string;
-  if (providerVal === '') {
-    const updated = await updateOrgAiProviderSettings(orgId, null);
-    if (!updated) {
-      throw new AppError('Organization not found', 'ORGANIZATION_NOT_FOUND', 404);
-    }
-    return updated;
+  patch: { profiles?: AiProviderProfile[]; reset?: boolean }
+): Promise<ResolvedOrgAiProvider> {
+  if (patch.reset) {
+    await updateOrgAiProviderSettings(orgId, null);
+    return { profiles: DEFAULT_PROVIDER_PROFILES, isDefault: true };
   }
 
-  // Normalize empty strings to undefined
-  const clean: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(patch)) {
-    if (value === '') {
-      clean[key] = undefined;
-    } else {
-      clean[key] = value;
-    }
-  }
-  const normalizedPatch = clean as Partial<OrgAiProviderSettings> & { provider: string };
+  const profiles = (patch.profiles ?? []).map(normalizeProfile);
 
-  const updated = await updateOrgAiProviderSettings(orgId, normalizedPatch);
-
-  if (!updated) {
+  const stored = await updateOrgAiProviderSettings(orgId, profiles);
+  if (!stored) {
     throw new AppError('Organization not found', 'ORGANIZATION_NOT_FOUND', 404);
   }
 
-  return updated;
-}
-
-/**
- * Builds an AIProviderConfig from org-level provider settings.
- * Falls back to env-var defaults when org settings are missing fields.
- */
-export function buildProviderConfigFromOrg(
-  orgSettings: OrgAiProviderSettings,
-  modelOverride?: string
-): AIProviderConfig {
-  const provider = orgSettings.provider as AIProvider;
-  const apiKey = orgSettings.apiKey || process.env[getApiKeyEnvVar(provider)] || '';
-  const baseURL = orgSettings.baseURL || undefined;
-  const model = modelOverride || orgSettings.model || undefined;
-
-  if (!apiKey) {
-    throw new AppError(
-      `AI provider "${provider}" has no API key configured. Set it in org settings or the ${getApiKeyEnvVar(provider)} env var.`,
-      'AI_PROVIDER_NOT_CONFIGURED',
-      503
-    );
-  }
-
-  return { provider, apiKey, baseURL, model };
-}
-
-function getApiKeyEnvVar(provider: AIProvider): string {
-  const map: Record<AIProvider, string> = {
-    [AIProvider.OPENAI]: 'OPENAI_API_KEY',
-    [AIProvider.ANTHROPIC]: 'ANTHROPIC_API_KEY',
-    [AIProvider.GOOGLE]: 'GOOGLE_API_KEY',
-    [AIProvider.MOONSHOT]: 'MOONSHOT_API_KEY',
-    [AIProvider.DEEPSEEK]: 'DEEPSEEK_API_KEY'
-  };
-  return map[provider] || 'OPENAI_API_KEY';
+  return { profiles: stored.profiles, isDefault: false };
 }
 
 /**
  * Resolves the provider config for a specific provider, merging org-level
- * overrides with env-var defaults.
+ * profiles with env-var defaults.
  *
- * Precedence: org settings.apiKey → env var → null
- *             org settings.baseURL → OPENAI_BASE_URL env → undefined
- *             org settings.model → model param → undefined
+ * Precedence: profile apiKey → env var → null
+ *             profile baseURL → provider default (createModel fallback)
+ *             model param → profile model → env default
  *
- * Returns null when neither org settings nor env var has an API key.
+ * When several profiles share a provider type, the one flagged `isDefault`
+ * wins; otherwise the first match in list order. Returns null when neither
+ * the profile nor the env var has an API key.
  */
 export async function getOrgAwareProviderConfig(
   orgId: string,
   provider: AIProvider,
   model?: string
 ): Promise<AIProviderConfig | null> {
-  const orgSettings = await getOrgAiProviderSettings(orgId);
-  const envConfig = getProviderConfigForProvider(provider);
+  const stored = await getOrgAiProviderSettings(orgId);
+  const profiles = stored?.profiles?.length ? stored.profiles : DEFAULT_PROVIDER_PROFILES;
 
-  // If org has no override for this provider, fall back to env var
-  if (!orgSettings || orgSettings.provider !== provider) {
+  const envConfig = getProviderConfigForProvider(provider);
+  const match =
+    profiles.find((profile) => profile.provider === provider && profile.isDefault) ??
+    profiles.find((profile) => profile.provider === provider);
+
+  // No profile for this provider — fall back to env var.
+  if (!match) {
     if (!envConfig) return null;
     return { ...envConfig, model: model ?? envConfig.model };
   }
 
-  const apiKey = orgSettings.apiKey || envConfig?.apiKey || '';
+  const apiKey = match.apiKey || envConfig?.apiKey || '';
   if (!apiKey) return null;
 
   return {
-    provider: provider as AIProvider,
+    provider,
     apiKey,
-    baseURL: orgSettings.baseURL || undefined,
-    model: model ?? orgSettings.model ?? envConfig?.model ?? undefined
+    baseURL: match.baseURL || undefined,
+    model: model ?? match.model ?? envConfig?.model ?? undefined
   };
 }

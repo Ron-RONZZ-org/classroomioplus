@@ -18,6 +18,7 @@ export {
 
 export type {
   AIProviderConfig,
+  AiProviderProfile,
   OrgAiProviderSettings,
   AgentContext,
   CoursePlan,
@@ -31,7 +32,14 @@ export type {
 } from './types';
 
 // Providers
-export { createModel, getProviderConfigForProvider, pickAnyConfiguredProvider } from './providers';
+export {
+  createModel,
+  getProviderConfigForProvider,
+  pickAnyConfiguredProvider,
+  DEFAULT_PROVIDER_PROFILES,
+  DEFAULT_MODELS,
+  DEEPSEEK_BASE_URL
+} from './providers';
 
 // Tools
 export { getToolSchemas } from './tools';

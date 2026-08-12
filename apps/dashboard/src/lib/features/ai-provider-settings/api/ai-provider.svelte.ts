@@ -24,13 +24,36 @@ class AiProviderApi extends BaseApiWithErrors {
     }
   }
 
-  async updateSettings(patch: Record<string, unknown>) {
+  async updateSettings(profiles: OrgAiProviderSettings['profiles']) {
     this.saving = true;
 
     try {
       await this.execute<(typeof classroomio.organization)['ai-provider']['$put']>({
-        requestFn: () => classroomio.organization['ai-provider'].$put({ json: patch }),
+        requestFn: () => classroomio.organization['ai-provider'].$put({ json: { profiles } }),
         logContext: 'updating AI provider settings',
+        onSuccess: (response) => {
+          this.settings = response.data;
+          this.errors = {};
+          snackbar.success('snackbar.ai_provider.saved');
+        },
+        onError: (result) => {
+          if (typeof result !== 'string' && 'field' in result && result.field) {
+            this.errors[result.field] = result.error;
+          }
+        }
+      });
+    } finally {
+      this.saving = false;
+    }
+  }
+
+  async resetSettings() {
+    this.saving = true;
+
+    try {
+      await this.execute<(typeof classroomio.organization)['ai-provider']['$put']>({
+        requestFn: () => classroomio.organization['ai-provider'].$put({ json: { reset: true } }),
+        logContext: 'resetting AI provider settings',
         onSuccess: (response) => {
           this.settings = response.data;
           this.errors = {};

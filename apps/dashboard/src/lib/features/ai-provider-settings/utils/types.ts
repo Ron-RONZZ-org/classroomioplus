@@ -5,3 +5,4 @@ export type UpdateOrgAiProviderRequest = (typeof classroomio.organization)['ai-p
 
 export type GetOrgAiProviderSuccess = Extract<InferResponseType<GetOrgAiProviderRequest>, { success: true }>;
 export type OrgAiProviderSettings = GetOrgAiProviderSuccess['data'];
+export type AiProviderProfile = OrgAiProviderSettings['profiles'][number];

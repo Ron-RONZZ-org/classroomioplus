@@ -3,20 +3,60 @@ import { createAnthropic } from '@ai-sdk/anthropic';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createMoonshotAI } from '@ai-sdk/moonshotai';
 import type { LanguageModel } from 'ai';
-import { AIProvider, type AIProviderConfig } from '../types';
+import { AIProvider, type AIProviderConfig, type AiProviderProfile } from '../types';
 
 /**
  * Default base URL for DeepSeek's OpenAI-compatible API.
  */
-const DEEPSEEK_BASE_URL = 'https://api.deepseek.com/v1';
+export const DEEPSEEK_BASE_URL = 'https://api.deepseek.com/v1';
 
-const DEFAULT_MODELS: Record<AIProvider, string> = {
+export const DEFAULT_MODELS: Record<AIProvider, string> = {
   [AIProvider.OPENAI]: 'gpt-5.4-mini',
   [AIProvider.ANTHROPIC]: 'claude-sonnet-4-20250514',
   [AIProvider.GOOGLE]: 'gemini-3.1-flash-lite',
   [AIProvider.MOONSHOT]: 'kimi-k2.6',
   [AIProvider.DEEPSEEK]: 'deepseek-chat'
 };
+
+/**
+ * The default provider profiles, built from the previously hardcoded
+ * constants. These become the editable "default state" shown in the
+ * AI provider settings page until an admin persists their own profiles.
+ */
+export const DEFAULT_PROVIDER_PROFILES: AiProviderProfile[] = [
+  {
+    id: 'google',
+    name: 'Google',
+    provider: AIProvider.GOOGLE,
+    model: DEFAULT_MODELS[AIProvider.GOOGLE],
+    isDefault: true
+  },
+  {
+    id: 'openai',
+    name: 'OpenAI',
+    provider: AIProvider.OPENAI,
+    model: DEFAULT_MODELS[AIProvider.OPENAI]
+  },
+  {
+    id: 'anthropic',
+    name: 'Anthropic',
+    provider: AIProvider.ANTHROPIC,
+    model: DEFAULT_MODELS[AIProvider.ANTHROPIC]
+  },
+  {
+    id: 'moonshot',
+    name: 'Moonshot',
+    provider: AIProvider.MOONSHOT,
+    model: DEFAULT_MODELS[AIProvider.MOONSHOT]
+  },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    provider: AIProvider.DEEPSEEK,
+    baseURL: DEEPSEEK_BASE_URL,
+    model: DEFAULT_MODELS[AIProvider.DEEPSEEK]
+  }
+];
 
 const PROVIDER_API_KEY_ENV: Record<AIProvider, string> = {
   [AIProvider.OPENAI]: 'OPENAI_API_KEY',
@@ -46,9 +86,10 @@ function resolveOpenAIBaseURL(config: AIProviderConfig): string | undefined {
  * Creates an AI SDK LanguageModel from provider configuration.
  * Normalizes all providers into a single interface for streamText().
  *
- * OpenAI-compatible providers (OpenAI, Moonshot, DeepSeek, custom) use
- * `createOpenAI()` with optional `baseURL`. Anthropic and Google use their
- * own SDK constructors.
+ * Every provider accepts an optional `baseURL`, so self-hosted instances can
+ * point any provider at a compatible endpoint (OpenAI-compatible proxies,
+ * gateway services, etc.). OpenAI-compatible providers (OpenAI, Moonshot,
+ * DeepSeek) fall back to `OPENAI_BASE_URL` / the DeepSeek default.
  */
 export function createModel(config: AIProviderConfig): LanguageModel {
   const modelName = config.model || DEFAULT_MODELS[config.provider];
@@ -61,15 +102,15 @@ export function createModel(config: AIProviderConfig): LanguageModel {
       return openai(modelName);
     }
     case AIProvider.ANTHROPIC: {
-      const anthropic = createAnthropic({ apiKey: config.apiKey });
+      const anthropic = createAnthropic({ apiKey: config.apiKey, baseURL: config.baseURL });
       return anthropic(modelName);
     }
     case AIProvider.GOOGLE: {
-      const google = createGoogleGenerativeAI({ apiKey: config.apiKey });
+      const google = createGoogleGenerativeAI({ apiKey: config.apiKey, baseURL: config.baseURL });
       return google(modelName);
     }
     case AIProvider.MOONSHOT: {
-      const moonshot = createMoonshotAI({ apiKey: config.apiKey });
+      const moonshot = createMoonshotAI({ apiKey: config.apiKey, baseURL: config.baseURL });
       return moonshot(modelName);
     }
     default:

@@ -12,7 +12,8 @@ import { getResolvedOrgAiProvider, updateOrgAiProviderService } from '@api/servi
  * Org-level AI provider configuration.
  *
  * GET /organization/ai-provider  — any org member can read the resolved config.
- * PUT /organization/ai-provider  — org admin only; sets the provider override.
+ * PUT /organization/ai-provider  — org admin only; replaces the profile list or
+ *                                  resets it to the built-in defaults.
  */
 export const organizationAiProviderRouter = new Hono()
   .get('/', authMiddleware, orgMemberMiddleware, async (c) => {
@@ -28,7 +29,7 @@ export const organizationAiProviderRouter = new Hono()
   .put('/', authMiddleware, orgAdminMiddleware, zValidator('json', ZAiProviderSettings), async (c) => {
     try {
       const orgId = c.req.header('cio-org-id')!;
-      const patch = c.req.valid('json') ?? {};
+      const patch = c.req.valid('json');
       const updated = await updateOrgAiProviderService(orgId, patch);
 
       return c.json({ success: true as const, data: updated });

@@ -401,8 +401,6 @@
       "notifications_tab": "Notifications",
       "organization_tab": "Organization",
       "landing_page_tab": "Landing Page",
-      "billing_tab": "Billing",
-      "ai_credits_tab": "AI Credits",
       "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "AI Tutor",
       "integrations_tab": "Integrations",
@@ -1019,53 +1017,40 @@
       "success_message": "Integration Successful",
       "disconnect": "Disconnect"
     },
-    "billing": {
-      "page_subtitle": "Your plan, billing portal, and how you pay for LibreClassroom.",
-      "sub_title": "Billing details",
-      "manage": "Manage your billing",
-      "active": "You don't have any active billing",
-      "provider": "We use Polar to help manage your billing",
-      "open_billing": "Open billing",
-      "error": "An error occurred while opening billing"
-    },
-    "ai_credits": {
-      "sub_title": "AI credits",
-      "page_subtitle": "Track AI assistant usage, team consumption, and purchase AI credit packs.",
-      "cost_note": "Credit usage is weighted by model cost. Gemini 3.1 Flash Lite counts as 1 credit unit per token. GPT-5.4 Mini and Kimi K2.6 count as 4× per token. Claude Sonnet 4.6 counts as 11× per token, reflecting its higher API cost.",
-      "included": {
-        "title": "Your included usage",
-        "subtitle": "Monthly AI credits included with your plan.",
-        "resets_on": "Resets {date}"
+    "ai_provider": {
+      "heading": "AI Provider",
+      "page_subtitle": "Manage the AI providers this workspace uses. Profiles override environment variables; when a profile has no API key, the provider's environment variable is used.",
+      "loading": "Loading…",
+      "empty": "No provider profiles yet. Add one to get started.",
+      "profiles_heading": "Provider profiles",
+      "using_defaults_note": "These are the built-in defaults. Save to make them this workspace's configuration.",
+      "default_hint": "When several profiles share a provider type, the default one is used by the AI assistant.",
+      "name_label": "Name",
+      "name_placeholder": "e.g. My DeepSeek",
+      "provider_label": "AI Provider",
+      "provider_options": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "google": "Google",
+        "moonshot": "Moonshot",
+        "deepseek": "DeepSeek"
       },
-      "purchased": {
-        "title": "Purchased usage",
-        "subtitle": "Extra AI credits you bought roll over until used.",
-        "lifetime": "{tokens} credits purchased · ${dollars} spent",
-        "buy_more": "Buy more"
-      },
-      "chart": {
-        "heading": "Usage",
-        "subheading": "Daily AI credits consumption this month.",
-        "tokens": "Credits",
-        "total_tokens": "Total credits",
-        "total_requests": "Total requests",
-        "empty": "No usage recorded this month yet."
-      },
-      "leaderboard": {
-        "title": "Team usage",
-        "this_month": "Current month",
-        "user": "User",
-        "favorite_model": "Favorite model",
-        "tokens": "Credits",
-        "empty": "Nobody on your team has used the AI assistant this month."
-      },
-      "buy_tokens": {
-        "title": "Buy more credits",
-        "description": "Each pack adds 5,000,000 credits for $5 USD. Choose how many packs you need.",
-        "quantity_hint": "packs",
-        "preview": "{quantity} pack(s) · {tokens} credits · ${dollars}",
-        "buy_button": "Buy for ${dollars}"
-      }
+      "api_key_label": "API Key",
+      "api_key_placeholder": "sk-...",
+      "api_key_description": "API key for this profile. Leave empty to use the {provider} environment variable.",
+      "base_url_label": "Base URL",
+      "base_url_placeholder": "https://api.example.com/v1",
+      "base_url_description": "API endpoint for this profile. Leave empty to use the provider's default.",
+      "model_label": "Model",
+      "model_placeholder": "model-id",
+      "model_description": "Model identifier. Leave empty to use the provider's default model.",
+      "is_default_label": "Default provider",
+      "add_profile": "Add provider",
+      "delete_profile": "Delete provider",
+      "save": "Save",
+      "reset_heading": "Reset",
+      "reset": "Reset to defaults",
+      "reset_description": "Discard all profiles and use the built-in defaults plus environment variables."
     }
   },
   "hls_upload": {
@@ -4142,10 +4127,6 @@
       "deleted": "Token auth removed.",
       "activated": "Token auth enabled.",
       "deactivated": "Token auth disabled."
-    },
-    "ai_credits": {
-      "purchase_success": "AI credit pack added to your balance.",
-      "checkout_failed": "Could not start checkout. Please try again."
     },
     "ai_provider": {
       "saved": "AI provider settings saved."
