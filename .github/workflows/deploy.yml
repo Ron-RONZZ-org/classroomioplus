@@ -69,10 +69,21 @@ jobs:
         # must be on the same commit so package.json / src / scripts exist
         # for pnpm install and db scripts. Never --delete the clone during
         # the overlay below.
+        #
+        # Stash any uncommitted TRACKED drift (e.g. a file-mode change or a
+        # hand edit), fast-forward to the artifact's commit, then restore the
+        # stash. This never destroys local work and never refuses to deploy
+        # because of harmless drift. Untracked files (data/, apps/*/.env) are
+        # gitignored so git never touches them — they survive untouched and
+        # are not stashed.
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
-            'cd /var/www/classroomio && git fetch origin main && git reset --hard origin/main'
+            'cd /var/www/classroomio && \
+             git fetch origin main && \
+             (git stash push -m "auto-deploy drift" || true) && \
+             git merge --ff-only origin/main && \
+             (git stash pop || true)'
 
       - name: Overlay build artifacts onto VPS
         # rsync the pre-built artifact over the existing repo clone.
