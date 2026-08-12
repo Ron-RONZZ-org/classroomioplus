@@ -2349,6 +2349,13 @@
           "description": "Eleven tæller efter status for dette kursus."
         },
         "empty_overview_description": "Hold dine medarbejdere kompatible og hold øje med, hvem der står bag."
+      },
+      "export": {
+        "title": "Eksporter kursus",
+        "description": "Download kursets struktur som JSON-fil til sikkerhedskopi eller migrering.",
+        "button": "Eksporter som JSON",
+        "success": "Kurset blev eksporteret",
+        "error": "Kunne ikke eksportere kurset"
       }
     },
     "search": {
@@ -2588,7 +2595,54 @@
       "tags": "Tags",
       "empty_tags": "Ingen tags tilgængelige"
     },
-    "page_subtitle": "Hvor lektioner bliver til kurser, og kurser bliver til tilmeldinger."
+    "page_subtitle": "Hvor lektioner bliver til kurser, og kurser bliver til tilmeldinger.",
+    "import_export": {
+      "page_title": "Importer / eksporter kurser",
+      "page_subtitle": "Eksporter kursusstrukturer til sikkerhedskopi eller migrering, eller importer kurser fra en JSON-fil.",
+      "export_section_title": "Eksporter kurser",
+      "export_section_description": "Vælg et eller flere kurser til eksport som JSON-filer.",
+      "export_button": "Eksporter valgte ({count})",
+      "export_all_button": "Eksporter alle",
+      "import_section_title": "Importer kursus",
+      "import_section_description": "Upload en JSON-fil eksporteret fra en anden LibreClassroom-instans.",
+      "import_button": "Importer",
+      "import_zone_label": "Slip kursets JSON-fil her eller klik for at gennemse",
+      "import_zone_hint": "Du kan vælge flere filer ad gangen — alle importeres som kladder.",
+      "import_processing": "Behandler {current} af {total}…",
+      "import_done": "{count} kursus(er) importeret som kladder.",
+      "drafts_title": "Importkladder",
+      "drafts_empty": "Ingen kladder endnu. Upload en kursuseksportfil ovenfor for at komme i gang.",
+      "drafts_status_draft": "Kladde",
+      "drafts_status_published": "Udgivet",
+      "drafts_status_archived": "Arkiveret",
+      "drafts_published_link": "Vis kursus",
+      "preview_title": "Forhåndsvisning: {title}",
+      "preview_type": "Type",
+      "preview_locale": "Sprog",
+      "preview_sections": "Sektioner ({count})",
+      "preview_lessons": "Lektioner ({count})",
+      "preview_exercises": "Øvelser ({count})",
+      "preview_tags": "Tags",
+      "preview_warnings": "Advarsler ({count})",
+      "publish_button": "Udgiv kursus",
+      "publish_success": "Kurset er udgivet! Videresender…",
+      "publish_error": "Kunne ikke udgive kurset",
+      "delete_draft_button": "Slet kladde",
+      "delete_draft_confirm": "Slet denne kladde?",
+      "delete_draft_success": "Kladde slettet",
+      "select_all": "Vælg alle",
+      "deselect_all": "Fravælg alle",
+      "select_courses_placeholder": "Søg i kurser…",
+      "no_courses_selected": "Vælg kurser fra listen ovenfor",
+      "success_export": "Kurset blev eksporteret",
+      "success_import": "Kurset blev importeret som kladde",
+      "selected_count": "{count} valgt",
+      "loading_courses": "Indlæser kurser…",
+      "course_lessons": "{count} lektioner",
+      "preview_description": "Beskrivelse",
+      "close": "Luk"
+    },
+    "heading_import_button": "Importer / eksporter kursus"
   },
   "ai": {
     "help_me": "Hjælp mig med at skrive",

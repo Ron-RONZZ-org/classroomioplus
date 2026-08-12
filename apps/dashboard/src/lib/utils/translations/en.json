@@ -1838,7 +1838,7 @@
     "heading": "Courses",
     "page_subtitle": "Where lessons turn into courses and courses turn into enrollments.",
     "heading_button": "Create Course",
-    "heading_import_button": "Import Course",
+    "heading_import_button": "Import / Export Course",
     "search_placeholder": "Find Course",
     "tag_filters": {
       "filter": "Filter",
@@ -1962,7 +1962,12 @@
       "select_courses_placeholder": "Search courses…",
       "no_courses_selected": "Select courses from the list above",
       "success_export": "Course exported successfully",
-      "success_import": "Course imported as draft"
+      "success_import": "Course imported as draft",
+      "selected_count": "{count} selected",
+      "loading_courses": "Loading courses…",
+      "course_lessons": "{count} lessons",
+      "preview_description": "Description",
+      "close": "Close"
     }
   },
   "course": {
@@ -3703,14 +3708,14 @@
         "delete": "Delete Course",
         "delete_text": "Delete this course,this action cannot be undone",
         "save": "Save Changes"
+      },
+      "export": {
+        "title": "Export Course",
+        "description": "Download the course structure as a JSON file for backup or migration.",
+        "button": "Export as JSON",
+        "success": "Course exported successfully",
+        "error": "Failed to export course"
       }
-    },
-    "export": {
-      "title": "Export Course",
-      "description": "Download the course structure as a JSON file for backup or migration.",
-      "button": "Export as JSON",
-      "success": "Course exported successfully",
-      "error": "Failed to export course"
     },
     "not_permitted": {
       "header": "No Permission",

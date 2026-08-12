@@ -222,4 +222,47 @@ test.describe('Course CRUD', () => {
 
     await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
   });
+
+  test('TC-CRUD-10: Course export page renders real UI (no raw translation keys)', async ({ page }) => {
+    test.setTimeout(120_000);
+
+    // The export page is at /courses/{id}/export (course view, not org-scoped)
+    await navigateAndSettle(page, BASE_URL + `/courses/${MVC_COURSE_ID}/export`);
+
+    // Regression guard for issue #66: the page previously rendered raw
+    // translation keys (course.navItem.export.title) because the keys were
+    // missing from every locale. Assert the translated heading and button
+    // actually render instead of the raw key strings.
+    await expect(page.getByRole('heading', { name: 'Export Course' }).first()).toBeVisible({ timeout: 20000 });
+
+    // The export button must be present (course loads via the layout store)
+    await expect(page.getByRole('button', { name: /export as json/i }).first()).toBeVisible({ timeout: 15000 });
+
+    // Raw-key regression: the literal key text must never be visible
+    await expect(page.getByText('course.navItem.export.title', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('course.navItem.export.description', { exact: true })).toHaveCount(0);
+  });
+
+  test('TC-CRUD-11: Org import-export page renders export + import sections (no raw keys)', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    // Global import-export page is org-scoped under /org/{slug}/import-export
+    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/import-export`);
+    await page.waitForTimeout(2000);
+
+    // Page header (route-level) must show the translated title, not the key
+    await expect(page.getByRole('heading', { name: /import \/ export courses/i }).first()).toBeVisible({
+      timeout: 20000
+    });
+
+    // Export section header (component-level)
+    await expect(page.getByText('Export Courses', { exact: true }).first()).toBeVisible({ timeout: 15000 });
+
+    // Import section header
+    await expect(page.getByText('Import Course', { exact: true }).first()).toBeVisible({ timeout: 15000 });
+
+    // Regression guard: raw key text must not render (issue #66)
+    await expect(page.getByText('courses.import_export.page_title', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('courses.import_export.export_section_title', { exact: true })).toHaveCount(0);
+  });
 });

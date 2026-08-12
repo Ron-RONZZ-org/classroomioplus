@@ -2349,6 +2349,13 @@
           "description": "L'étudiant compte par statut pour ce cours."
         },
         "empty_overview_description": "Gardez vos employés conformes et suivez qui est derrière."
+      },
+      "export": {
+        "title": "Exporter le cours",
+        "description": "Téléchargez la structure du cours sous forme de fichier JSON pour sauvegarde ou migration.",
+        "button": "Exporter en JSON",
+        "success": "Cours exporté avec succès",
+        "error": "Échec de l'exportation du cours"
       }
     },
     "search": {
@@ -2588,7 +2595,54 @@
       "tags": "Étiquettes",
       "empty_tags": "Aucune balise disponible"
     },
-    "page_subtitle": "Là où les leçons deviennent des cours et les cours deviennent des inscriptions."
+    "page_subtitle": "Là où les leçons deviennent des cours et les cours deviennent des inscriptions.",
+    "import_export": {
+      "page_title": "Importer / Exporter des cours",
+      "page_subtitle": "Exportez les structures de cours pour sauvegarde ou migration, ou importez des cours depuis un fichier JSON.",
+      "export_section_title": "Exporter des cours",
+      "export_section_description": "Sélectionnez un ou plusieurs cours à exporter sous forme de fichiers JSON.",
+      "export_button": "Exporter la sélection ({count})",
+      "export_all_button": "Tout exporter",
+      "import_section_title": "Importer un cours",
+      "import_section_description": "Téléversez un fichier JSON exporté depuis une autre instance LibreClassroom.",
+      "import_button": "Importer",
+      "import_zone_label": "Déposez le fichier JSON du cours ici ou cliquez pour parcourir",
+      "import_zone_hint": "Vous pouvez sélectionner plusieurs fichiers à la fois — tous seront importés comme brouillons.",
+      "import_processing": "Traitement de {current} sur {total}…",
+      "import_done": "{count} cours importé(s) comme brouillons.",
+      "drafts_title": "Brouillons d'importation",
+      "drafts_empty": "Aucun brouillon pour le moment. Téléversez un fichier d’export de cours ci-dessus pour commencer.",
+      "drafts_status_draft": "Brouillon",
+      "drafts_status_published": "Publié",
+      "drafts_status_archived": "Archivé",
+      "drafts_published_link": "Voir le cours",
+      "preview_title": "Aperçu : {title}",
+      "preview_type": "Type",
+      "preview_locale": "Langue",
+      "preview_sections": "Sections ({count})",
+      "preview_lessons": "Leçons ({count})",
+      "preview_exercises": "Exercices ({count})",
+      "preview_tags": "Étiquettes",
+      "preview_warnings": "Avertissements ({count})",
+      "publish_button": "Publier le cours",
+      "publish_success": "Cours publié ! Redirection…",
+      "publish_error": "Échec de la publication du cours",
+      "delete_draft_button": "Supprimer le brouillon",
+      "delete_draft_confirm": "Supprimer ce brouillon ?",
+      "delete_draft_success": "Brouillon supprimé",
+      "select_all": "Tout sélectionner",
+      "deselect_all": "Tout désélectionner",
+      "select_courses_placeholder": "Rechercher des cours…",
+      "no_courses_selected": "Sélectionnez des cours dans la liste ci-dessus",
+      "success_export": "Cours exporté avec succès",
+      "success_import": "Cours importé comme brouillon",
+      "selected_count": "{count} sélectionné(s)",
+      "loading_courses": "Chargement des cours…",
+      "course_lessons": "{count} leçons",
+      "preview_description": "Description",
+      "close": "Fermer"
+    },
+    "heading_import_button": "Importer / Exporter un cours"
   },
   "ai": {
     "help_me": "Aide-moi à écrire",

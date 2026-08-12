@@ -234,14 +234,14 @@
         </button>
         {#if selectedCount > 0}
           <span class="ui:text-muted-foreground text-sm tabular-nums">
-            {selectedCount} selected
+            {$t('courses.import_export.selected_count', { count: selectedCount })}
           </span>
         {/if}
       </div>
 
       {#if filteredCourses.length === 0}
         <p class="ui:text-muted-foreground py-8 text-center text-sm">
-          {courses.length === 0 ? 'Loading courses…' : $t('courses.course_card.empty_title')}
+          {courses.length === 0 ? $t('courses.import_export.loading_courses') : $t('courses.course_card.empty_title')}
         </p>
       {:else}
         <div class="ui:border-border max-h-80 space-y-1 overflow-y-auto rounded-lg border p-2">
@@ -255,7 +255,9 @@
               <Label for={`export-course-${course.id}`} class="flex-1 cursor-pointer text-sm font-normal">
                 {course.title}
               </Label>
-              <span class="ui:text-muted-foreground text-xs tabular-nums">{course.lessonCount ?? 0} lessons</span>
+              <span class="ui:text-muted-foreground text-xs tabular-nums"
+                >{$t('courses.import_export.course_lessons', { count: course.lessonCount ?? 0 })}</span
+              >
             </div>
           {/each}
         </div>
@@ -437,7 +439,9 @@
 
           {#if draftData.course?.description}
             <div>
-              <p class="ui:text-muted-foreground text-xs font-medium tracking-wider uppercase">Description</p>
+              <p class="ui:text-muted-foreground text-xs font-medium tracking-wider uppercase">
+                {$t('courses.import_export.preview_description')}
+              </p>
               <p class="mt-1 line-clamp-3 text-sm">{draftData.course.description}</p>
             </div>
           {/if}
@@ -492,7 +496,7 @@
             {$t('courses.import_export.delete_draft_button')}
           </Button>
         {/if}
-        <Button variant="ghost" onclick={closePreview}>Close</Button>
+        <Button variant="ghost" onclick={closePreview}>{$t('courses.import_export.close')}</Button>
       </div>
     </Dialog.Content>
   </Dialog.Root>
