@@ -94,7 +94,7 @@ describe('organization AI provider management', () => {
     expect(profiles.length).toBeGreaterThanOrEqual(5);
 
     // Every default provider got a profile referencing it.
-    const profileProviderIds = new Set(profiles.map((p: { providerId: string }) => p.providerId));
+    const profileProviderIds = new Set((profiles as { providerId: string }[]).map((p) => p.providerId));
     for (const provider of providers as { id: string }[]) {
       expect(profileProviderIds.has(provider.id)).toBe(true);
     }
@@ -122,9 +122,9 @@ describe('organization AI provider management', () => {
     });
     expect(create.status).toBe(200);
     const createBody = await create.json();
-    const created = (createBody.data.providers as { name: string }[]).find((p) => p.name === 'Custom LLM');
+    const created = (createBody.data.providers as { id: string; name: string }[]).find((p) => p.name === 'Custom LLM');
     expect(created).toBeDefined();
-    createdProviderId = (created as { id: string }).id;
+    createdProviderId = created!.id;
 
     const update = await app.request(`/organization/ai-provider/providers/${createdProviderId}`, {
       method: 'PUT',
