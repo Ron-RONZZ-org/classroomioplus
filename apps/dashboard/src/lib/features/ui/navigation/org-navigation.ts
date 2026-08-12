@@ -209,6 +209,7 @@ export const baseNavConfig: NavItemConfig[] = [
     matchPattern: '^/org/[^/]+/zapier(/.*)?$'
   },
   {
+    group: 'home',
     titleKey: 'org_navigation.settings',
     path: '/settings',
     icon: SettingsIcon,
