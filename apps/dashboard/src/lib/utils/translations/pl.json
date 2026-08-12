@@ -2350,6 +2350,13 @@
           "description": "Studenci liczą się według statusu tego kursu."
         },
         "empty_overview_description": "Dbaj o przestrzeganie zasad przez swoich pracowników i śledź, kto ma zaległości."
+      },
+      "export": {
+        "title": "Eksportuj kurs",
+        "description": "Pobierz strukturę kursu jako plik JSON do tworzenia kopii zapasowej lub migracji.",
+        "button": "Eksportuj jako JSON",
+        "success": "Kurs wyeksportowany pomyślnie",
+        "error": "Nie udało się wyeksportować kursu"
       }
     },
     "search": {
@@ -2589,7 +2596,54 @@
       "tags": "Tagi",
       "empty_tags": "Brak dostępnych tagów"
     },
-    "page_subtitle": "Gdzie lekcje stają się kursami, a kursy — zapisami."
+    "page_subtitle": "Gdzie lekcje stają się kursami, a kursy — zapisami.",
+    "import_export": {
+      "page_title": "Importuj / eksportuj kursy",
+      "page_subtitle": "Eksportuj struktury kursów do tworzenia kopii zapasowej lub migracji albo importuj kursy z pliku JSON.",
+      "export_section_title": "Eksportuj kursy",
+      "export_section_description": "Wybierz jeden lub więcej kursów do eksportu jako pliki JSON.",
+      "export_button": "Eksportuj zaznaczone ({count})",
+      "export_all_button": "Eksportuj wszystkie",
+      "import_section_title": "Importuj kurs",
+      "import_section_description": "Prześlij plik JSON wyeksportowany z innej instancji LibreClassroom.",
+      "import_button": "Importuj",
+      "import_zone_label": "Upuść plik JSON kursu tutaj lub kliknij, aby przeglądać",
+      "import_zone_hint": "Możesz wybrać kilka plików naraz — wszystkie zostaną zaimportowane jako wersje robocze.",
+      "import_processing": "Przetwarzanie {current} z {total}…",
+      "import_done": "{count} kurs(ów) zaimportowanych jako wersje robocze.",
+      "drafts_title": "Wersje robocze importu",
+      "drafts_empty": "Brak wersji roboczych. Prześlij powyżej plik eksportu kursu, aby rozpocząć.",
+      "drafts_status_draft": "Wersja robocza",
+      "drafts_status_published": "Opublikowano",
+      "drafts_status_archived": "Zarchiwizowano",
+      "drafts_published_link": "Zobacz kurs",
+      "preview_title": "Podgląd: {title}",
+      "preview_type": "Typ",
+      "preview_locale": "Język",
+      "preview_sections": "Sekcje ({count})",
+      "preview_lessons": "Lekcje ({count})",
+      "preview_exercises": "Ćwiczenia ({count})",
+      "preview_tags": "Tagi",
+      "preview_warnings": "Ostrzeżenia ({count})",
+      "publish_button": "Opublikuj kurs",
+      "publish_success": "Kurs opublikowany! Przekierowanie…",
+      "publish_error": "Nie udało się opublikować kursu",
+      "delete_draft_button": "Usuń wersję roboczą",
+      "delete_draft_confirm": "Usunąć tę wersję roboczą?",
+      "delete_draft_success": "Wersja robocza usunięta",
+      "select_all": "Zaznacz wszystko",
+      "deselect_all": "Odznacz wszystko",
+      "select_courses_placeholder": "Szukaj kursów…",
+      "no_courses_selected": "Wybierz kursy z powyższej listy",
+      "success_export": "Kurs wyeksportowany pomyślnie",
+      "success_import": "Kurs zaimportowany jako wersja robocza",
+      "selected_count": "Wybrano: {count}",
+      "loading_courses": "Ładowanie kursów…",
+      "course_lessons": "{count} lekcji",
+      "preview_description": "Opis",
+      "close": "Zamknij"
+    },
+    "heading_import_button": "Importuj / eksportuj kurs"
   },
   "ai": {
     "help_me": "Pomóż mi pisać",

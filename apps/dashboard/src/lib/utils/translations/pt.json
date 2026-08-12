@@ -2350,6 +2350,13 @@
           "description": "Contagens de alunos por status para este curso."
         },
         "empty_overview_description": "Mantenha seus funcionários em conformidade e monitore quem está por trás."
+      },
+      "export": {
+        "title": "Exportar curso",
+        "description": "Baixe a estrutura do curso como um arquivo JSON para backup ou migração.",
+        "button": "Exportar como JSON",
+        "success": "Curso exportado com sucesso",
+        "error": "Falha ao exportar o curso"
       }
     },
     "search": {
@@ -2589,7 +2596,54 @@
       "tags": "Etiquetas",
       "empty_tags": "Nenhuma tag disponível"
     },
-    "page_subtitle": "Onde lições viram cursos e cursos viram matrículas."
+    "page_subtitle": "Onde lições viram cursos e cursos viram matrículas.",
+    "import_export": {
+      "page_title": "Importar / exportar cursos",
+      "page_subtitle": "Exporte as estruturas dos cursos para backup ou migração, ou importe cursos de um arquivo JSON.",
+      "export_section_title": "Exportar cursos",
+      "export_section_description": "Selecione um ou mais cursos para exportar como arquivos JSON.",
+      "export_button": "Exportar selecionados ({count})",
+      "export_all_button": "Exportar tudo",
+      "import_section_title": "Importar curso",
+      "import_section_description": "Envie um arquivo JSON exportado de outra instância do LibreClassroom.",
+      "import_button": "Importar",
+      "import_zone_label": "Solte o arquivo JSON do curso aqui ou clique para navegar",
+      "import_zone_hint": "Você pode selecionar vários arquivos de uma vez — todos serão importados como rascunhos.",
+      "import_processing": "Processando {current} de {total}…",
+      "import_done": "{count} curso(s) importados como rascunhos.",
+      "drafts_title": "Rascunhos de importação",
+      "drafts_empty": "Nenhum rascunho ainda. Envie um arquivo de exportação de curso acima para começar.",
+      "drafts_status_draft": "Rascunho",
+      "drafts_status_published": "Publicado",
+      "drafts_status_archived": "Arquivado",
+      "drafts_published_link": "Ver curso",
+      "preview_title": "Pré-visualização: {title}",
+      "preview_type": "Tipo",
+      "preview_locale": "Idioma",
+      "preview_sections": "Seções ({count})",
+      "preview_lessons": "Lições ({count})",
+      "preview_exercises": "Exercícios ({count})",
+      "preview_tags": "Etiquetas",
+      "preview_warnings": "Avisos ({count})",
+      "publish_button": "Publicar curso",
+      "publish_success": "Curso publicado! Redirecionando…",
+      "publish_error": "Falha ao publicar o curso",
+      "delete_draft_button": "Excluir rascunho",
+      "delete_draft_confirm": "Excluir este rascunho?",
+      "delete_draft_success": "Rascunho excluído",
+      "select_all": "Selecionar tudo",
+      "deselect_all": "Desmarcar tudo",
+      "select_courses_placeholder": "Pesquisar cursos…",
+      "no_courses_selected": "Selecione cursos da lista acima",
+      "success_export": "Curso exportado com sucesso",
+      "success_import": "Curso importado como rascunho",
+      "selected_count": "{count} selecionado(s)",
+      "loading_courses": "Carregando cursos…",
+      "course_lessons": "{count} lições",
+      "preview_description": "Descrição",
+      "close": "Fechar"
+    },
+    "heading_import_button": "Importar / exportar curso"
   },
   "ai": {
     "help_me": "Ajude-me a escrever",

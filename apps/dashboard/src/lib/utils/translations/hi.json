@@ -2350,6 +2350,13 @@
           "description": "इस पाठ्यक्रम के लिए विद्यार्थी की गणना स्थिति के आधार पर की जाती है।"
         },
         "empty_overview_description": "अपने कर्मचारियों को आज्ञाकारी रखें और ट्रैक करें कि पीछे कौन है।"
+      },
+      "export": {
+        "title": "कोर्स निर्यात करें",
+        "description": "बैकअप या माइग्रेशन के लिए कोर्स संरचना को JSON फ़ाइल के रूप में डाउनलोड करें।",
+        "button": "JSON के रूप में निर्यात करें",
+        "success": "कोर्स सफलतापूर्वक निर्यात हुआ",
+        "error": "कोर्स निर्यात करने में विफल"
       }
     },
     "search": {
@@ -2589,7 +2596,54 @@
       "tags": "टैग",
       "empty_tags": "कोई टैग उपलब्ध नहीं है"
     },
-    "page_subtitle": "जहाँ पाठ पाठ्यक्रम बनते हैं और पाठ्यक्रम नामांकन बनते हैं।"
+    "page_subtitle": "जहाँ पाठ पाठ्यक्रम बनते हैं और पाठ्यक्रम नामांकन बनते हैं।",
+    "import_export": {
+      "page_title": "कोर्स आयात / निर्यात करें",
+      "page_subtitle": "बैकअप या माइग्रेशन के लिए कोर्स संरचनाएँ निर्यात करें, या JSON फ़ाइल से कोर्स आयात करें।",
+      "export_section_title": "कोर्स निर्यात करें",
+      "export_section_description": "JSON फ़ाइलों के रूप में निर्यात करने के लिए एक या अधिक कोर्स चुनें।",
+      "export_button": "चयनित निर्यात करें ({count})",
+      "export_all_button": "सभी निर्यात करें",
+      "import_section_title": "कोर्स आयात करें",
+      "import_section_description": "किसी अन्य LibreClassroom इंस्टेंस से निर्यात की गई JSON फ़ाइल अपलोड करें।",
+      "import_button": "आयात करें",
+      "import_zone_label": "कोर्स की JSON फ़ाइल यहाँ छोड़ें या ब्राउज़ करने के लिए क्लिक करें",
+      "import_zone_hint": "आप एक साथ कई फ़ाइलें चुन सकते हैं — सभी ड्राफ़्ट के रूप में आयात की जाएँगी।",
+      "import_processing": "{total} में से {current} संसाधित हो रहा है…",
+      "import_done": "{count} कोर्स ड्राफ़्ट के रूप में आयात हुए।",
+      "drafts_title": "आयात ड्राफ़्ट",
+      "drafts_empty": "अभी कोई ड्राफ़्ट नहीं है। शुरू करने के लिए ऊपर कोर्स निर्यात फ़ाइल अपलोड करें।",
+      "drafts_status_draft": "ड्राफ़्ट",
+      "drafts_status_published": "प्रकाशित",
+      "drafts_status_archived": "संग्रहीत",
+      "drafts_published_link": "कोर्स देखें",
+      "preview_title": "पूर्वावलोकन: {title}",
+      "preview_type": "प्रकार",
+      "preview_locale": "भाषा",
+      "preview_sections": "अनुभाग ({count})",
+      "preview_lessons": "पाठ ({count})",
+      "preview_exercises": "अभ्यास ({count})",
+      "preview_tags": "टैग",
+      "preview_warnings": "चेतावनी ({count})",
+      "publish_button": "कोर्स प्रकाशित करें",
+      "publish_success": "कोर्स प्रकाशित हुआ! पुनर्निर्देशित…",
+      "publish_error": "कोर्स प्रकाशित करने में विफल",
+      "delete_draft_button": "ड्राफ़्ट हटाएँ",
+      "delete_draft_confirm": "यह ड्राफ़्ट हटाएँ?",
+      "delete_draft_success": "ड्राफ़्ट हटाया गया",
+      "select_all": "सभी चुनें",
+      "deselect_all": "सभी अचयनित करें",
+      "select_courses_placeholder": "कोर्स खोजें…",
+      "no_courses_selected": "ऊपर की सूची से कोर्स चुनें",
+      "success_export": "कोर्स सफलतापूर्वक निर्यात हुआ",
+      "success_import": "कोर्स ड्राफ़्ट के रूप में आयात हुआ",
+      "selected_count": "{count} चयनित",
+      "loading_courses": "कोर्स लोड हो रहे हैं…",
+      "course_lessons": "{count} पाठ",
+      "preview_description": "विवरण",
+      "close": "बंद करें"
+    },
+    "heading_import_button": "कोर्स आयात / निर्यात करें"
   },
   "ai": {
     "help_me": "मुझे लिखने में मदद करें",

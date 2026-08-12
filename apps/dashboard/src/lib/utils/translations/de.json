@@ -2350,6 +2350,13 @@
           "description": "Die Anzahl der Studierenden für diesen Kurs richtet sich nach dem Status."
         },
         "empty_overview_description": "Halten Sie Ihre Mitarbeiter konform und verfolgen Sie, wer im Rückstand ist."
+      },
+      "export": {
+        "title": "Kurs exportieren",
+        "description": "Laden Sie die Kursstruktur als JSON-Datei zur Sicherung oder Migration herunter.",
+        "button": "Als JSON exportieren",
+        "success": "Kurs erfolgreich exportiert",
+        "error": "Kurs konnte nicht exportiert werden"
       }
     },
     "search": {
@@ -2589,7 +2596,54 @@
       "tags": "Tags",
       "empty_tags": "Keine Tags verfügbar"
     },
-    "page_subtitle": "Wo Lektionen zu Kursen und Kurse zu Einschreibungen werden."
+    "page_subtitle": "Wo Lektionen zu Kursen und Kurse zu Einschreibungen werden.",
+    "import_export": {
+      "page_title": "Kurse importieren / exportieren",
+      "page_subtitle": "Exportieren Sie Kursstrukturen zur Sicherung oder Migration oder importieren Sie Kurse aus einer JSON-Datei.",
+      "export_section_title": "Kurse exportieren",
+      "export_section_description": "Wählen Sie einen oder mehrere Kurse zum Export als JSON-Dateien aus.",
+      "export_button": "Auswahl exportieren ({count})",
+      "export_all_button": "Alle exportieren",
+      "import_section_title": "Kurs importieren",
+      "import_section_description": "Laden Sie eine JSON-Datei hoch, die aus einer anderen LibreClassroom-Instanz exportiert wurde.",
+      "import_button": "Importieren",
+      "import_zone_label": "Kurs-JSON-Datei hier ablegen oder zum Durchsuchen klicken",
+      "import_zone_hint": "Sie können mehrere Dateien gleichzeitig auswählen — alle werden als Entwürfe importiert.",
+      "import_processing": "{current} von {total} wird verarbeitet…",
+      "import_done": "{count} Kurs(e) als Entwürfe importiert.",
+      "drafts_title": "Import-Entwürfe",
+      "drafts_empty": "Noch keine Entwürfe. Laden Sie oben eine Kurs-Exportdatei hoch, um zu beginnen.",
+      "drafts_status_draft": "Entwurf",
+      "drafts_status_published": "Veröffentlicht",
+      "drafts_status_archived": "Archiviert",
+      "drafts_published_link": "Kurs ansehen",
+      "preview_title": "Vorschau: {title}",
+      "preview_type": "Typ",
+      "preview_locale": "Sprache",
+      "preview_sections": "Abschnitte ({count})",
+      "preview_lessons": "Lektionen ({count})",
+      "preview_exercises": "Übungen ({count})",
+      "preview_tags": "Tags",
+      "preview_warnings": "Warnungen ({count})",
+      "publish_button": "Kurs veröffentlichen",
+      "publish_success": "Kurs veröffentlicht! Weiterleitung…",
+      "publish_error": "Kurs konnte nicht veröffentlicht werden",
+      "delete_draft_button": "Entwurf löschen",
+      "delete_draft_confirm": "Diesen Entwurf löschen?",
+      "delete_draft_success": "Entwurf gelöscht",
+      "select_all": "Alle auswählen",
+      "deselect_all": "Auswahl aufheben",
+      "select_courses_placeholder": "Kurse suchen…",
+      "no_courses_selected": "Wählen Sie Kurse aus der obigen Liste aus",
+      "success_export": "Kurs erfolgreich exportiert",
+      "success_import": "Kurs als Entwurf importiert",
+      "selected_count": "{count} ausgewählt",
+      "loading_courses": "Kurse werden geladen…",
+      "course_lessons": "{count} Lektionen",
+      "preview_description": "Beschreibung",
+      "close": "Schließen"
+    },
+    "heading_import_button": "Kurs importieren / exportieren"
   },
   "ai": {
     "help_me": "Hilf mir zu schreiben",

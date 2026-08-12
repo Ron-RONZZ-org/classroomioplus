@@ -2350,6 +2350,13 @@
           "description": "Số lượng sinh viên theo trạng thái cho khóa học này."
         },
         "empty_overview_description": "Giúp nhân viên của bạn luôn tuân thủ và theo dõi xem ai đứng sau."
+      },
+      "export": {
+        "title": "Xuất khóa học",
+        "description": "Tải cấu trúc khóa học dưới dạng tệp JSON để sao lưu hoặc di chuyển.",
+        "button": "Xuất dưới dạng JSON",
+        "success": "Đã xuất khóa học thành công",
+        "error": "Không thể xuất khóa học"
       }
     },
     "search": {
@@ -2589,7 +2596,54 @@
       "tags": "Thẻ",
       "empty_tags": "Không có thẻ nào"
     },
-    "page_subtitle": "Nơi các bài học trở thành khóa học và khóa học trở thành đăng ký."
+    "page_subtitle": "Nơi các bài học trở thành khóa học và khóa học trở thành đăng ký.",
+    "import_export": {
+      "page_title": "Nhập / xuất khóa học",
+      "page_subtitle": "Xuất cấu trúc khóa học để sao lưu hoặc di chuyển, hoặc nhập khóa học từ tệp JSON.",
+      "export_section_title": "Xuất khóa học",
+      "export_section_description": "Chọn một hoặc nhiều khóa học để xuất dưới dạng tệp JSON.",
+      "export_button": "Xuất mục đã chọn ({count})",
+      "export_all_button": "Xuất tất cả",
+      "import_section_title": "Nhập khóa học",
+      "import_section_description": "Tải lên tệp JSON được xuất từ một phiên bản LibreClassroom khác.",
+      "import_button": "Nhập",
+      "import_zone_label": "Thả tệp JSON khóa học vào đây hoặc nhấp để duyệt",
+      "import_zone_hint": "Bạn có thể chọn nhiều tệp cùng lúc — tất cả sẽ được nhập dưới dạng bản nháp.",
+      "import_processing": "Đang xử lý {current} trên {total}…",
+      "import_done": "{count} khóa học được nhập dưới dạng bản nháp.",
+      "drafts_title": "Bản nháp nhập",
+      "drafts_empty": "Chưa có bản nháp nào. Tải tệp xuất khóa học ở trên để bắt đầu.",
+      "drafts_status_draft": "Bản nháp",
+      "drafts_status_published": "Đã xuất bản",
+      "drafts_status_archived": "Đã lưu trữ",
+      "drafts_published_link": "Xem khóa học",
+      "preview_title": "Xem trước: {title}",
+      "preview_type": "Loại",
+      "preview_locale": "Ngôn ngữ",
+      "preview_sections": "Mục ({count})",
+      "preview_lessons": "Bài học ({count})",
+      "preview_exercises": "Bài tập ({count})",
+      "preview_tags": "Thẻ",
+      "preview_warnings": "Cảnh báo ({count})",
+      "publish_button": "Xuất bản khóa học",
+      "publish_success": "Đã xuất bản khóa học! Đang chuyển hướng…",
+      "publish_error": "Không thể xuất bản khóa học",
+      "delete_draft_button": "Xóa bản nháp",
+      "delete_draft_confirm": "Xóa bản nháp này?",
+      "delete_draft_success": "Đã xóa bản nháp",
+      "select_all": "Chọn tất cả",
+      "deselect_all": "Bỏ chọn tất cả",
+      "select_courses_placeholder": "Tìm kiếm khóa học…",
+      "no_courses_selected": "Chọn khóa học từ danh sách ở trên",
+      "success_export": "Đã xuất khóa học thành công",
+      "success_import": "Đã nhập khóa học dưới dạng bản nháp",
+      "selected_count": "{count} đã chọn",
+      "loading_courses": "Đang tải khóa học…",
+      "course_lessons": "{count} bài học",
+      "preview_description": "Mô tả",
+      "close": "Đóng"
+    },
+    "heading_import_button": "Nhập / xuất khóa học"
   },
   "ai": {
     "help_me": "Giúp tôi viết",

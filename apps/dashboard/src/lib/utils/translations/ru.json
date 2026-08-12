@@ -2350,6 +2350,13 @@
           "description": "Студенты учитываются по статусу для этого курса."
         },
         "empty_overview_description": "Следите за тем, чтобы ваши сотрудники соблюдали требования и отслеживали, кто отстает."
+      },
+      "export": {
+        "title": "Экспорт курса",
+        "description": "Скачайте структуру курса в виде JSON-файла для резервного копирования или миграции.",
+        "button": "Экспортировать в JSON",
+        "success": "Курс успешно экспортирован",
+        "error": "Не удалось экспортировать курс"
       }
     },
     "search": {
@@ -2589,7 +2596,54 @@
       "tags": "Теги",
       "empty_tags": "Нет доступных тегов"
     },
-    "page_subtitle": "Здесь уроки превращаются в курсы, а курсы — в зачисления."
+    "page_subtitle": "Здесь уроки превращаются в курсы, а курсы — в зачисления.",
+    "import_export": {
+      "page_title": "Импорт / экспорт курсов",
+      "page_subtitle": "Экспортируйте структуры курсов для резервного копирования или миграции либо импортируйте курсы из JSON-файла.",
+      "export_section_title": "Экспорт курсов",
+      "export_section_description": "Выберите один или несколько курсов для экспорта в виде JSON-файлов.",
+      "export_button": "Экспортировать выбранные ({count})",
+      "export_all_button": "Экспортировать все",
+      "import_section_title": "Импорт курса",
+      "import_section_description": "Загрузите JSON-файл, экспортированный из другого экземпляра LibreClassroom.",
+      "import_button": "Импортировать",
+      "import_zone_label": "Перетащите JSON-файл курса сюда или нажмите, чтобы выбрать",
+      "import_zone_hint": "Вы можете выбрать несколько файлов сразу — все будут импортированы как черновики.",
+      "import_processing": "Обработка {current} из {total}…",
+      "import_done": "{count} курсов импортировано как черновики.",
+      "drafts_title": "Черновики импорта",
+      "drafts_empty": "Пока нет черновиков. Загрузите файл экспорта курса выше, чтобы начать.",
+      "drafts_status_draft": "Черновик",
+      "drafts_status_published": "Опубликован",
+      "drafts_status_archived": "Архивирован",
+      "drafts_published_link": "Перейти к курсу",
+      "preview_title": "Предпросмотр: {title}",
+      "preview_type": "Тип",
+      "preview_locale": "Язык",
+      "preview_sections": "Разделы ({count})",
+      "preview_lessons": "Уроки ({count})",
+      "preview_exercises": "Упражнения ({count})",
+      "preview_tags": "Теги",
+      "preview_warnings": "Предупреждения ({count})",
+      "publish_button": "Опубликовать курс",
+      "publish_success": "Курс опубликован! Перенаправление…",
+      "publish_error": "Не удалось опубликовать курс",
+      "delete_draft_button": "Удалить черновик",
+      "delete_draft_confirm": "Удалить этот черновик?",
+      "delete_draft_success": "Черновик удалён",
+      "select_all": "Выбрать все",
+      "deselect_all": "Снять выделение",
+      "select_courses_placeholder": "Поиск курсов…",
+      "no_courses_selected": "Выберите курсы из списка выше",
+      "success_export": "Курс успешно экспортирован",
+      "success_import": "Курс импортирован как черновик",
+      "selected_count": "Выбрано: {count}",
+      "loading_courses": "Загрузка курсов…",
+      "course_lessons": "{count} уроков",
+      "preview_description": "Описание",
+      "close": "Закрыть"
+    },
+    "heading_import_button": "Импорт / экспорт курса"
   },
   "ai": {
     "help_me": "Помогите мне написать",

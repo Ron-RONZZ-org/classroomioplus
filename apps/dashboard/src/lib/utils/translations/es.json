@@ -2350,6 +2350,13 @@
           "description": "El estudiante cuenta por estado para este curso."
         },
         "empty_overview_description": "Haga que sus empleados cumplan y realice un seguimiento de quién está detrás."
+      },
+      "export": {
+        "title": "Exportar curso",
+        "description": "Descargue la estructura del curso como archivo JSON para copia de seguridad o migración.",
+        "button": "Exportar como JSON",
+        "success": "Curso exportado con éxito",
+        "error": "No se pudo exportar el curso"
       }
     },
     "search": {
@@ -2589,7 +2596,54 @@
       "tags": "Etiquetas",
       "empty_tags": "No hay etiquetas disponibles"
     },
-    "page_subtitle": "Donde las lecciones se convierten en cursos y los cursos en inscripciones."
+    "page_subtitle": "Donde las lecciones se convierten en cursos y los cursos en inscripciones.",
+    "import_export": {
+      "page_title": "Importar / exportar cursos",
+      "page_subtitle": "Exporte las estructuras de los cursos para copia de seguridad o migración, o importe cursos desde un archivo JSON.",
+      "export_section_title": "Exportar cursos",
+      "export_section_description": "Seleccione uno o varios cursos para exportarlos como archivos JSON.",
+      "export_button": "Exportar selección ({count})",
+      "export_all_button": "Exportar todo",
+      "import_section_title": "Importar curso",
+      "import_section_description": "Suba un archivo JSON exportado desde otra instancia de LibreClassroom.",
+      "import_button": "Importar",
+      "import_zone_label": "Suelte el archivo JSON del curso aquí o haga clic para explorar",
+      "import_zone_hint": "Puede seleccionar varios archivos a la vez; todos se importarán como borradores.",
+      "import_processing": "Procesando {current} de {total}…",
+      "import_done": "{count} curso(s) importados como borradores.",
+      "drafts_title": "Borradores de importación",
+      "drafts_empty": "Aún no hay borradores. Suba un archivo de exportación de curso arriba para comenzar.",
+      "drafts_status_draft": "Borrador",
+      "drafts_status_published": "Publicado",
+      "drafts_status_archived": "Archivado",
+      "drafts_published_link": "Ver curso",
+      "preview_title": "Vista previa: {title}",
+      "preview_type": "Tipo",
+      "preview_locale": "Idioma",
+      "preview_sections": "Secciones ({count})",
+      "preview_lessons": "Lecciones ({count})",
+      "preview_exercises": "Ejercicios ({count})",
+      "preview_tags": "Etiquetas",
+      "preview_warnings": "Advertencias ({count})",
+      "publish_button": "Publicar curso",
+      "publish_success": "¡Curso publicado! Redirigiendo…",
+      "publish_error": "No se pudo publicar el curso",
+      "delete_draft_button": "Eliminar borrador",
+      "delete_draft_confirm": "¿Eliminar este borrador?",
+      "delete_draft_success": "Borrador eliminado",
+      "select_all": "Seleccionar todo",
+      "deselect_all": "Deseleccionar todo",
+      "select_courses_placeholder": "Buscar cursos…",
+      "no_courses_selected": "Seleccione cursos de la lista de arriba",
+      "success_export": "Curso exportado con éxito",
+      "success_import": "Curso importado como borrador",
+      "selected_count": "{count} seleccionado(s)",
+      "loading_courses": "Cargando cursos…",
+      "course_lessons": "{count} lecciones",
+      "preview_description": "Descripción",
+      "close": "Cerrar"
+    },
+    "heading_import_button": "Importar / exportar curso"
   },
   "ai": {
     "help_me": "Ayúdame a escribir",
