@@ -111,7 +111,7 @@ test.describe('Org admin', () => {
     await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
   });
 
-  test('TC-ADMIN-06: Settings pages load (notifications, integrations, customize-lms, billing, workspaces, ai-credits, ai-tutor)', async ({
+  test('TC-ADMIN-06: Settings pages load (notifications, integrations, customize-lms, workspaces, ai-tutor)', async ({
     page
   }) => {
     test.setTimeout(300_000);
@@ -120,9 +120,7 @@ test.describe('Org admin', () => {
       `/org/${ORG_SLUG}/settings/notifications`,
       `/org/${ORG_SLUG}/settings/integrations`,
       `/org/${ORG_SLUG}/settings/customize-lms`,
-      `/org/${ORG_SLUG}/settings/billing`,
       `/org/${ORG_SLUG}/settings/workspaces`,
-      `/org/${ORG_SLUG}/settings/ai-credits`,
       `/org/${ORG_SLUG}/settings/ai-tutor`
     ];
 

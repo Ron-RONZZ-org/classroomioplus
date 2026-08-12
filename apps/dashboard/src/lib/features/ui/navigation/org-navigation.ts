@@ -250,14 +250,6 @@ export const baseNavConfig: NavItemConfig[] = [
         path: '/settings/landingpage'
       },
       {
-        titleKey: 'settings.tabs.billing_tab',
-        path: '/settings/billing'
-      },
-      {
-        titleKey: 'settings.tabs.ai_credits_tab',
-        path: '/settings/ai-credits'
-      },
-      {
         titleKey: 'settings.tabs.ai_provider_tab',
         path: '/settings/ai-provider'
       },
@@ -276,14 +268,6 @@ export const baseNavConfig: NavItemConfig[] = [
       {
         path: 'notifications',
         titleKey: 'settings.tabs.notifications_tab'
-      },
-      {
-        path: 'billing',
-        titleKey: 'settings.tabs.billing_tab'
-      },
-      {
-        path: 'ai-credits',
-        titleKey: 'settings.tabs.ai_credits_tab'
       },
       {
         path: 'ai-provider',

@@ -3047,18 +3047,6 @@
   },
   "settings": {
     "heading": "Einstellungen",
-    "billing": {
-      "sub_title": "Rechnungsdetails",
-      "manage": "Verwalten Sie Ihre Abrechnung",
-      "active": "Sie haben keine aktive Abrechnung",
-      "provider": "Wir verwenden Polar, um Ihre Abrechnung zu verwalten",
-      "open_billing": "Abrechnung öffnen",
-      "error": "Beim Öffnen der Abrechnung ist ein Fehler aufgetreten",
-      "page_subtitle": "Ihr Plan, Abrechnungsportal und wie Sie ClassroomIO bezahlen.",
-      "ai_credits": "AI credits",
-      "ai_tokens_used": "AI credits diesen Monat verwendet",
-      "ai_bonus_credits": "Bonus-AI credits verfügbar"
-    },
     "integrations": {
       "heading": "Telegram",
       "sub_heading": "Verbinden Sie Ihr Konto mit Telegram, um über jede Änderung innerhalb der Anwendung benachrichtigt zu werden.",
@@ -3466,7 +3454,6 @@
       "profile_tab": "Profil",
       "organization_tab": "Organisation",
       "landing_page_tab": "Landingpage",
-      "billing_tab": "Abrechnung",
       "integrations_tab": "Integrationen",
       "language_tab": "Sprache",
       "auth_tab": "Authentifizierung",
@@ -3613,45 +3600,6 @@
     },
     "teams": {
       "page_subtitle": "Laden Sie Teammitglieder ein und steuern Sie, wer diese Organisation mitbetreibt."
-    },
-    "ai_credits": {
-      "sub_title": "KI-Credits",
-      "page_subtitle": "Verfolgen Sie die Nutzung des AI-Assistenten, den Teamverbrauch und den Kauf von AI credit packs.",
-      "cost_note": "Die Credit-Nutzung wird nach Modellkosten gewichtet. Gemini 3.1 Flash Lite zählt als 1 Credit-Einheit pro Token. GPT-5.4 Mini und Kimi K2.6 zählen als 4× pro Token. Claude Sonnet 4.6 zählt als 11× pro Token, was die höheren API-Kosten widerspiegelt.",
-      "included": {
-        "title": "Ihr inbegriffener Verbrauch",
-        "subtitle": "Monatliche AI credits in Ihrem Plan enthalten.",
-        "resets_on": "Setzt {date} zurück"
-      },
-      "purchased": {
-        "title": "Gekaufte Nutzung",
-        "subtitle": "Zusätzliche AI credits, die Sie gekauft haben, werden übertragen, bis sie verwendet werden.",
-        "lifetime": "{tokens} credits gekauft · ${dollars} ausgegeben",
-        "buy_more": "Mehr kaufen"
-      },
-      "chart": {
-        "heading": "Nutzung",
-        "subheading": "Täglicher AI credits-Verbrauch in diesem Monat.",
-        "tokens": "Credits",
-        "total_tokens": "Credits gesamt",
-        "total_requests": "Gesamtzahl der Anfragen",
-        "empty": "In diesem Monat wurde noch keine Nutzung registriert."
-      },
-      "leaderboard": {
-        "title": "Teamnutzung",
-        "this_month": "Aktueller Monat",
-        "user": "Benutzer",
-        "favorite_model": "Lieblingsmodell",
-        "tokens": "Credits",
-        "empty": "Niemand in Ihrem Team hat diesen Monat den AI-Assistenten verwendet."
-      },
-      "buy_tokens": {
-        "title": "Mehr credits kaufen",
-        "description": "Jedes Paket fügt 5,000,000 credits für $5 USD hinzu. Wählen Sie, wie viele Pakete Sie benötigen.",
-        "quantity_hint": "Pakete",
-        "preview": "{quantity} Paket(e) · {tokens} Credits · ${dollars}",
-        "buy_button": "Für ${dollars} kaufen"
-      }
     },
     "notifications": {
       "heading": "Benachrichtigungen",
@@ -4118,7 +4066,6 @@
     "attach_document": "Ein Dokument anhängen (PDF, DOCX, PPTX)",
     "upgrade_to_upload": "Upgrade zum Hochladen von Dokumenten",
     "tokens_exhausted": "Das monatliche AI-Token-Limit wurde erreicht.",
-    "tokens_exhausted_buy_more": "Mehr kaufen",
     "chat_history": "Chat-Verlauf",
     "no_conversations": "Noch keine Gespräche",
     "untitled": "Ohne Titel",

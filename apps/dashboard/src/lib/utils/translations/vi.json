@@ -3047,18 +3047,6 @@
   },
   "settings": {
     "heading": "Cài đặt",
-    "billing": {
-      "sub_title": "Chi tiết thanh toán",
-      "manage": "Quản lý thanh toán của bạn",
-      "active": "Bạn không có bất kỳ thanh toán nào đang hoạt động",
-      "provider": "Chúng tôi sử dụng Polar để giúp quản lý việc thanh toán của bạn",
-      "open_billing": "Thanh toán mở",
-      "error": "Đã xảy ra lỗi khi mở thanh toán",
-      "page_subtitle": "Gói của bạn, cổng thanh toán và cách bạn thanh toán cho ClassroomIO.",
-      "ai_credits": "AI credits",
-      "ai_tokens_used": "AI credits đã dùng trong tháng này",
-      "ai_bonus_credits": "AI credits thưởng có sẵn"
-    },
     "integrations": {
       "heading": "Telegram",
       "sub_heading": "Kết nối tài khoản của bạn với điện tín để nhận thông báo về bất kỳ thay đổi nào trong ứng dụng.",
@@ -3466,7 +3454,6 @@
       "profile_tab": "Hồ sơ",
       "organization_tab": "Tổ chức",
       "landing_page_tab": "Trang đích",
-      "billing_tab": "Thanh toán",
       "integrations_tab": "Tích hợp",
       "language_tab": "Ngôn ngữ",
       "auth_tab": "Xác thực",
@@ -3613,45 +3600,6 @@
     },
     "teams": {
       "page_subtitle": "Mời đồng đội và kiểm soát ai giúp vận hành tổ chức này."
-    },
-    "ai_credits": {
-      "sub_title": "Tín dụng AI",
-      "page_subtitle": "Theo dõi việc sử dụng trợ lý AI, mức tiêu thụ của nhóm và mua các gói AI credits.",
-      "cost_note": "Việc sử dụng tín dụng được tính theo chi phí mô hình. Gemini 3.1 Flash Lite tính 1 đơn vị tín dụng mỗi token. GPT-5.4 Mini và Kimi K2.6 tính gấp 4 lần mỗi token. Claude Sonnet 4.6 tính gấp 11 lần mỗi token, phản ánh chi phí API cao hơn.",
-      "included": {
-        "title": "Mức sử dụng được bao gồm",
-        "subtitle": "AI credits hàng tháng có trong gói của bạn.",
-        "resets_on": "Đặt lại {date}"
-      },
-      "purchased": {
-        "title": "Sử dụng đã mua",
-        "subtitle": "AI credits bổ sung bạn mua sẽ được chuyển sang cho đến khi sử dụng.",
-        "lifetime": "{tokens} credits đã mua · ${dollars} đã chi",
-        "buy_more": "Mua thêm"
-      },
-      "chart": {
-        "heading": "Sử dụng",
-        "subheading": "Mức tiêu thụ AI credits hàng ngày trong tháng này.",
-        "tokens": "Tín dụng",
-        "total_tokens": "Tổng tín dụng",
-        "total_requests": "Tổng số yêu cầu",
-        "empty": "Chưa ghi nhận mức sử dụng nào trong tháng này."
-      },
-      "leaderboard": {
-        "title": "Sử dụng của nhóm",
-        "this_month": "Tháng hiện tại",
-        "user": "Người dùng",
-        "favorite_model": "Model yêu thích",
-        "tokens": "Tín dụng",
-        "empty": "Không ai trong nhóm của bạn đã sử dụng trợ lý AI trong tháng này."
-      },
-      "buy_tokens": {
-        "title": "Mua thêm credits",
-        "description": "Mỗi gói bổ sung thêm 5,000,000 credits với giá $5 USD. Chọn số lượng gói bạn cần.",
-        "quantity_hint": "gói",
-        "preview": "{quantity} gói · {tokens} tín dụng · ${dollars}",
-        "buy_button": "Mua với ${dollars}"
-      }
     },
     "notifications": {
       "heading": "Thông báo",
@@ -4118,7 +4066,6 @@
     "attach_document": "Đính kèm tài liệu (PDF, DOCX, PPTX)",
     "upgrade_to_upload": "Nâng cấp để tải lên tài liệu",
     "tokens_exhausted": "Đã đạt đến giới hạn mã thông báo AI hàng tháng.",
-    "tokens_exhausted_buy_more": "Mua thêm",
     "chat_history": "Lịch sử trò chuyện",
     "no_conversations": "Chưa có cuộc trò chuyện nào",
     "untitled": "Không có tiêu đề",
