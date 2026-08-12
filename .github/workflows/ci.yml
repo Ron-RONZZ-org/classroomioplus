@@ -124,8 +124,8 @@ jobs:
             -c 'CREATE DATABASE classroomio_test'
       # The seed path imports @cio/utils through dist (packages/db/src/schema.ts),
       # so it must be built before db:setup:seed can run.
-      - name: Build @cio/utils
-        run: pnpm --filter @cio/utils build
+      - name: Build @cio/question-types + @cio/utils
+        run: pnpm --filter @cio/question-types build && pnpm --filter @cio/utils build
       - name: Seed test database
         run: pnpm --filter @cio/db db:setup:seed
         env:
@@ -226,8 +226,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       # The seed path imports @cio/utils through dist (packages/db/src/schema.ts),
       # so it must be built before db:setup:seed can run.
-      - name: Build @cio/utils
-        run: pnpm --filter @cio/utils build
+      - name: Build @cio/question-types + @cio/utils
+        run: pnpm --filter @cio/question-types build && pnpm --filter @cio/utils build
       - name: Seed database
         run: pnpm --filter @cio/db db:setup:seed
         env:
