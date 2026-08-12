@@ -122,8 +122,12 @@ jobs:
         run: |
           PGPASSWORD=postgres psql -h localhost -U postgres \
             -c 'CREATE DATABASE classroomio_test'
-      - name: Run migrations
-        run: pnpm --filter @cio/db db:migrate
+      # The seed path imports @cio/utils through dist (packages/db/src/schema.ts),
+      # so it must be built before db:setup:seed can run.
+      - name: Build @cio/utils
+        run: pnpm --filter @cio/utils build
+      - name: Seed test database
+        run: pnpm --filter @cio/db db:setup:seed
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/classroomio_test
       - name: Run API integration tests
@@ -220,6 +224,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      # The seed path imports @cio/utils through dist (packages/db/src/schema.ts),
+      # so it must be built before db:setup:seed can run.
+      - name: Build @cio/utils
+        run: pnpm --filter @cio/utils build
       - name: Seed database
         run: pnpm --filter @cio/db db:setup:seed
         env:
