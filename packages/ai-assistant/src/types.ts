@@ -29,14 +29,29 @@ export interface AIProviderConfig {
 }
 
 /**
+ * A named AI provider profile for an org.
+ *
+ * Defaults for name/endpoint/model come from {@link DEFAULT_PROVIDER_PROFILES}
+ * (the previously hardcoded constants); admins can edit them, delete profiles,
+ * or add new ones. An empty `apiKey` falls back to the provider's env var.
+ * `isDefault` disambiguates when several profiles share the same provider type.
+ */
+export interface AiProviderProfile {
+  id: string;
+  name: string;
+  provider: AIProvider;
+  baseURL?: string;
+  apiKey?: string;
+  model?: string;
+  isDefault?: boolean;
+}
+
+/**
  * Resolved AI provider settings for an org.
  * This is the shape stored in organization.settings.aiProvider.
  */
 export interface OrgAiProviderSettings {
-  provider: AIProvider;
-  apiKey?: string;
-  baseURL?: string;
-  model?: string;
+  profiles: AiProviderProfile[];
 }
 
 // ─── Agent Context (passed with each chat message) ───────────────────────────

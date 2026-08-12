@@ -392,10 +392,6 @@
       "rotated": "Automatiseringsnøglen drejet. Gem den nye hemmelighed nu, fordi den ikke vil blive vist igen.",
       "revoked": "Automatiseringsnøgle tilbagekaldt."
     },
-    "ai_credits": {
-      "purchase_success": "AI credit pack tilføjet til din saldo.",
-      "checkout_failed": "Kunne ikke starte betaling. Prøv igen."
-    },
     "ai_provider": {
       "saved": "AI provider settings saved."
     },
@@ -3050,18 +3046,6 @@
   },
   "settings": {
     "heading": "Indstillinger",
-    "billing": {
-      "sub_title": "Faktureringsoplysninger",
-      "manage": "Administrer din fakturering",
-      "active": "Du har ingen aktiv fakturering",
-      "provider": "Vi bruger Polar til at hjælpe med at administrere din fakturering",
-      "open_billing": "Åben fakturering",
-      "error": "Der opstod en fejl under åbning af fakturering",
-      "page_subtitle": "Din plan, faktureringsportal og hvordan du betaler for ClassroomIO.",
-      "ai_credits": "AI credits",
-      "ai_tokens_used": "AI credits brugt denne måned",
-      "ai_bonus_credits": "bonus AI credits tilgængelige"
-    },
     "integrations": {
       "heading": "Telegram",
       "sub_heading": "Tilslut din konto til telegram for at få besked om enhver ændring i applikationen.",
@@ -3483,7 +3467,6 @@
       "profile_tab": "Profil",
       "organization_tab": "Organisation",
       "landing_page_tab": "Landingsside",
-      "billing_tab": "Fakturering",
       "integrations_tab": "Integrationer",
       "language_tab": "Sprog",
       "auth_tab": "Autentificering",
@@ -3492,7 +3475,6 @@
       "customize_lms_tab": "Tilpas LMS",
       "domains_tab": "Domæner",
       "teams_tab": "Hold",
-      "ai_credits_tab": "AI-credits",
       "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "AI underviser",
       "notifications_tab": "Notifikationer"
@@ -3631,45 +3613,6 @@
     "teams": {
       "page_subtitle": "Inviter teammedlemmer og styr, hvem der hjælper med at drive denne organisation."
     },
-    "ai_credits": {
-      "sub_title": "AI-credits",
-      "page_subtitle": "Spor brug af AI-assistent, teamforbrug og køb af AI credit packs.",
-      "cost_note": "Creditforbrug vægtes efter modelomkostning. Gemini 3.1 Flash Lite tæller som 1 credit-enhed pr. token. GPT-5.4 Mini og Kimi K2.6 tæller som 4× pr. token. Claude Sonnet 4.6 tæller som 11× pr. token, hvilket afspejler dens højere API-omkostning.",
-      "included": {
-        "title": "Dit inkluderede forbrug",
-        "subtitle": "Månedlige AI credits inkluderet i din plan.",
-        "resets_on": "Nulstiller {date}"
-      },
-      "purchased": {
-        "title": "Købt forbrug",
-        "subtitle": "Ekstra AI credits, du har købt, overføres, indtil de er brugt.",
-        "lifetime": "{tokens} credits købt · ${dollars} brugt",
-        "buy_more": "Køb mere"
-      },
-      "chart": {
-        "heading": "Brug",
-        "subheading": "Dagligt AI credits-forbrug denne måned.",
-        "tokens": "Credits",
-        "total_tokens": "Credits i alt",
-        "total_requests": "Samlet antal anmodninger",
-        "empty": "Der er ikke registreret noget forbrug i denne måned endnu."
-      },
-      "leaderboard": {
-        "title": "Teambrug",
-        "this_month": "Nuværende måned",
-        "user": "Bruger",
-        "favorite_model": "Yndlingsmodel",
-        "tokens": "Credits",
-        "empty": "Ingen på dit hold har brugt AI-assistenten denne måned."
-      },
-      "buy_tokens": {
-        "title": "Køb flere credits",
-        "description": "Hver pakke tilføjer 5,000,000 credits for $5 USD. Vælg, hvor mange pakker du har brug for.",
-        "quantity_hint": "pakker",
-        "preview": "{quantity} pakke(r) · {tokens} credits · ${dollars}",
-        "buy_button": "Køb for ${dollars}"
-      }
-    },
     "notifications": {
       "heading": "Notifikationer",
       "page_title": "Notifikationer",
@@ -3740,6 +3683,41 @@
         }
       },
       "personal_page_subtitle": "Vælg hvilke e-mailnotifikationer du modtager fra ClassroomIO."
+    },
+    "ai_provider": {
+      "heading": "AI Provider",
+      "page_subtitle": "Manage the AI providers this workspace uses. Profiles override environment variables; when a profile has no API key, the provider's environment variable is used.",
+      "loading": "Loading…",
+      "empty": "No provider profiles yet. Add one to get started.",
+      "profiles_heading": "Provider profiles",
+      "using_defaults_note": "These are the built-in defaults. Save to make them this workspace's configuration.",
+      "default_hint": "When several profiles share a provider type, the default one is used by the AI assistant.",
+      "name_label": "Name",
+      "name_placeholder": "e.g. My DeepSeek",
+      "provider_label": "AI Provider",
+      "provider_options": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "google": "Google",
+        "moonshot": "Moonshot",
+        "deepseek": "DeepSeek"
+      },
+      "api_key_label": "API Key",
+      "api_key_placeholder": "sk-...",
+      "api_key_description": "API key for this profile. Leave empty to use the {provider} environment variable.",
+      "base_url_label": "Base URL",
+      "base_url_placeholder": "https://api.example.com/v1",
+      "base_url_description": "API endpoint for this profile. Leave empty to use the provider's default.",
+      "model_label": "Model",
+      "model_placeholder": "model-id",
+      "model_description": "Model identifier. Leave empty to use the provider's default model.",
+      "is_default_label": "Default provider",
+      "add_profile": "Add provider",
+      "delete_profile": "Delete provider",
+      "save": "Save",
+      "reset_heading": "Reset",
+      "reset": "Reset to defaults",
+      "reset_description": "Discard all profiles and use the built-in defaults plus environment variables."
     }
   },
   "profileMenu": {
@@ -4135,7 +4113,6 @@
     "attach_document": "Vedhæft et dokument (PDF, DOCX, PPTX)",
     "upgrade_to_upload": "Opgrader for at uploade dokumenter",
     "tokens_exhausted": "Månedlig AI-token-grænse nået.",
-    "tokens_exhausted_buy_more": "Køb mere",
     "chat_history": "Chat historie",
     "no_conversations": "Ingen samtaler endnu",
     "untitled": "Uden titel",

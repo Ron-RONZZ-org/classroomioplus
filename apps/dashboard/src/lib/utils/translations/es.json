@@ -392,10 +392,6 @@
       "rotated": "Tecla de automatización girada. Guarde el nuevo secreto ahora porque no se volverá a mostrar.",
       "revoked": "Clave de automatización revocada."
     },
-    "ai_credits": {
-      "purchase_success": "Paquete de AI credits añadido a su saldo.",
-      "checkout_failed": "No se pudo iniciar el pago. Inténtelo de nuevo."
-    },
     "ai_provider": {
       "saved": "AI provider settings saved."
     },
@@ -3050,18 +3046,6 @@
   },
   "settings": {
     "heading": "Configuración",
-    "billing": {
-      "sub_title": "Detalles de facturación",
-      "manage": "Gestiona tu facturación",
-      "active": "No tienes ninguna facturación activa",
-      "provider": "Usamos Polar para ayudarte a gestionar tu facturación",
-      "open_billing": "Facturación abierta",
-      "error": "Se produjo un error al abrir la facturación.",
-      "page_subtitle": "Tu plan, el portal de facturación y cómo pagas ClassroomIO.",
-      "ai_credits": "AI credits",
-      "ai_tokens_used": "AI credits usados este mes",
-      "ai_bonus_credits": "AI credits de bonificación disponibles"
-    },
     "integrations": {
       "heading": "Telegram",
       "sub_heading": "Conecte su cuenta a Telegram para recibir notificaciones de cualquier cambio dentro de la aplicación.",
@@ -3483,7 +3467,6 @@
       "profile_tab": "Perfil",
       "organization_tab": "Organización",
       "landing_page_tab": "Página de destino",
-      "billing_tab": "Facturación",
       "integrations_tab": "Integraciones",
       "language_tab": "Idioma",
       "auth_tab": "Autenticación",
@@ -3492,7 +3475,6 @@
       "customize_lms_tab": "Personalizar LMS",
       "domains_tab": "Dominios",
       "teams_tab": "equipos",
-      "ai_credits_tab": "Créditos de IA",
       "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "Tutor de IA",
       "notifications_tab": "Notificaciones"
@@ -3631,45 +3613,6 @@
     "teams": {
       "page_subtitle": "Invita a compañeros de equipo y controla quién ayuda a administrar esta organización."
     },
-    "ai_credits": {
-      "sub_title": "Créditos de IA",
-      "page_subtitle": "Realice un seguimiento del uso del asistente de IA, del consumo del equipo y compre paquetes de AI credits.",
-      "cost_note": "El uso de créditos se pondera según el costo del modelo. Gemini 3.1 Flash Lite cuenta como 1 unidad de crédito por token. GPT-5.4 Mini y Kimi K2.6 cuentan como 4× por token. Claude Sonnet 4.6 cuenta como 11× por token, reflejando su mayor costo de API.",
-      "included": {
-        "title": "Su uso incluido",
-        "subtitle": "AI credits mensuales incluidos en su plan.",
-        "resets_on": "Se restablece el {date}"
-      },
-      "purchased": {
-        "title": "Uso comprado",
-        "subtitle": "Los AI credits extra que compró se acumulan hasta que se usen.",
-        "lifetime": "{tokens} credits comprados · ${dollars} gastados",
-        "buy_more": "Comprar más"
-      },
-      "chart": {
-        "heading": "Uso",
-        "subheading": "Consumo diario de AI credits este mes.",
-        "tokens": "Créditos",
-        "total_tokens": "Créditos totales",
-        "total_requests": "Total de solicitudes",
-        "empty": "Aún no se ha registrado ningún uso este mes."
-      },
-      "leaderboard": {
-        "title": "Uso del equipo",
-        "this_month": "Mes actual",
-        "user": "Usuario",
-        "favorite_model": "Modelo favorito",
-        "tokens": "Créditos",
-        "empty": "Nadie de su equipo ha usado el asistente de IA este mes."
-      },
-      "buy_tokens": {
-        "title": "Comprar más credits",
-        "description": "Cada paquete agrega 5,000,000 credits por $5 USD. Elige cuántos paquetes necesitas.",
-        "quantity_hint": "paquetes",
-        "preview": "{quantity} paquete(s) · {tokens} créditos · ${dollars}",
-        "buy_button": "Comprar por ${dollars}"
-      }
-    },
     "notifications": {
       "heading": "Notificaciones",
       "page_title": "Notificaciones",
@@ -3740,6 +3683,41 @@
         }
       },
       "personal_page_subtitle": "Elige qué notificaciones por correo recibes de ClassroomIO."
+    },
+    "ai_provider": {
+      "heading": "AI Provider",
+      "page_subtitle": "Manage the AI providers this workspace uses. Profiles override environment variables; when a profile has no API key, the provider's environment variable is used.",
+      "loading": "Loading…",
+      "empty": "No provider profiles yet. Add one to get started.",
+      "profiles_heading": "Provider profiles",
+      "using_defaults_note": "These are the built-in defaults. Save to make them this workspace's configuration.",
+      "default_hint": "When several profiles share a provider type, the default one is used by the AI assistant.",
+      "name_label": "Name",
+      "name_placeholder": "e.g. My DeepSeek",
+      "provider_label": "AI Provider",
+      "provider_options": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "google": "Google",
+        "moonshot": "Moonshot",
+        "deepseek": "DeepSeek"
+      },
+      "api_key_label": "API Key",
+      "api_key_placeholder": "sk-...",
+      "api_key_description": "API key for this profile. Leave empty to use the {provider} environment variable.",
+      "base_url_label": "Base URL",
+      "base_url_placeholder": "https://api.example.com/v1",
+      "base_url_description": "API endpoint for this profile. Leave empty to use the provider's default.",
+      "model_label": "Model",
+      "model_placeholder": "model-id",
+      "model_description": "Model identifier. Leave empty to use the provider's default model.",
+      "is_default_label": "Default provider",
+      "add_profile": "Add provider",
+      "delete_profile": "Delete provider",
+      "save": "Save",
+      "reset_heading": "Reset",
+      "reset": "Reset to defaults",
+      "reset_description": "Discard all profiles and use the built-in defaults plus environment variables."
     }
   },
   "profileMenu": {
@@ -4135,7 +4113,6 @@
     "attach_document": "Adjunte un documento (PDF, DOCX, PPTX)",
     "upgrade_to_upload": "Actualizar para cargar documentos",
     "tokens_exhausted": "Se alcanzó el límite mensual de tokens de IA.",
-    "tokens_exhausted_buy_more": "Comprar más",
     "chat_history": "Historial de chat",
     "no_conversations": "Aún no hay conversaciones",
     "untitled": "Sin título",

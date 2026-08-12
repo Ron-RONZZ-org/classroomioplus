@@ -392,10 +392,6 @@
       "rotated": "स्वचालन कुंजी घुमाई गई. नया रहस्य अभी सहेजें क्योंकि यह दोबारा नहीं दिखाया जाएगा।",
       "revoked": "स्वचालन कुंजी निरस्त कर दी गई."
     },
-    "ai_credits": {
-      "purchase_success": "AI credit pack आपके balance में जोड़ा गया।",
-      "checkout_failed": "Checkout शुरू नहीं हो सका। कृपया पुनः प्रयास करें।"
-    },
     "ai_provider": {
       "saved": "AI provider settings saved."
     },
@@ -3050,18 +3046,6 @@
   },
   "settings": {
     "heading": "सेटिंग्स",
-    "billing": {
-      "sub_title": "बिलिंग विवरण",
-      "manage": "अपनी बिलिंग प्रबंधित करें",
-      "active": "आपके पास कोई सक्रिय बिलिंग नहीं है",
-      "provider": "हम आपकी बिलिंग प्रबंधित करने में सहायता के लिए पोलर का उपयोग करते हैं",
-      "open_billing": "बिलिंग खोलें",
-      "error": "बिलिंग खोलते समय एक त्रुटि उत्पन्न हुई",
-      "page_subtitle": "आपकी योजना, बिलिंग पोर्टल और ClassroomIO के लिए भुगतान का तरीका।",
-      "ai_credits": "AI credits",
-      "ai_tokens_used": "इस महीने उपयोग किए गए AI credits",
-      "ai_bonus_credits": "bonus AI credits उपलब्ध"
-    },
     "integrations": {
       "heading": "टेलीग्राम",
       "sub_heading": "एप्लिकेशन में किसी भी बदलाव की सूचना पाने के लिए अपने खाते को टेलीग्राम से कनेक्ट करें।",
@@ -3483,7 +3467,6 @@
       "profile_tab": "प्रोफाइल",
       "organization_tab": "संगठन",
       "landing_page_tab": "लैंडिंग पृष्ठ",
-      "billing_tab": "बिलिंग",
       "integrations_tab": "एकीकरण",
       "language_tab": "भाषा",
       "auth_tab": "प्रमाणीकरण",
@@ -3492,7 +3475,6 @@
       "customize_lms_tab": "एलएमएस को अनुकूलित करें",
       "domains_tab": "डोमेन",
       "teams_tab": "टीमें",
-      "ai_credits_tab": "AI क्रेडिट",
       "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "एआई ट्यूटर",
       "notifications_tab": "सूचनाएँ"
@@ -3631,45 +3613,6 @@
     "teams": {
       "page_subtitle": "टीम के सदस्यों को आमंत्रित करें और नियंत्रित करें कि इस संगठन को कौन चलाने में मदद करता है।"
     },
-    "ai_credits": {
-      "sub_title": "AI क्रेडिट",
-      "page_subtitle": "AI assistant उपयोग, टीम की खपत और AI credit packs खरीदारी को ट्रैक करें।",
-      "cost_note": "क्रेडिट उपयोग मॉडल लागत के अनुसार भारित है। Gemini 3.1 Flash Lite प्रति टोकन 1 क्रेडिट इकाई के रूप में गिना जाता है। GPT-5.4 Mini और Kimi K2.6 प्रति टोकन 4× गिने जाते हैं। Claude Sonnet 4.6 प्रति टोकन 11× गिना जाता है, जो इसकी उच्च API लागत को दर्शाता है।",
-      "included": {
-        "title": "आपका शामिल उपयोग",
-        "subtitle": "आपकी योजना में मासिक AI credits शामिल हैं।",
-        "resets_on": "{date} को reset होता है"
-      },
-      "purchased": {
-        "title": "खरीदा गया उपयोग",
-        "subtitle": "आपके द्वारा खरीदे गए अतिरिक्त AI credits उपयोग होने तक carry forward रहेंगे।",
-        "lifetime": "{tokens} credits खरीदे गए · ${dollars} खर्च",
-        "buy_more": "और खरीदें"
-      },
-      "chart": {
-        "heading": "उपयोग",
-        "subheading": "इस महीने दैनिक AI credits की खपत।",
-        "tokens": "क्रेडिट",
-        "total_tokens": "कुल क्रेडिट",
-        "total_requests": "कुल अनुरोध",
-        "empty": "इस महीने अभी तक कोई उपयोग दर्ज नहीं किया गया है।"
-      },
-      "leaderboard": {
-        "title": "टीम का उपयोग",
-        "this_month": "चालू माह",
-        "user": "उपयोगकर्ता",
-        "favorite_model": "पसंदीदा model",
-        "tokens": "क्रेडिट",
-        "empty": "इस महीने आपकी टीम में किसी ने भी AI assistant का उपयोग नहीं किया है।"
-      },
-      "buy_tokens": {
-        "title": "और credits खरीदें",
-        "description": "प्रत्येक pack $5 USD में 5,000,000 credits जोड़ता है। चुनें कि आपको कितने packs चाहिए।",
-        "quantity_hint": "पैक",
-        "preview": "{quantity} पैक · {tokens} क्रेडिट · ${dollars}",
-        "buy_button": "${dollars} में खरीदें"
-      }
-    },
     "notifications": {
       "heading": "सूचनाएँ",
       "page_title": "सूचनाएँ",
@@ -3740,6 +3683,41 @@
         }
       },
       "personal_page_subtitle": "चुनें कि आप ClassroomIO से कौन सी ईमेल सूचनाएँ प्राप्त करते हैं।"
+    },
+    "ai_provider": {
+      "heading": "AI Provider",
+      "page_subtitle": "Manage the AI providers this workspace uses. Profiles override environment variables; when a profile has no API key, the provider's environment variable is used.",
+      "loading": "Loading…",
+      "empty": "No provider profiles yet. Add one to get started.",
+      "profiles_heading": "Provider profiles",
+      "using_defaults_note": "These are the built-in defaults. Save to make them this workspace's configuration.",
+      "default_hint": "When several profiles share a provider type, the default one is used by the AI assistant.",
+      "name_label": "Name",
+      "name_placeholder": "e.g. My DeepSeek",
+      "provider_label": "AI Provider",
+      "provider_options": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "google": "Google",
+        "moonshot": "Moonshot",
+        "deepseek": "DeepSeek"
+      },
+      "api_key_label": "API Key",
+      "api_key_placeholder": "sk-...",
+      "api_key_description": "API key for this profile. Leave empty to use the {provider} environment variable.",
+      "base_url_label": "Base URL",
+      "base_url_placeholder": "https://api.example.com/v1",
+      "base_url_description": "API endpoint for this profile. Leave empty to use the provider's default.",
+      "model_label": "Model",
+      "model_placeholder": "model-id",
+      "model_description": "Model identifier. Leave empty to use the provider's default model.",
+      "is_default_label": "Default provider",
+      "add_profile": "Add provider",
+      "delete_profile": "Delete provider",
+      "save": "Save",
+      "reset_heading": "Reset",
+      "reset": "Reset to defaults",
+      "reset_description": "Discard all profiles and use the built-in defaults plus environment variables."
     }
   },
   "profileMenu": {
@@ -4135,7 +4113,6 @@
     "attach_document": "एक दस्तावेज़ संलग्न करें (पीडीएफ, DOCX, PPTX)",
     "upgrade_to_upload": "दस्तावेज़ अपलोड करने के लिए अपग्रेड करें",
     "tokens_exhausted": "मासिक एआई टोकन सीमा पूरी हो गई।",
-    "tokens_exhausted_buy_more": "और खरीदें",
     "chat_history": "चैट इतिहास",
     "no_conversations": "अभी तक कोई बातचीत नहीं",
     "untitled": "शीर्षकहीन",

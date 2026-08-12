@@ -1,5 +1,6 @@
 <script lang="ts">
   import { ProfilePage } from '$features/settings/pages';
+  import { CtrlSaveShortcut } from '$features/settings/components';
   import { VisitOrgSiteButton } from '$features/ui';
   import { t } from '$lib/utils/functions/translations';
   import { Button } from '@cio/ui/base/button';
@@ -22,21 +23,24 @@
   <title>Settings - LibreClassroom</title>
 </svelte:head>
 
+<CtrlSaveShortcut onSave={handleUpdate} />
+
 <Page.Header isSticky>
   <Page.HeaderContent>
     <Page.Title>{$t('settings.profile.heading')}</Page.Title>
     <Page.Subtitle>{$t('settings.profile.page_subtitle')}</Page.Subtitle>
   </Page.HeaderContent>
-  <Page.Action>
-    <Button variant="secondary" loading={isLoading} onclick={handleUpdate}>
-      {$t('settings.profile.update_profile')}
-    </Button>
-
-    <VisitOrgSiteButton />
-  </Page.Action>
 </Page.Header>
 <Page.Body>
   {#snippet child()}
     <ProfilePage bind:this={profileComponent} />
+
+    <div class="flex flex-wrap items-center gap-3 px-2 pt-8">
+      <Button variant="secondary" loading={isLoading} onclick={handleUpdate}>
+        {$t('settings.profile.update_profile')}
+      </Button>
+
+      <VisitOrgSiteButton />
+    </div>
   {/snippet}
 </Page.Body>

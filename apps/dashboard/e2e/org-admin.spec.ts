@@ -62,6 +62,56 @@ test.describe('Org admin', () => {
     await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
   });
 
+  test('TC-ADMIN-02b: AI provider settings — profile CRUD', async ({ page }) => {
+    test.setTimeout(240_000);
+
+    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/settings/ai-provider`);
+
+    // Wait for the profile list to initialise (default profiles render).
+    const addProfileButton = page.getByRole('button', { name: 'Add provider' });
+    await expect(addProfileButton).toBeVisible({ timeout: 20000 });
+
+    // Restore a pristine state if a previous run left persisted profiles behind.
+    const resetButton = page.getByRole('button', { name: 'Reset to defaults' });
+    if (await resetButton.isEnabled().catch(() => false)) {
+      await resetButton.click();
+      await page.getByRole('button', { name: 'Save' }).click();
+      await expect(addProfileButton).toBeVisible({ timeout: 20000 });
+      await page.waitForTimeout(1500);
+    }
+
+    // Add a new provider profile.
+    await addProfileButton.click();
+    const profileName = `E2E Profile ${Date.now()}`;
+    const nameInputs = page.getByPlaceholder('e.g. My DeepSeek');
+    const newNameInput = nameInputs.last();
+    await expect(newNameInput).toBeVisible({ timeout: 10000 });
+    await newNameInput.fill(profileName);
+
+    // Give it an API key (last visible password input).
+    const apiKeyInputs = page.locator('input[type="password"]');
+    await apiKeyInputs.last().fill('sk-e2e-test-key');
+
+    // Save and verify the snackbar confirms.
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByText('AI provider settings saved.')).toBeVisible({ timeout: 15000 });
+
+    // Reload — the added profile must persist.
+    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/settings/ai-provider`);
+    await expect(page.getByPlaceholder('e.g. My DeepSeek').last()).toHaveValue(profileName, { timeout: 20000 });
+
+    // Delete the added profile and save.
+    await page.getByRole('button', { name: 'Delete provider' }).last().click();
+    await page.getByRole('button', { name: 'Save' }).click();
+    await expect(page.getByText('AI provider settings saved.')).toBeVisible({ timeout: 15000 });
+
+    // Reload — the added profile must be gone.
+    await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/settings/ai-provider`);
+    await expect(page.getByPlaceholder('e.g. My DeepSeek').last()).not.toHaveValue(profileName, {
+      timeout: 20000
+    });
+  });
+
   test('TC-ADMIN-03: Audience and analytics pages render', async ({ page }) => {
     test.setTimeout(180_000);
 
@@ -111,7 +161,7 @@ test.describe('Org admin', () => {
     await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
   });
 
-  test('TC-ADMIN-06: Settings pages load (notifications, integrations, customize-lms, billing, workspaces, ai-credits, ai-tutor)', async ({
+  test('TC-ADMIN-06: Settings pages load (notifications, integrations, customize-lms, workspaces, ai-tutor)', async ({
     page
   }) => {
     test.setTimeout(300_000);
@@ -120,9 +170,7 @@ test.describe('Org admin', () => {
       `/org/${ORG_SLUG}/settings/notifications`,
       `/org/${ORG_SLUG}/settings/integrations`,
       `/org/${ORG_SLUG}/settings/customize-lms`,
-      `/org/${ORG_SLUG}/settings/billing`,
       `/org/${ORG_SLUG}/settings/workspaces`,
-      `/org/${ORG_SLUG}/settings/ai-credits`,
       `/org/${ORG_SLUG}/settings/ai-tutor`
     ];
 
