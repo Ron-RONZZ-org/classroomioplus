@@ -6,7 +6,7 @@
   }
 
   import * as Page from '@cio/ui/base/page';
-  import { OrgSettingsInlineTabs } from '$features/settings/components';
+  import { OrgSettingsInlineTabs, CtrlSaveShortcut } from '$features/settings/components';
   import { settingsHeaderAction } from '$features/settings/utils/store';
   import { t } from '$lib/utils/functions/translations';
 
@@ -18,9 +18,15 @@
       page.url.pathname.endsWith('/settings/domains') ||
       page.url.pathname.endsWith('/settings/teams')
   );
+
+  function handleCtrlSave() {
+    $settingsHeaderAction.onClick?.();
+  }
 </script>
 
 <Page.Root class="w-full pb-10 md:max-w-3xl lg:mx-auto">
+  <CtrlSaveShortcut onSave={handleCtrlSave} />
+
   {#if showOrgSettingsTabs}
     <Page.Header>
       <Page.HeaderContent>

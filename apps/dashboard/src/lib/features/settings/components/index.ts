@@ -3,3 +3,4 @@ export { default as AuthGeneral } from './auth-general.svelte';
 export { default as AuthSso } from './auth-sso.svelte';
 export { default as AuthTokenAuth } from './auth-token-auth.svelte';
 export { default as OrgSettingsInlineTabs } from './org-settings-inline-tabs.svelte';
+export { default as CtrlSaveShortcut } from './ctrl-save-shortcut.svelte';
