@@ -1,126 +1,205 @@
-import { AIProvider, type AIProviderConfig, type OrgAiProviderSettings } from '@cio/ai-assistant';
+import {
+  AIProvider,
+  AgentRole,
+  type AIProviderConfig,
+  type AiProfileRole,
+  type OrgAiProfile,
+  type OrgAiProvider,
+  type OrgAiProviderManagement
+} from '@cio/ai-assistant';
 import { getProviderConfigForProvider } from '@cio/ai-assistant/providers';
-import { getOrgAiProviderSettings, updateOrgAiProviderSettings } from '@cio/db/queries/agent';
+import {
+  activateOrgAiProfile,
+  createOrgAiProfile,
+  createOrgAiProvider,
+  deleteOrgAiProfile,
+  deleteOrgAiProvider,
+  ensureDefaultAiProviderData,
+  getOrgAiProviderManagement,
+  updateOrgAiProfile,
+  updateOrgAiProvider
+} from '@cio/db/queries/agent';
 
-import { AppError } from '@api/utils/errors';
+import { AppError, ErrorCodes } from '@api/utils/errors';
 
 /**
- * Resolves the effective AI provider config for an org.
+ * AI provider & profile management service.
  *
- * Merge order (later overrides):
- *   env-var defaults  →  org-level settings (settings.aiProvider)
- *
- * When no org override is set, returns env-var-based config.
+ * Separation of concerns:
+ *   - Providers: the org's catalog (name, underlying SDK type, default base URL).
+ *   - Profiles: credential sets referencing a provider (API key, base URL, model).
+ *   - Active profile per agent role: one profile can serve the teacher agent and
+ *     one can serve the student agent.
  */
-export async function getResolvedOrgAiProvider(orgId: string): Promise<OrgAiProviderSettings | null> {
-  const orgOverride = await getOrgAiProviderSettings(orgId);
-  return orgOverride ?? null;
+
+// ─── Read ─────────────────────────────────────────────────────────────────────
+
+export async function getOrgAiProviderManagementService(orgId: string): Promise<OrgAiProviderManagement | null> {
+  return getOrgAiProviderManagement(orgId);
 }
 
-/**
- * Updates the org-level AI provider settings.
- */
-export async function updateOrgAiProviderService(
+/** Idempotently seeds default provider/profile data. Used at org creation. */
+export async function seedDefaultAiProviderDataService(orgId: string): Promise<void> {
+  await ensureDefaultAiProviderData(orgId);
+}
+
+// ─── Provider CRUD ────────────────────────────────────────────────────────────
+
+export async function createAiProviderService(
   orgId: string,
-  patch: Partial<OrgAiProviderSettings>
-): Promise<OrgAiProviderSettings> {
-  // When provider is an empty string, the caller wants to clear the override.
-  // Pass null to the DB layer so it removes the aiProvider key entirely.
-  const providerVal = patch.provider as string;
-  if (providerVal === '') {
-    const updated = await updateOrgAiProviderSettings(orgId, null);
-    if (!updated) {
-      throw new AppError('Organization not found', 'ORGANIZATION_NOT_FOUND', 404);
-    }
-    return updated;
+  data: { name: string; providerType: OrgAiProvider['providerType']; defaultBaseUrl?: string }
+): Promise<OrgAiProvider> {
+  const provider = await createOrgAiProvider(orgId, data);
+  if (!provider) {
+    throw new AppError('Organization not found', ErrorCodes.ORGANIZATION_NOT_FOUND, 404);
   }
-
-  // Normalize empty strings to undefined
-  const clean: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(patch)) {
-    if (value === '') {
-      clean[key] = undefined;
-    } else {
-      clean[key] = value;
-    }
-  }
-  const normalizedPatch = clean as Partial<OrgAiProviderSettings> & { provider: string };
-
-  const updated = await updateOrgAiProviderSettings(orgId, normalizedPatch);
-
-  if (!updated) {
-    throw new AppError('Organization not found', 'ORGANIZATION_NOT_FOUND', 404);
-  }
-
-  return updated;
+  return provider;
 }
 
-/**
- * Builds an AIProviderConfig from org-level provider settings.
- * Falls back to env-var defaults when org settings are missing fields.
- */
-export function buildProviderConfigFromOrg(
-  orgSettings: OrgAiProviderSettings,
-  modelOverride?: string
-): AIProviderConfig {
-  const provider = orgSettings.provider as AIProvider;
-  const apiKey = orgSettings.apiKey || process.env[getApiKeyEnvVar(provider)] || '';
-  const baseURL = orgSettings.baseURL || undefined;
-  const model = modelOverride || orgSettings.model || undefined;
+export async function updateAiProviderService(
+  orgId: string,
+  providerId: string,
+  patch: Partial<Pick<OrgAiProvider, 'name' | 'providerType' | 'defaultBaseUrl'>>
+): Promise<OrgAiProvider> {
+  const provider = await updateOrgAiProvider(orgId, providerId, patch);
+  if (!provider) {
+    throw new AppError('AI provider not found', ErrorCodes.NOT_FOUND, 404);
+  }
+  return provider;
+}
 
-  if (!apiKey) {
+export async function deleteAiProviderService(orgId: string, providerId: string): Promise<{ deleted: true }> {
+  const result = await deleteOrgAiProvider(orgId, providerId);
+  if (!result) {
+    throw new AppError('AI provider not found', ErrorCodes.NOT_FOUND, 404);
+  }
+
+  if (!result.deleted) {
     throw new AppError(
-      `AI provider "${provider}" has no API key configured. Set it in org settings or the ${getApiKeyEnvVar(provider)} env var.`,
-      'AI_PROVIDER_NOT_CONFIGURED',
-      503
+      `AI provider is still referenced by ${result.referencedByProfiles} profile(s). Repoint or delete those profiles first.`,
+      ErrorCodes.CONFLICT,
+      409
     );
   }
 
-  return { provider, apiKey, baseURL, model };
+  return { deleted: true };
 }
 
-function getApiKeyEnvVar(provider: AIProvider): string {
-  const map: Record<AIProvider, string> = {
-    [AIProvider.OPENAI]: 'OPENAI_API_KEY',
-    [AIProvider.ANTHROPIC]: 'ANTHROPIC_API_KEY',
-    [AIProvider.GOOGLE]: 'GOOGLE_API_KEY',
-    [AIProvider.MOONSHOT]: 'MOONSHOT_API_KEY',
-    [AIProvider.DEEPSEEK]: 'DEEPSEEK_API_KEY'
-  };
-  return map[provider] || 'OPENAI_API_KEY';
+// ─── Profile CRUD ─────────────────────────────────────────────────────────────
+
+export async function createAiProfileService(
+  orgId: string,
+  data: { name: string; providerId: string; apiKey?: string; baseURL?: string; model?: string }
+): Promise<OrgAiProfile> {
+  const management = await getOrgAiProviderManagement(orgId);
+  if (!management) {
+    throw new AppError('Organization not found', ErrorCodes.ORGANIZATION_NOT_FOUND, 404);
+  }
+
+  const provider = management.providers.find((p) => p.id === data.providerId);
+  if (!provider) {
+    throw new AppError('AI provider not found', ErrorCodes.NOT_FOUND, 404);
+  }
+
+  // Default the base URL from the provider catalog when the caller left it empty.
+  const baseURL = data.baseURL || provider.defaultBaseUrl || undefined;
+  const profile = await createOrgAiProfile(orgId, { ...data, baseURL });
+  if (!profile) {
+    throw new AppError('Organization not found', ErrorCodes.ORGANIZATION_NOT_FOUND, 404);
+  }
+  return profile;
 }
+
+export async function updateAiProfileService(
+  orgId: string,
+  profileId: string,
+  patch: Partial<Pick<OrgAiProfile, 'name' | 'providerId' | 'apiKey' | 'baseURL' | 'model'>>
+): Promise<OrgAiProfile> {
+  const management = await getOrgAiProviderManagement(orgId);
+  if (!management) {
+    throw new AppError('Organization not found', ErrorCodes.ORGANIZATION_NOT_FOUND, 404);
+  }
+
+  if (patch.providerId && !management.providers.some((p) => p.id === patch.providerId)) {
+    throw new AppError('AI provider not found', ErrorCodes.NOT_FOUND, 404);
+  }
+
+  const profile = await updateOrgAiProfile(orgId, profileId, patch);
+  if (!profile) {
+    throw new AppError('AI profile not found', ErrorCodes.NOT_FOUND, 404);
+  }
+  return profile;
+}
+
+export async function deleteAiProfileService(orgId: string, profileId: string): Promise<{ deleted: true }> {
+  const deleted = await deleteOrgAiProfile(orgId, profileId);
+  if (!deleted) {
+    throw new AppError('AI profile not found', ErrorCodes.NOT_FOUND, 404);
+  }
+  return { deleted: true };
+}
+
+export async function activateAiProfileService(
+  orgId: string,
+  role: AiProfileRole,
+  profileId: string
+): Promise<Partial<Record<AiProfileRole, string>>> {
+  const management = await getOrgAiProviderManagement(orgId);
+  if (!management) {
+    throw new AppError('Organization not found', ErrorCodes.ORGANIZATION_NOT_FOUND, 404);
+  }
+
+  if (!management.profiles.some((p) => p.id === profileId)) {
+    throw new AppError('AI profile not found', ErrorCodes.NOT_FOUND, 404);
+  }
+
+  const active = await activateOrgAiProfile(orgId, role, profileId);
+  if (!active) {
+    throw new AppError('AI profile not found', ErrorCodes.NOT_FOUND, 404);
+  }
+  return active;
+}
+
+// ─── Agent resolution ─────────────────────────────────────────────────────────
 
 /**
- * Resolves the provider config for a specific provider, merging org-level
- * overrides with env-var defaults.
+ * Resolves the provider config for a specific provider + role, merging org-level
+ * profiles with env-var defaults.
  *
- * Precedence: org settings.apiKey → env var → null
- *             org settings.baseURL → OPENAI_BASE_URL env → undefined
- *             org settings.model → model param → undefined
+ * Precedence:
+ *   1. The profile activated for `role` — used only when its provider matches the
+ *      requested provider AND it has an API key.
+ *   2. Env-var defaults for the requested provider.
  *
- * Returns null when neither org settings nor env var has an API key.
+ * Legacy single-override data (`settings.aiProvider`) is transparently migrated
+ * into a profile active for both roles on first read, so no separate legacy path
+ * is needed here.
  */
 export async function getOrgAwareProviderConfig(
   orgId: string,
   provider: AIProvider,
-  model?: string
+  model?: string,
+  role: AgentRole = AgentRole.TEACHER
 ): Promise<AIProviderConfig | null> {
-  const orgSettings = await getOrgAiProviderSettings(orgId);
-  const envConfig = getProviderConfigForProvider(provider);
+  const management = await getOrgAiProviderManagement(orgId);
 
-  // If org has no override for this provider, fall back to env var
-  if (!orgSettings || orgSettings.provider !== provider) {
-    if (!envConfig) return null;
-    return { ...envConfig, model: model ?? envConfig.model };
+  const profileId = management?.activeProfileByRole?.[role];
+  if (management && profileId) {
+    const profile = management.profiles.find((p) => p.id === profileId);
+    if (profile) {
+      const catalogProvider = management.providers.find((p) => p.id === profile.providerId);
+      if (catalogProvider && catalogProvider.providerType === provider && profile.apiKey) {
+        return {
+          provider,
+          apiKey: profile.apiKey,
+          baseURL: profile.baseURL || catalogProvider.defaultBaseUrl || undefined,
+          model: model ?? profile.model
+        };
+      }
+    }
   }
 
-  const apiKey = orgSettings.apiKey || envConfig?.apiKey || '';
-  if (!apiKey) return null;
-
-  return {
-    provider: provider as AIProvider,
-    apiKey,
-    baseURL: orgSettings.baseURL || undefined,
-    model: model ?? orgSettings.model ?? envConfig?.model ?? undefined
-  };
+  const envConfig = getProviderConfigForProvider(provider);
+  if (!envConfig) return null;
+  return { ...envConfig, model: model ?? envConfig.model };
 }

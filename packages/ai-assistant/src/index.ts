@@ -19,6 +19,10 @@ export {
 export type {
   AIProviderConfig,
   OrgAiProviderSettings,
+  OrgAiProvider,
+  OrgAiProfile,
+  OrgAiProviderManagement,
+  AiProfileRole,
   AgentContext,
   CoursePlan,
   CoursePlanSection,

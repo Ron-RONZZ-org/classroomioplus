@@ -8,6 +8,7 @@ import {
   getOrganizationByProfileId,
   getOrganizationCount
 } from '@cio/db/queries';
+import { ensureDefaultAiProviderData } from '@cio/db/queries/agent';
 import { getProfileById, updateProfile } from '@cio/db/queries/auth';
 
 import { ROLE } from '@cio/utils/constants';
@@ -59,17 +60,20 @@ export async function createOrganizationWithOwner(
 
       // Self-hosted: assign Enterprise plan to the new org
       await createOrganizationPlan(
-          {
-            orgId: organization.id,
-            planName: PLAN.ENTERPRISE as 'ENTERPRISE',
-            subscriptionId: `selfhosted-${organization.id}`,
-            triggeredBy: member.id,
-            payload: {},
-            isActive: true,
-            provider: 'selfhosted'
-          },
-          tx
-        );
+        {
+          orgId: organization.id,
+          planName: PLAN.ENTERPRISE as 'ENTERPRISE',
+          subscriptionId: `selfhosted-${organization.id}`,
+          triggeredBy: member.id,
+          payload: {},
+          isActive: true,
+          provider: 'selfhosted'
+        },
+        tx
+      );
+
+      // Seed the default AI provider catalog + one profile per provider.
+      await ensureDefaultAiProviderData(organization.id, tx);
 
       return { organization, member };
     });

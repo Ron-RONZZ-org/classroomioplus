@@ -30,13 +30,42 @@ export interface AIProviderConfig {
 
 /**
  * Resolved AI provider settings for an org.
- * This is the shape stored in organization.settings.aiProvider.
+ * This is the shape stored in organization.settings.aiProvider (legacy single override).
  */
 export interface OrgAiProviderSettings {
   provider: AIProvider;
   apiKey?: string;
   baseURL?: string;
   model?: string;
+}
+
+// ─── AI Provider & Profile Management ─────────────────────────────────────────
+
+export type AiProfileRole = 'teacher' | 'student';
+
+/** Org-managed AI provider catalog entry. Stored in organization.settings.aiProviders. */
+export interface OrgAiProvider {
+  id: string;
+  name: string;
+  providerType: AIProvider;
+  defaultBaseUrl?: string;
+}
+
+/** Org-managed AI profile (credential set referencing a provider). Stored in organization.settings.aiProfiles. */
+export interface OrgAiProfile {
+  id: string;
+  name: string;
+  providerId: string;
+  apiKey?: string;
+  baseURL?: string;
+  model?: string;
+}
+
+/** Full org AI provider management state returned by GET /organization/ai-provider. */
+export interface OrgAiProviderManagement {
+  providers: OrgAiProvider[];
+  profiles: OrgAiProfile[];
+  activeProfileByRole: Partial<Record<AiProfileRole, string>>;
 }
 
 // ─── Agent Context (passed with each chat message) ───────────────────────────

@@ -1,6 +1,7 @@
 import 'dotenv/config';
 
 import { seedAccount } from '@db/utils/seed/account';
+import { seedAiProviders } from '@db/utils/seed/aiProvider';
 import { seedCompliance } from '@db/utils/seed/compliance';
 import { MVC_SECTION_ID, PANDAS_SECTION_ID, REACT_SECTION_ID, seedCourseSections } from '@db/utils/seed/courseSection';
 import { seedCourses } from '@db/utils/seed/course';
@@ -72,6 +73,7 @@ Flags:
   --organizations             Seed organizations
   --organization-members      Seed organization members
   --organization-plan         Seed enterprise + early adopter plans
+  --ai-providers              Seed default AI providers/profiles
   --groups                    Seed groups
   --group-members             Seed group members
   --courses                  Seed courses
@@ -144,6 +146,12 @@ const seedFunctions = {
     await seedEnterpriseOrganizationPlan({ enterpriseOrgId: ENTERPRISE_ORG_ID });
     console.log('📝 Seeding early adopter organization plan...');
     await seedEarlyAdopterOrganizationPlan({ earlyAdopterOrgId: EARLY_ADOPTER_ORG_ID });
+  },
+  'ai-providers': async () => {
+    console.log('📝 Seeding default AI providers/profiles...');
+    await seedAiProviders({
+      orgIds: [TEST_ORG_ID, ENTERPRISE_ORG_ID, EARLY_ADOPTER_ORG_ID]
+    });
   },
   groups: async () => {
     console.log('📝 Seeding groups...');
@@ -251,6 +259,7 @@ async function seed() {
       await seedFunctions.organizations();
       await seedFunctions['organization-members']();
       await seedFunctions['organization-plan']();
+      await seedFunctions['ai-providers']();
       await seedFunctions.groups();
       await seedFunctions['group-members']();
       await seedFunctions.courses();
@@ -273,6 +282,7 @@ async function seed() {
         'organizations',
         'organization-members',
         'organization-plan',
+        'ai-providers',
         'groups',
         'group-members',
         'courses',

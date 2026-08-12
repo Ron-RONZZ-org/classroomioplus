@@ -2049,12 +2049,33 @@ export const organization = pgTable(
         enrollmentWelcome?: boolean;
         courseCompletion?: boolean;
       };
-      /** AI provider configuration for this org. Overrides env-var defaults. */
+      /** Legacy single AI provider override (pre-management fork). Auto-migrated to aiProviders/aiProfiles on read. */
       aiProvider?: {
         provider: 'openai' | 'anthropic' | 'google' | 'moonshot' | 'deepseek';
         apiKey?: string;
         baseURL?: string;
         model?: string;
+      };
+      /** AI provider catalog for this org. Managed in settings/ai-provider. */
+      aiProviders?: Array<{
+        id: string;
+        name: string;
+        providerType: 'openai' | 'anthropic' | 'google' | 'moonshot' | 'deepseek';
+        defaultBaseUrl?: string;
+      }>;
+      /** AI profiles (credential sets) referencing aiProviders. */
+      aiProfiles?: Array<{
+        id: string;
+        name: string;
+        providerId: string;
+        apiKey?: string;
+        baseURL?: string;
+        model?: string;
+      }>;
+      /** Active profile id per agent role (teacher/student). */
+      activeAiProfileByRole?: {
+        teacher?: string;
+        student?: string;
       };
     }>(),
     landingpage: jsonb().default({}).$type<{

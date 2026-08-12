@@ -389,12 +389,14 @@ const agentCoreRouter = new Hono()
         role === AgentRole.STUDENT ? DEFAULT_PICKER_MODEL_ID : (requestedModel ?? DEFAULT_PICKER_MODEL_ID);
       const modelDescriptor = AGENT_MODELS[modelId];
 
-      // Resolve provider config: org-level settings take precedence over env vars.
+      // Resolve provider config: org-level active profile for the caller's role
+      // takes precedence over env vars.
       const baseProviderConfig =
         (await getOrgAwareProviderConfig(
           orgId,
           modelDescriptor.provider as AIProvider,
-          modelDescriptor.backendModelId
+          modelDescriptor.backendModelId,
+          role
         )) ?? getProviderConfigForProvider(modelDescriptor.provider as AIProvider);
 
       if (!baseProviderConfig) {
