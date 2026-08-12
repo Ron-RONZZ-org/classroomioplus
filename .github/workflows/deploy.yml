@@ -64,13 +64,30 @@ jobs:
           echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
 
+      - name: Refresh VPS repo source (git pull)
+        # The artifact only ships built output; the repo clone on the VPS
+        # must be on the same commit so package.json / src / scripts exist
+        # for pnpm install and db scripts. Never --delete the clone during
+        # the overlay below.
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            'cd /var/www/classroomio && git fetch origin main && git reset --hard origin/main'
+
       - name: Overlay build artifacts onto VPS
-        # rsync over the existing repo clone. Deletes files that no longer
-        # exist in the artifact so stale dist/ build output can't linger.
+        # rsync the pre-built artifact over the existing repo clone.
+        #
+        # CRITICAL: no --delete. The artifact only contains built output
+        # (apps/*/dist, apps/dashboard/build, packages/*/dist, infra/) plus
+        # lockfiles — it does NOT contain package.json files, src/, scripts/,
+        # tsconfigs, etc. --delete would wipe those from the repo clone and
+        # break the next deploy (pnpm install needs package.json everywhere).
+        # The VPS repo is refreshed via git pull before overlaying instead.
+        #
         # Excludes: node_modules (reinstalled by deploy script), .git,
         # data (MinIO storage), apps/*/.env (server-specific secrets).
         run: |
-          rsync -az --delete \
+          rsync -az \
             -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
             --exclude node_modules \
             --exclude .git \
@@ -80,7 +97,12 @@ jobs:
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/classroomio/
 
       - name: Run post-deploy steps (PM2 reload, DB migrations, MinIO)
+        # NOTE: do not pipe ssh output through tail — the pipeline exit code
+        # would come from tail, masking a failed deploy. Capture to a file and
+        # fail on ssh's exit code.
         run: |
+          set -euo pipefail
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
             ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
-            'cd /var/www/classroomio && bash infra/deploy-remote.sh --yes' 2>&1 | tail -60
+            'cd /var/www/classroomio && bash infra/deploy-remote.sh --yes' > /tmp/deploy.log 2>&1 || { cat /tmp/deploy.log; exit 1; }
+          tail -40 /tmp/deploy.log
