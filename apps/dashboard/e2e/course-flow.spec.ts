@@ -230,21 +230,24 @@ test.describe('Course CRUD', () => {
   });
 
   test('TC-CRUD-10: Course export page renders real UI and downloads course JSON', async ({ page }) => {
-    test.setTimeout(180_000);
+    test.setTimeout(240_000);
 
-    // The export page is at /courses/{id}/export (course view, not org-scoped)
+    // The export page is at /courses/{id}/export (course view, not org-scoped).
+    // The heading only renders once the layout's isCourseReady gate opens
+    // (course API round-trip populates courseApi.course + group) — on a cold
+    // Vite dev server that can take 30-60s, so keep the timeout generous.
     await navigateAndSettle(page, BASE_URL + `/courses/${MVC_COURSE_ID}/export`);
 
     // Regression guard for issue #66: the page previously rendered raw
     // translation keys (course.navItem.export.title) because the keys were
     // missing from every locale, and the body was silently dropped because
     // it was passed as children to Page.Body (which requires {#snippet child()}).
-    await expect(page.getByRole('heading', { name: 'Export Course' }).first()).toBeVisible({ timeout: 20000 });
+    await expect(page.getByRole('heading', { name: 'Export Course' }).first()).toBeVisible({ timeout: 60000 });
 
     // The export button must be present (course loads via the layout store)
     const exportButton = page.getByRole('button', { name: /export as json/i }).first();
-    await expect(exportButton).toBeVisible({ timeout: 15000 });
-    await expect(exportButton).toBeEnabled({ timeout: 15000 });
+    await expect(exportButton).toBeVisible({ timeout: 30000 });
+    await expect(exportButton).toBeEnabled({ timeout: 30000 });
 
     // Raw-key regression: the literal key text must never be visible
     await expect(page.getByText('course.navItem.export.title', { exact: true })).toHaveCount(0);
@@ -252,7 +255,7 @@ test.describe('Course CRUD', () => {
 
     // Functional assertion: clicking the button must download a JSON file
     // named after the course (title lowercased, spaces → dashes).
-    const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
+    const downloadPromise = page.waitForEvent('download', { timeout: 45000 });
     await exportButton.click();
 
     const download = await downloadPromise;

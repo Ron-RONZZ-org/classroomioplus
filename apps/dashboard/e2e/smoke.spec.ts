@@ -149,13 +149,18 @@ test.describe('Public pages (no auth)', () => {
     expectCollectorEmpty(err);
   });
 
-  test('TC-07: Public org landing page and course catalog', async ({ page }) => {
+  test('TC-07: Public course landing page shows seeded content (no auth)', async ({ page }) => {
     test.setTimeout(180_000);
 
-    await benchNavigate(page, BASE_URL + `/org/${ORG_SLUG}`, 'Public org landing');
-    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
+    // Public pages on the app host are served at /course/{slug} via the
+    // anonymous org-site API. /courses (catalog) and /org/{slug}/courses
+    // (admin list) both require auth on the app host — only tenant
+    // subdomains/custom domains serve the public catalog. See
+    // public-flow.spec.ts TC-PUB-01/02 for the catalog coverage.
+    await benchNavigate(page, BASE_URL + '/course/getting-started-with-mvc', 'Public course landing');
 
-    await benchNavigate(page, BASE_URL + `/org/${ORG_SLUG}/courses`, 'Public course catalog');
-    await expect(page.getByText('Modern Web Development')).toBeVisible({ timeout: 20000 });
+    // The seeded course title must render without login.
+    await expect(page.getByText('Getting started with MVC').first()).toBeVisible({ timeout: 30000 });
+    await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
   });
 });

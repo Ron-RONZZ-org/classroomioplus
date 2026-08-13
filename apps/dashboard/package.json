@@ -16,6 +16,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test --config e2e/playwright.config.ts",
+    "test:e2e:smoke": "playwright test --config e2e/playwright.config.ts --grep \"TC-CRUD-10|TC-CRUD-11|TC-01|TC-02|TC-03\"",
+    "test:e2e:export": "playwright test --config e2e/playwright.config.ts --grep \"TC-CRUD-10|TC-CRUD-11\"",
     "ci": "cp .env.example .env && vite build && vite preview",
     "translate": "node ./scripts/translate.cjs"
   },

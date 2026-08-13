@@ -94,7 +94,7 @@ test.describe('Org admin', () => {
 
     // Save and verify the snackbar confirms.
     await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByText('AI provider settings saved.')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('AI provider settings saved.').last()).toBeVisible({ timeout: 15000 });
 
     // Reload — the added profile must persist.
     await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/settings/ai-provider`);
@@ -103,7 +103,7 @@ test.describe('Org admin', () => {
     // Delete the added profile and save.
     await page.getByRole('button', { name: 'Delete provider' }).last().click();
     await page.getByRole('button', { name: 'Save' }).click();
-    await expect(page.getByText('AI provider settings saved.')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('AI provider settings saved.').last()).toBeVisible({ timeout: 15000 });
 
     // Reload — the added profile must be gone.
     await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/settings/ai-provider`);

@@ -642,6 +642,15 @@ Use `.server.ts` files for server-side code to isolate API keys.
 - Use base primitives (`@cio/ui/base/input`, `@cio/ui/base/textarea`, `@cio/ui/base/checkbox`, `@cio/ui/base/label`) only when creating/updating reusable UI components or when no custom field wrapper exists.
 - In app-level form UIs, do not introduce native form controls (`<input>`, `<textarea>`, `<label>`) when equivalent `packages/ui` components exist.
 - **Icon-only buttons** (a `Button` whose content is just an icon, e.g. `size="icon"`) must use `variant="secondary"`.
+- **`Page.Body` renders ONLY a `{#snippet child()}` prop — never children.** `Page.Header`, `Page.HeaderContent`, `Page.Title`, and `Page.Subtitle` take `children`, but `Page.Body` does not. Passing body markup as children **silently drops it** (the component renders nothing, no warning), while the header still renders — producing pages that look "half-rendered". This bit the course export page and the org import-export page (issue #66). Correct usage:
+  ```svelte
+  <Page.Body>
+    {#snippet child()}
+      <MyContent />
+    {/snippet}
+  </Page.Body>
+  ```
+  If a page renders its header but the body is empty in the DOM (and in `curl` of the SSR HTML, not just after hydration), suspect this first. When adding a new page that uses `Page.*`, copy the `{#snippet child()}` pattern from an existing page (e.g. `apps/dashboard/src/routes/(app)/org/[slug]/dash/+page.svelte`).
 - **Theme color classes:** Classes that use colors from `packages/ui/src/index.css` (e.g. `text-muted-foreground`, `text-primary`) must be prefixed with `ui:` in dashboard code so they resolve against the UI theme (e.g. `ui:text-muted-foreground`, `ui:text-primary`). Only color-related utilities need the prefix; layout/sizing classes like `rounded`, `border`, `p-4` stay unprefixed (Tailwind defaults).
 
 ## Emails: system vs org-branded
@@ -871,3 +880,29 @@ on `127.0.0.1:<port>` but the API is configured as `localhost:<port>`
 (`PUBLIC_SERVER_URL`), the session cookie never reaches the dashboard page
 and every navigation bounces back to `/login`. Keep the hosts consistent:
 either both `localhost` or both `127.0.0.1`.
+
+### One-command E2E runner
+
+`scripts/test-e2e.sh` starts Postgres/Redis (if needed), seeds, starts the
+API + dashboard dev servers (if not already listening), and runs Playwright:
+
+```bash
+./scripts/test-e2e.sh                # full suite (~40 min on a cold dev server)
+./scripts/test-e2e.sh --smoke        # fast: export/import + core login tests
+./scripts/test-e2e.sh --grep TC-CRUD-10   # single test
+./scripts/test-e2e.sh --stop         # kill servers started by the script
+```
+
+Per-test alternatives once servers are up:
+`pnpm --filter @cio/dashboard test:e2e:smoke` or `test:e2e:export` (see
+`apps/dashboard/package.json`).
+
+### Org-scoped E2E: prefer `loginAndGotoOrgAdmin`
+
+For tests that navigate `/org/{slug}/...` pages, use the
+`loginAndGotoOrgAdmin(page, orgSlug)` helper from `e2e/helpers.ts` instead
+of raw `login()` + `goto`. It asserts the session resolved the org (fails
+fast with a clear message if the seed marks the account as a non-admin,
+which would otherwise surface as confusing `ORG_ID_REQUIRED` console errors
+on every later assertion). The seed marks `admin@test.com` as admin
+(roleId 1) of `udemy-test` and `student@test.com` as student (roleId 3).

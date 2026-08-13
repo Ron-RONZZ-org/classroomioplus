@@ -229,6 +229,24 @@ jobs:
         run: pnpm --filter @cio/db db:setup:seed
         env:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/classroomio
+      # On seed failure, re-run the seed and dump its tail so the failure
+      # reason (e.g. a missing dist/ build or a zod validation error) is
+      # visible in the same job instead of a bare "Seed database" red X.
+      # The first run's output is in the failed step's log; this re-run adds
+      # explicit echo markers so the tail is easy to spot.
+      - name: Seed failure diagnostics
+        if: failure()
+        run: |
+          echo "::group::db:setup:seed re-run (tail)"
+          DATABASE_URL="postgresql://postgres:postgres@localhost:5432/classroomio" \
+            pnpm --filter @cio/db db:setup:seed 2>&1 | tail -50 || true
+          echo "::endgroup::"
+          echo "::group::Environment facts"
+          echo "node: $(node -v)"
+          echo "@cio/utils dist present: $(test -d packages/utils/dist && echo yes || echo no)"
+          echo "@cio/question-types dist present: $(test -d packages/question-types/dist && echo yes || echo no)"
+          echo "::endgroup::"
+          exit 0
       - name: Build API
         run: pnpm --filter @cio/api^... build && pnpm --filter @cio/api build
       - name: Build dashboard
