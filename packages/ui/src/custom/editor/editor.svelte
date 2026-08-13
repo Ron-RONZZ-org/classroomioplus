@@ -132,15 +132,17 @@
     if (!editor || editor.isDestroyed) return;
 
     if (sourceMode) {
-      // Switching back to Visual mode — push textarea content into Tiptap
+      // Switching back to Visual mode — push textarea content into Tiptap.
+      // emitUpdate: true so the content flows through onUpdate into the
+      // save/draft pipeline (emitUpdate: false would silently drop it).
       const raw = sourceTextareaEl?.value ?? '';
-      editor.commands.setContent(raw, false);
+      editor.commands.setContent(raw, true);
       sourceMode = false;
     } else {
-      // Switching to Source mode — capture current HTML into textarea
+      // Switching to Source mode — capture current HTML into textarea.
+      // The editor stays mounted (hidden), so the textarea's value expression
+      // reads editor.getHTML() when it mounts.
       sourceMode = true;
-      // Use $effect-friendly pattern: the textarea will read editor.getHTML()
-      // when it mounts via its bind:value
     }
   }
 </script>
@@ -155,12 +157,14 @@
     {#if editor && !editor.isDestroyed}
       {#if showToolBar}
         <div class="ui:flex ui:w-full ui:items-stretch">
-          <div transition:slide class="ui:flex-1 ui:min-w-0">
-            <EdraToolBar
-              class="ui:bg-secondary/50 ui:flex ui:w-full ui:items-center ui:overflow-x-auto ui:border-b ui:border-dashed ui:p-0.5"
-              {editor}
-            />
-          </div>
+          {#if !sourceMode}
+            <div transition:slide class="ui:flex-1 ui:min-w-0">
+              <EdraToolBar
+                class="ui:bg-secondary/50 ui:flex ui:w-full ui:items-center ui:overflow-x-auto ui:border-b ui:border-dashed ui:p-0.5"
+                {editor}
+              />
+            </div>
+          {/if}
           {#if showSourceToggle && editable}
             <button
               type="button"
@@ -198,15 +202,18 @@
           editorClass
         )}
       ></textarea>
-    {:else}
-      <EdraEditor
-        class={cn('ui:relative ui:h-128 ui:overflow-auto ui:p-4', editorClass)}
-        bind:editor
-        {editable}
-        {content}
-        {onUpdate}
-        {placeholder}
-      />
     {/if}
+
+    <!-- The editor stays mounted in source mode (hidden) so the Tiptap
+         instance and its view remain alive. Unmounting it would destroy the
+         view, breaking toolbar commands and the toggle back to visual mode. -->
+    <EdraEditor
+      class={cn('ui:relative ui:h-128 ui:overflow-auto ui:p-4', editorClass, sourceMode && 'ui:hidden')}
+      bind:editor
+      {editable}
+      {content}
+      {onUpdate}
+      {placeholder}
+    />
   </div>
 {/if}
