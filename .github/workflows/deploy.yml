@@ -1,0 +1,119 @@
+name: Deploy to VPS
+
+# Deploys the CI-built artifacts to the production VPS on every push to main.
+#
+# Flow:
+#   1. `ci.yml` builds on push to main and uploads the `classroomio-build` artifact.
+#   2. This workflow runs after CI's `build` job completes successfully.
+#   3. It downloads the artifact, rsyncs it over the existing clone at
+#      /var/www/classroomio, and runs `infra/deploy-remote.sh --yes` (PM2 reload,
+#      DB migrations, MinIO checks).
+#
+# Secrets required (repo-level):
+#   VPS_SSH_KEY — ed25519 private key of a deploy user (public key in the VPS
+#                 user's ~/.ssh/authorized_keys)
+#   VPS_HOST    — VPS IP or hostname
+#   VPS_USER    — SSH user (must have passwordless sudo)
+
+on:
+  workflow_run:
+    workflows: ['CI Pipeline']
+    types:
+      - completed
+    branches:
+      - main
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to VPS
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: dawidd6/action-download-artifact@v6
+        with:
+          run_id: ${{ github.event.workflow_run.id }}
+          name: classroomio-build
+          path: build-artifacts
+          if_no_artifact_found: warn
+
+      - name: Fail if artifact missing
+        run: |
+          if [ ! -d build-artifacts ]; then
+            echo "::error::classroomio-build artifact not found in CI run ${{ github.event.workflow_run.id }}. CI's build job must run on push to main."
+            exit 1
+          fi
+          echo "Artifact contents:"
+          ls build-artifacts
+
+      - name: Setup SSH agent and known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+
+      - name: Refresh VPS repo source (git pull)
+        # The artifact only ships built output; the repo clone on the VPS
+        # must be on the same commit so package.json / src / scripts exist
+        # for pnpm install and db scripts. Never --delete the clone during
+        # the overlay below.
+        #
+        # Stash any uncommitted TRACKED drift (e.g. a file-mode change or a
+        # hand edit), fast-forward to the artifact's commit, then restore the
+        # stash. This never destroys local work and never refuses to deploy
+        # because of harmless drift. Untracked files (data/, apps/*/.env) are
+        # gitignored so git never touches them — they survive untouched and
+        # are not stashed.
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            'cd /var/www/classroomio && \
+             git fetch origin main && \
+             (git stash push -m "auto-deploy drift" || true) && \
+             git merge --ff-only origin/main && \
+             (git stash pop || true)'
+
+      - name: Overlay build artifacts onto VPS
+        # rsync the pre-built artifact over the existing repo clone.
+        #
+        # CRITICAL: no --delete. The artifact only contains built output
+        # (apps/*/dist, apps/dashboard/build, packages/*/dist, infra/) plus
+        # lockfiles — it does NOT contain package.json files, src/, scripts/,
+        # tsconfigs, etc. --delete would wipe those from the repo clone and
+        # break the next deploy (pnpm install needs package.json everywhere).
+        # The VPS repo is refreshed via git pull before overlaying instead.
+        #
+        # Excludes: node_modules (reinstalled by deploy script), .git,
+        # data (MinIO storage), apps/*/.env (server-specific secrets).
+        run: |
+          rsync -az \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no" \
+            --exclude node_modules \
+            --exclude .git \
+            --exclude data \
+            --exclude 'apps/*/.env' \
+            build-artifacts/ \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:/var/www/classroomio/
+
+      - name: Run post-deploy steps (PM2 reload, DB migrations, MinIO)
+        # NOTE: do not pipe ssh output through tail — the pipeline exit code
+        # would come from tail, masking a failed deploy. Capture to a file and
+        # fail on ssh's exit code.
+        run: |
+          set -euo pipefail
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
+            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} \
+            'cd /var/www/classroomio && bash infra/deploy-remote.sh --yes' > /tmp/deploy.log 2>&1 || { cat /tmp/deploy.log; exit 1; }
+          tail -40 /tmp/deploy.log

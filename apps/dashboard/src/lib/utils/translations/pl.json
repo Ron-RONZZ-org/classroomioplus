@@ -392,10 +392,6 @@
       "rotated": "Klucz automatyki obrócony. Zapisz teraz nowy sekret, ponieważ nie będzie on wyświetlany ponownie.",
       "revoked": "Klucz automatyzacji unieważniony."
     },
-    "ai_credits": {
-      "purchase_success": "Pakiet AI credits dodany do salda.",
-      "checkout_failed": "Nie udało się rozpocząć płatności. Spróbuj ponownie."
-    },
     "ai_provider": {
       "saved": "AI provider settings saved."
     },
@@ -454,6 +450,9 @@
         "post_created": "Post został utworzony pomyślnie",
         "post_updated": "Post został pomyślnie zaktualizowany"
       }
+    },
+    "profile": {
+      "password_changed": "Password changed"
     }
   },
   "explore": {
@@ -2350,6 +2349,13 @@
           "description": "Studenci liczą się według statusu tego kursu."
         },
         "empty_overview_description": "Dbaj o przestrzeganie zasad przez swoich pracowników i śledź, kto ma zaległości."
+      },
+      "export": {
+        "title": "Eksportuj kurs",
+        "description": "Pobierz strukturę kursu jako plik JSON do tworzenia kopii zapasowej lub migracji.",
+        "button": "Eksportuj jako JSON",
+        "success": "Kurs wyeksportowany pomyślnie",
+        "error": "Nie udało się wyeksportować kursu"
       }
     },
     "search": {
@@ -2589,7 +2595,54 @@
       "tags": "Tagi",
       "empty_tags": "Brak dostępnych tagów"
     },
-    "page_subtitle": "Gdzie lekcje stają się kursami, a kursy — zapisami."
+    "page_subtitle": "Gdzie lekcje stają się kursami, a kursy — zapisami.",
+    "import_export": {
+      "page_title": "Importuj / eksportuj kursy",
+      "page_subtitle": "Eksportuj struktury kursów do tworzenia kopii zapasowej lub migracji albo importuj kursy z pliku JSON.",
+      "export_section_title": "Eksportuj kursy",
+      "export_section_description": "Wybierz jeden lub więcej kursów do eksportu jako pliki JSON.",
+      "export_button": "Eksportuj zaznaczone ({count})",
+      "export_all_button": "Eksportuj wszystkie",
+      "import_section_title": "Importuj kurs",
+      "import_section_description": "Prześlij plik JSON wyeksportowany z innej instancji LibreClassroom.",
+      "import_button": "Importuj",
+      "import_zone_label": "Upuść plik JSON kursu tutaj lub kliknij, aby przeglądać",
+      "import_zone_hint": "Możesz wybrać kilka plików naraz — wszystkie zostaną zaimportowane jako wersje robocze.",
+      "import_processing": "Przetwarzanie {current} z {total}…",
+      "import_done": "{count} kurs(ów) zaimportowanych jako wersje robocze.",
+      "drafts_title": "Wersje robocze importu",
+      "drafts_empty": "Brak wersji roboczych. Prześlij powyżej plik eksportu kursu, aby rozpocząć.",
+      "drafts_status_draft": "Wersja robocza",
+      "drafts_status_published": "Opublikowano",
+      "drafts_status_archived": "Zarchiwizowano",
+      "drafts_published_link": "Zobacz kurs",
+      "preview_title": "Podgląd: {title}",
+      "preview_type": "Typ",
+      "preview_locale": "Język",
+      "preview_sections": "Sekcje ({count})",
+      "preview_lessons": "Lekcje ({count})",
+      "preview_exercises": "Ćwiczenia ({count})",
+      "preview_tags": "Tagi",
+      "preview_warnings": "Ostrzeżenia ({count})",
+      "publish_button": "Opublikuj kurs",
+      "publish_success": "Kurs opublikowany! Przekierowanie…",
+      "publish_error": "Nie udało się opublikować kursu",
+      "delete_draft_button": "Usuń wersję roboczą",
+      "delete_draft_confirm": "Usunąć tę wersję roboczą?",
+      "delete_draft_success": "Wersja robocza usunięta",
+      "select_all": "Zaznacz wszystko",
+      "deselect_all": "Odznacz wszystko",
+      "select_courses_placeholder": "Szukaj kursów…",
+      "no_courses_selected": "Wybierz kursy z powyższej listy",
+      "success_export": "Kurs wyeksportowany pomyślnie",
+      "success_import": "Kurs zaimportowany jako wersja robocza",
+      "selected_count": "Wybrano: {count}",
+      "loading_courses": "Ładowanie kursów…",
+      "course_lessons": "{count} lekcji",
+      "preview_description": "Opis",
+      "close": "Zamknij"
+    },
+    "heading_import_button": "Importuj / eksportuj kurs"
   },
   "ai": {
     "help_me": "Pomóż mi pisać",
@@ -3047,18 +3100,6 @@
   },
   "settings": {
     "heading": "Ustawienia",
-    "billing": {
-      "sub_title": "Szczegóły rozliczenia",
-      "manage": "Zarządzaj swoimi rozliczeniami",
-      "active": "Nie masz żadnych aktywnych rozliczeń",
-      "provider": "Używamy Polar do zarządzania Twoimi rozliczeniami",
-      "open_billing": "Otwórz rozliczenia",
-      "error": "Wystąpił błąd podczas otwierania rozliczeń",
-      "page_subtitle": "Twój plan, portal rozliczeniowy i sposób płatności za ClassroomIO.",
-      "ai_credits": "AI credits",
-      "ai_tokens_used": "AI credits wykorzystane w tym miesiącu",
-      "ai_bonus_credits": "dostępne bonusowe AI credits"
-    },
     "integrations": {
       "heading": "Telegram",
       "sub_heading": "Połącz swoje konto z telegramem, aby otrzymywać powiadomienia o wszelkich zmianach w aplikacji.",
@@ -3460,13 +3501,26 @@
         "accepted": "Zaakceptowano:",
         "validation_error": "Rozmiar pliku przekracza maksymalny limit:"
       },
-      "page_subtitle": "Twoje imię, e-mail i sposób, w jaki jesteś widoczny w ClassroomIO."
+      "page_subtitle": "Twoje imię, e-mail i sposób, w jaki jesteś widoczny w ClassroomIO.",
+      "password": {
+        "change_password": {
+          "heading": "Change Password",
+          "page_subtitle": "Update your password to keep your account secure.",
+          "current_password": "Current Password",
+          "new_password": "New Password",
+          "confirm_password": "Confirm New Password",
+          "update": "Update Password",
+          "cancel": "Cancel",
+          "change": "Change Password",
+          "success": "Your password has been updated.",
+          "confirm_mismatch": "New password and confirmation do not match."
+        }
+      }
     },
     "tabs": {
       "profile_tab": "Profil",
       "organization_tab": "Organizacja",
       "landing_page_tab": "Strona docelowa",
-      "billing_tab": "Rozliczenia",
       "integrations_tab": "Integracje",
       "language_tab": "Język",
       "auth_tab": "Uwierzytelnianie",
@@ -3475,7 +3529,6 @@
       "customize_lms_tab": "Dostosuj LMS-a",
       "domains_tab": "Domeny",
       "teams_tab": "Zespoły",
-      "ai_credits_tab": "Kredyty AI",
       "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "Nauczyciel AI",
       "notifications_tab": "Powiadomienia"
@@ -3614,45 +3667,6 @@
     "teams": {
       "page_subtitle": "Zaproś współpracowników i kontroluj, kto pomaga zarządzać tą organizacją."
     },
-    "ai_credits": {
-      "sub_title": "Kredyty AI",
-      "page_subtitle": "Śledź wykorzystanie asystenta AI, zużycie zespołu i kupuj pakiety AI credits.",
-      "cost_note": "Zużycie kredytów jest ważone kosztem modelu. Gemini 3.1 Flash Lite liczy się jako 1 jednostka kredytu na token. GPT-5.4 Mini i Kimi K2.6 liczą się jako 4× na token. Claude Sonnet 4.6 liczy się jako 11× na token, odzwierciedlając wyższy koszt API.",
-      "included": {
-        "title": "Twoje uwzględnione wykorzystanie",
-        "subtitle": "Miesięczne AI credits wliczone w Twój plan.",
-        "resets_on": "Resetuje się {date}"
-      },
-      "purchased": {
-        "title": "Zakupione wykorzystanie",
-        "subtitle": "Dodatkowe AI credits, które kupiłeś, przechodzą na kolejny okres do wykorzystania.",
-        "lifetime": "{tokens} credits zakupionych · ${dollars} wydane",
-        "buy_more": "Kup więcej"
-      },
-      "chart": {
-        "heading": "Wykorzystanie",
-        "subheading": "Dzienne zużycie AI credits w tym miesiącu.",
-        "tokens": "Kredyty",
-        "total_tokens": "Łączna liczba kredytów",
-        "total_requests": "Łączna liczba żądań",
-        "empty": "W tym miesiącu nie zarejestrowano jeszcze żadnego wykorzystania."
-      },
-      "leaderboard": {
-        "title": "Wykorzystanie zespołu",
-        "this_month": "Bieżący miesiąc",
-        "user": "Użytkownik",
-        "favorite_model": "Ulubiony model",
-        "tokens": "Kredyty",
-        "empty": "Nikt w Twoim zespole nie korzystał z asystenta AI w tym miesiącu."
-      },
-      "buy_tokens": {
-        "title": "Kup więcej credits",
-        "description": "Każdy pakiet dodaje 5,000,000 credits za $5 USD. Wybierz, ile pakietów potrzebujesz.",
-        "quantity_hint": "pakiety",
-        "preview": "{quantity} pakiet(ów) · {tokens} kredytów · ${dollars}",
-        "buy_button": "Kup za ${dollars}"
-      }
-    },
     "notifications": {
       "heading": "Powiadomienia",
       "page_title": "Powiadomienia",
@@ -3723,6 +3737,41 @@
         }
       },
       "personal_page_subtitle": "Wybierz, które powiadomienia e-mail otrzymujesz od ClassroomIO."
+    },
+    "ai_provider": {
+      "heading": "AI Provider",
+      "page_subtitle": "Manage the AI providers this workspace uses. Profiles override environment variables; when a profile has no API key, the provider's environment variable is used.",
+      "loading": "Loading…",
+      "empty": "No provider profiles yet. Add one to get started.",
+      "profiles_heading": "Provider profiles",
+      "using_defaults_note": "These are the built-in defaults. Save to make them this workspace's configuration.",
+      "default_hint": "When several profiles share a provider type, the default one is used by the AI assistant.",
+      "name_label": "Name",
+      "name_placeholder": "e.g. My DeepSeek",
+      "provider_label": "AI Provider",
+      "provider_options": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "google": "Google",
+        "moonshot": "Moonshot",
+        "deepseek": "DeepSeek"
+      },
+      "api_key_label": "API Key",
+      "api_key_placeholder": "sk-...",
+      "api_key_description": "API key for this profile. Leave empty to use the {provider} environment variable.",
+      "base_url_label": "Base URL",
+      "base_url_placeholder": "https://api.example.com/v1",
+      "base_url_description": "API endpoint for this profile. Leave empty to use the provider's default.",
+      "model_label": "Model",
+      "model_placeholder": "model-id",
+      "model_description": "Model identifier. Leave empty to use the provider's default model.",
+      "is_default_label": "Default provider",
+      "add_profile": "Add provider",
+      "delete_profile": "Delete provider",
+      "save": "Save",
+      "reset_heading": "Reset",
+      "reset": "Reset to defaults",
+      "reset_description": "Discard all profiles and use the built-in defaults plus environment variables."
     }
   },
   "profileMenu": {
@@ -4118,7 +4167,6 @@
     "attach_document": "Załącz dokument (PDF, DOCX, PPTX)",
     "upgrade_to_upload": "Uaktualnij, aby przesyłać dokumenty",
     "tokens_exhausted": "Osiągnięto miesięczny limit tokenów AI.",
-    "tokens_exhausted_buy_more": "Kup więcej",
     "chat_history": "Historia czatu",
     "no_conversations": "Nie ma jeszcze żadnych rozmów",
     "untitled": "Bez tytułu",

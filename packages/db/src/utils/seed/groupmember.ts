@@ -6,9 +6,6 @@ interface SeedGroupmember {
   pandasGroupId: string;
   adminUserId: string;
   studentUserId: string;
-  earlyAdopterGroupId: string;
-  earlyAdopterAdminUserId: string;
-  earlyAdopterStudentUserId: string;
 }
 
 export async function seedGroupmembers({
@@ -16,10 +13,7 @@ export async function seedGroupmembers({
   reactGroupId,
   pandasGroupId,
   adminUserId,
-  studentUserId,
-  earlyAdopterGroupId,
-  earlyAdopterAdminUserId,
-  earlyAdopterStudentUserId
+  studentUserId
 }: SeedGroupmember) {
   const existingGroupMembers = await db.select().from(groupmember);
   const existingGroupMemberKeys = existingGroupMembers.map((gm) => `${gm.groupId}-${gm.profileId || gm.email}`);
@@ -47,17 +41,6 @@ export async function seedGroupmembers({
       groupId: pandasGroupId,
       roleId: 3, // STUDENT
       profileId: studentUserId
-    },
-    {
-      groupId: earlyAdopterGroupId,
-      roleId: 2, // TUTOR
-      profileId: earlyAdopterAdminUserId,
-      email: 'early-adopter@test.com'
-    },
-    {
-      groupId: earlyAdopterGroupId,
-      roleId: 3, // STUDENT
-      profileId: earlyAdopterStudentUserId
     }
   ].filter((gm) => !existingGroupMemberKeys.includes(`${gm.groupId}-${gm.profileId || gm.email}`));
 

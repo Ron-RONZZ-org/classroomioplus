@@ -7,6 +7,7 @@
   import { t } from '$lib/utils/functions/translations';
   import LanguagePicker from '../components/language-picker.svelte';
   import { Input } from '@cio/ui/base/input';
+  import { Password } from '@cio/ui/custom/password';
   import { Button } from '@cio/ui/base/button';
   import { UploadImage, UnsavedChanges } from '$features/ui';
   import * as Field from '@cio/ui/base/field';
@@ -18,6 +19,31 @@
   let email = $derived($profile.email || '');
   let isChangingEmail = $state(false);
   let emailChangeInitiated = $state(false);
+
+  // Change password state
+  let passwordForm = $state({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  let isChangingPassword = $state(false);
+  let passwordChanged = $state(false);
+
+  function resetPasswordForm() {
+    passwordForm.currentPassword = '';
+    passwordForm.newPassword = '';
+    passwordForm.confirmPassword = '';
+    passwordChanged = false;
+  }
+
+  async function handlePasswordChange() {
+    await profileApi.changePassword(passwordForm);
+
+    if (profileApi.success) {
+      isChangingPassword = false;
+      resetPasswordForm();
+    }
+  }
 
   export async function handleUpdate() {
     await profileApi.submit(
@@ -162,5 +188,83 @@
         />
       </Field.Field>
     </Field.Group>
+  </Field.Set>
+
+  <Field.Separator />
+
+  <Field.Set>
+    <Field.Legend>{$t('settings.profile.password.change_password.heading')}</Field.Legend>
+    <Field.Description>{$t('settings.profile.password.change_password.page_subtitle')}</Field.Description>
+
+    {#if passwordChanged}
+      <div class="flex items-center gap-2 rounded-md border border-gray-200 p-2 text-green-500">
+        <CircleCheckBig class="size-8" />
+        <p class="text-sm">{$t('settings.profile.password.change_password.success')}</p>
+      </div>
+    {:else if isChangingPassword}
+      <Field.Group>
+        <Field.Field>
+          <Field.Label>{$t('settings.profile.password.change_password.current_password')}</Field.Label>
+          <Password
+            bind:value={passwordForm.currentPassword}
+            autocomplete="current-password"
+            aria-invalid={profileApi.errors.currentPassword ? 'true' : undefined}
+          />
+          {#if profileApi.errors.currentPassword}
+            <Field.Error>{$t(profileApi.errors.currentPassword)}</Field.Error>
+          {/if}
+        </Field.Field>
+        <Field.Field>
+          <Field.Label>{$t('settings.profile.password.change_password.new_password')}</Field.Label>
+          <Password
+            bind:value={passwordForm.newPassword}
+            autocomplete="new-password"
+            aria-invalid={profileApi.errors.newPassword ? 'true' : undefined}
+          />
+          {#if profileApi.errors.newPassword}
+            <Field.Error>{$t(profileApi.errors.newPassword)}</Field.Error>
+          {/if}
+        </Field.Field>
+        <Field.Field>
+          <Field.Label>{$t('settings.profile.password.change_password.confirm_password')}</Field.Label>
+          <Password
+            bind:value={passwordForm.confirmPassword}
+            autocomplete="new-password"
+            aria-invalid={profileApi.errors.confirmPassword ? 'true' : undefined}
+          />
+          {#if profileApi.errors.confirmPassword}
+            <Field.Error>{$t(profileApi.errors.confirmPassword)}</Field.Error>
+          {/if}
+        </Field.Field>
+        <div class="flex gap-2">
+          <Button
+            variant="default"
+            loading={profileApi.isLoading}
+            disabled={profileApi.isLoading}
+            onclick={handlePasswordChange}
+          >
+            {$t('settings.profile.password.change_password.update')}
+          </Button>
+          <Button
+            variant="ghost"
+            class="ui:text-primary"
+            disabled={profileApi.isLoading}
+            onclick={() => {
+              isChangingPassword = false;
+              resetPasswordForm();
+              profileApi.errors.currentPassword = '';
+              profileApi.errors.newPassword = '';
+              profileApi.errors.confirmPassword = '';
+            }}
+          >
+            {$t('settings.profile.password.change_password.cancel')}
+          </Button>
+        </div>
+      </Field.Group>
+    {:else}
+      <Button variant="outline" onclick={() => (isChangingPassword = true)}>
+        {$t('settings.profile.password.change_password.change')}
+      </Button>
+    {/if}
   </Field.Set>
 </Field.Group>

@@ -45,7 +45,7 @@
         </Button>
       </div>
     {:else}
-      <p class="ui:text-muted-foreground text-sm">{$t('course.navItem.not_permitted.body')}</p>
+      <p class="ui:text-muted-foreground text-sm">{$t('course.not_permitted.body')}</p>
     {/if}
   </Page.Body>
 </Page.Root>

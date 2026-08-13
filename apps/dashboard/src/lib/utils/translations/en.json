@@ -401,8 +401,6 @@
       "notifications_tab": "Notifications",
       "organization_tab": "Organization",
       "landing_page_tab": "Landing Page",
-      "billing_tab": "Billing",
-      "ai_credits_tab": "AI Credits",
       "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "AI Tutor",
       "integrations_tab": "Integrations",
@@ -435,7 +433,21 @@
       },
       "heading": "Profile",
       "update_profile": "Update Profile",
-      "logout": "Log out"
+      "logout": "Log out",
+      "password": {
+        "change_password": {
+          "heading": "Change Password",
+          "page_subtitle": "Update your password to keep your account secure.",
+          "current_password": "Current Password",
+          "new_password": "New Password",
+          "confirm_password": "Confirm New Password",
+          "update": "Update Password",
+          "cancel": "Cancel",
+          "change": "Change Password",
+          "success": "Your password has been updated.",
+          "confirm_mismatch": "New password and confirmation do not match."
+        }
+      }
     },
     "notifications": {
       "heading": "Notifications",
@@ -1019,53 +1031,40 @@
       "success_message": "Integration Successful",
       "disconnect": "Disconnect"
     },
-    "billing": {
-      "page_subtitle": "Your plan, billing portal, and how you pay for LibreClassroom.",
-      "sub_title": "Billing details",
-      "manage": "Manage your billing",
-      "active": "You don't have any active billing",
-      "provider": "We use Polar to help manage your billing",
-      "open_billing": "Open billing",
-      "error": "An error occurred while opening billing"
-    },
-    "ai_credits": {
-      "sub_title": "AI credits",
-      "page_subtitle": "Track AI assistant usage, team consumption, and purchase AI credit packs.",
-      "cost_note": "Credit usage is weighted by model cost. Gemini 3.1 Flash Lite counts as 1 credit unit per token. GPT-5.4 Mini and Kimi K2.6 count as 4× per token. Claude Sonnet 4.6 counts as 11× per token, reflecting its higher API cost.",
-      "included": {
-        "title": "Your included usage",
-        "subtitle": "Monthly AI credits included with your plan.",
-        "resets_on": "Resets {date}"
+    "ai_provider": {
+      "heading": "AI Provider",
+      "page_subtitle": "Manage the AI providers this workspace uses. Profiles override environment variables; when a profile has no API key, the provider's environment variable is used.",
+      "loading": "Loading…",
+      "empty": "No provider profiles yet. Add one to get started.",
+      "profiles_heading": "Provider profiles",
+      "using_defaults_note": "These are the built-in defaults. Save to make them this workspace's configuration.",
+      "default_hint": "When several profiles share a provider type, the default one is used by the AI assistant.",
+      "name_label": "Name",
+      "name_placeholder": "e.g. My DeepSeek",
+      "provider_label": "AI Provider",
+      "provider_options": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "google": "Google",
+        "moonshot": "Moonshot",
+        "deepseek": "DeepSeek"
       },
-      "purchased": {
-        "title": "Purchased usage",
-        "subtitle": "Extra AI credits you bought roll over until used.",
-        "lifetime": "{tokens} credits purchased · ${dollars} spent",
-        "buy_more": "Buy more"
-      },
-      "chart": {
-        "heading": "Usage",
-        "subheading": "Daily AI credits consumption this month.",
-        "tokens": "Credits",
-        "total_tokens": "Total credits",
-        "total_requests": "Total requests",
-        "empty": "No usage recorded this month yet."
-      },
-      "leaderboard": {
-        "title": "Team usage",
-        "this_month": "Current month",
-        "user": "User",
-        "favorite_model": "Favorite model",
-        "tokens": "Credits",
-        "empty": "Nobody on your team has used the AI assistant this month."
-      },
-      "buy_tokens": {
-        "title": "Buy more credits",
-        "description": "Each pack adds 5,000,000 credits for $5 USD. Choose how many packs you need.",
-        "quantity_hint": "packs",
-        "preview": "{quantity} pack(s) · {tokens} credits · ${dollars}",
-        "buy_button": "Buy for ${dollars}"
-      }
+      "api_key_label": "API Key",
+      "api_key_placeholder": "sk-...",
+      "api_key_description": "API key for this profile. Leave empty to use the {provider} environment variable.",
+      "base_url_label": "Base URL",
+      "base_url_placeholder": "https://api.example.com/v1",
+      "base_url_description": "API endpoint for this profile. Leave empty to use the provider's default.",
+      "model_label": "Model",
+      "model_placeholder": "model-id",
+      "model_description": "Model identifier. Leave empty to use the provider's default model.",
+      "is_default_label": "Default provider",
+      "add_profile": "Add provider",
+      "delete_profile": "Delete provider",
+      "save": "Save",
+      "reset_heading": "Reset",
+      "reset": "Reset to defaults",
+      "reset_description": "Discard all profiles and use the built-in defaults plus environment variables."
     }
   },
   "hls_upload": {
@@ -1839,7 +1838,7 @@
     "heading": "Courses",
     "page_subtitle": "Where lessons turn into courses and courses turn into enrollments.",
     "heading_button": "Create Course",
-    "heading_import_button": "Import Course",
+    "heading_import_button": "Import / Export Course",
     "search_placeholder": "Find Course",
     "tag_filters": {
       "filter": "Filter",
@@ -1963,7 +1962,12 @@
       "select_courses_placeholder": "Search courses…",
       "no_courses_selected": "Select courses from the list above",
       "success_export": "Course exported successfully",
-      "success_import": "Course imported as draft"
+      "success_import": "Course imported as draft",
+      "selected_count": "{count} selected",
+      "loading_courses": "Loading courses…",
+      "course_lessons": "{count} lessons",
+      "preview_description": "Description",
+      "close": "Close"
     }
   },
   "course": {
@@ -3704,14 +3708,14 @@
         "delete": "Delete Course",
         "delete_text": "Delete this course,this action cannot be undone",
         "save": "Save Changes"
+      },
+      "export": {
+        "title": "Export Course",
+        "description": "Download the course structure as a JSON file for backup or migration.",
+        "button": "Export as JSON",
+        "success": "Course exported successfully",
+        "error": "Failed to export course"
       }
-    },
-    "export": {
-      "title": "Export Course",
-      "description": "Download the course structure as a JSON file for backup or migration.",
-      "button": "Export as JSON",
-      "success": "Course exported successfully",
-      "error": "Failed to export course"
     },
     "not_permitted": {
       "header": "No Permission",
@@ -4143,10 +4147,6 @@
       "activated": "Token auth enabled.",
       "deactivated": "Token auth disabled."
     },
-    "ai_credits": {
-      "purchase_success": "AI credit pack added to your balance.",
-      "checkout_failed": "Could not start checkout. Please try again."
-    },
     "ai_provider": {
       "saved": "AI provider settings saved."
     },
@@ -4430,6 +4430,9 @@
           "cohort_newsfeed_comment_not_found": "That comment could not be found."
         }
       }
+    },
+    "profile": {
+      "password_changed": "Password changed"
     }
   },
   "specialization": {
@@ -4650,7 +4653,6 @@
     "upload_error_generic": "Failed to upload document. Please try again.",
     "upgrade_to_upload": "Upgrade to upload documents",
     "tokens_exhausted": "Monthly AI token limit reached.",
-    "tokens_exhausted_buy_more": "Buy more",
     "chat_history": "Chat History",
     "no_conversations": "No conversations yet",
     "untitled": "Untitled",

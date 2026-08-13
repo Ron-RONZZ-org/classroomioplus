@@ -2049,12 +2049,17 @@ export const organization = pgTable(
         enrollmentWelcome?: boolean;
         courseCompletion?: boolean;
       };
-      /** AI provider configuration for this org. Overrides env-var defaults. */
+      /** AI provider profiles for this org. Overrides env-var defaults. */
       aiProvider?: {
-        provider: 'openai' | 'anthropic' | 'google' | 'moonshot' | 'deepseek';
-        apiKey?: string;
-        baseURL?: string;
-        model?: string;
+        profiles: {
+          id: string;
+          name: string;
+          provider: 'openai' | 'anthropic' | 'google' | 'moonshot' | 'deepseek';
+          baseURL?: string;
+          apiKey?: string;
+          model?: string;
+          isDefault?: boolean;
+        }[];
       };
     }>(),
     landingpage: jsonb().default({}).$type<{

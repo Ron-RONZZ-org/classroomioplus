@@ -12,8 +12,7 @@
   import LoaderIcon from '@lucide/svelte/icons/loader';
   import TableOfContentsIcon from '@lucide/svelte/icons/table-of-contents';
   import { t } from '$lib/utils/functions/translations';
-  import { resolve } from '$app/paths';
-  import { currentOrgPath, isFreePlan } from '$lib/utils/store/org';
+  import { isFreePlan } from '$lib/utils/store/org';
   import { openUpgradeModal } from '$lib/utils/functions/org';
   import { ModelPicker } from '@cio/ui/custom/model-picker';
   import type { AgentModelId } from '@cio/utils/agent-models';
@@ -191,16 +190,6 @@
         class="flex flex-col gap-2 rounded border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700 sm:flex-row sm:items-center sm:justify-between dark:border-amber-800 dark:bg-amber-950 dark:text-amber-300"
       >
         <span>{$t('ai_assistant.tokens_exhausted')}</span>
-        {#if $currentOrgPath !== '#'}
-          <Button
-            variant="outline"
-            size="sm"
-            href={`${resolve(`${$currentOrgPath}/settings/ai-credits`)}#buy-tokens`}
-            class="w-full shrink-0 sm:w-auto"
-          >
-            {$t('ai_assistant.tokens_exhausted_buy_more')}
-          </Button>
-        {/if}
       </div>
     {:else}
       {#if isStreaming && !agentRunningWarningDismissed && !isStudent}

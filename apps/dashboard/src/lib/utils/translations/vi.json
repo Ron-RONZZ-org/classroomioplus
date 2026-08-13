@@ -392,10 +392,6 @@
       "rotated": "Phím tự động đã được xoay. Hãy lưu lại bí mật mới ngay bây giờ vì nó sẽ không được hiển thị lại.",
       "revoked": "Khóa tự động hóa đã bị thu hồi."
     },
-    "ai_credits": {
-      "purchase_success": "Gói AI credits đã được thêm vào số dư của bạn.",
-      "checkout_failed": "Không thể bắt đầu thanh toán. Vui lòng thử lại."
-    },
     "ai_provider": {
       "saved": "AI provider settings saved."
     },
@@ -454,6 +450,9 @@
         "post_created": "Bài viết được tạo thành công",
         "post_updated": "Đã cập nhật bài đăng thành công"
       }
+    },
+    "profile": {
+      "password_changed": "Password changed"
     }
   },
   "explore": {
@@ -2350,6 +2349,13 @@
           "description": "Số lượng sinh viên theo trạng thái cho khóa học này."
         },
         "empty_overview_description": "Giúp nhân viên của bạn luôn tuân thủ và theo dõi xem ai đứng sau."
+      },
+      "export": {
+        "title": "Xuất khóa học",
+        "description": "Tải cấu trúc khóa học dưới dạng tệp JSON để sao lưu hoặc di chuyển.",
+        "button": "Xuất dưới dạng JSON",
+        "success": "Đã xuất khóa học thành công",
+        "error": "Không thể xuất khóa học"
       }
     },
     "search": {
@@ -2589,7 +2595,54 @@
       "tags": "Thẻ",
       "empty_tags": "Không có thẻ nào"
     },
-    "page_subtitle": "Nơi các bài học trở thành khóa học và khóa học trở thành đăng ký."
+    "page_subtitle": "Nơi các bài học trở thành khóa học và khóa học trở thành đăng ký.",
+    "import_export": {
+      "page_title": "Nhập / xuất khóa học",
+      "page_subtitle": "Xuất cấu trúc khóa học để sao lưu hoặc di chuyển, hoặc nhập khóa học từ tệp JSON.",
+      "export_section_title": "Xuất khóa học",
+      "export_section_description": "Chọn một hoặc nhiều khóa học để xuất dưới dạng tệp JSON.",
+      "export_button": "Xuất mục đã chọn ({count})",
+      "export_all_button": "Xuất tất cả",
+      "import_section_title": "Nhập khóa học",
+      "import_section_description": "Tải lên tệp JSON được xuất từ một phiên bản LibreClassroom khác.",
+      "import_button": "Nhập",
+      "import_zone_label": "Thả tệp JSON khóa học vào đây hoặc nhấp để duyệt",
+      "import_zone_hint": "Bạn có thể chọn nhiều tệp cùng lúc — tất cả sẽ được nhập dưới dạng bản nháp.",
+      "import_processing": "Đang xử lý {current} trên {total}…",
+      "import_done": "{count} khóa học được nhập dưới dạng bản nháp.",
+      "drafts_title": "Bản nháp nhập",
+      "drafts_empty": "Chưa có bản nháp nào. Tải tệp xuất khóa học ở trên để bắt đầu.",
+      "drafts_status_draft": "Bản nháp",
+      "drafts_status_published": "Đã xuất bản",
+      "drafts_status_archived": "Đã lưu trữ",
+      "drafts_published_link": "Xem khóa học",
+      "preview_title": "Xem trước: {title}",
+      "preview_type": "Loại",
+      "preview_locale": "Ngôn ngữ",
+      "preview_sections": "Mục ({count})",
+      "preview_lessons": "Bài học ({count})",
+      "preview_exercises": "Bài tập ({count})",
+      "preview_tags": "Thẻ",
+      "preview_warnings": "Cảnh báo ({count})",
+      "publish_button": "Xuất bản khóa học",
+      "publish_success": "Đã xuất bản khóa học! Đang chuyển hướng…",
+      "publish_error": "Không thể xuất bản khóa học",
+      "delete_draft_button": "Xóa bản nháp",
+      "delete_draft_confirm": "Xóa bản nháp này?",
+      "delete_draft_success": "Đã xóa bản nháp",
+      "select_all": "Chọn tất cả",
+      "deselect_all": "Bỏ chọn tất cả",
+      "select_courses_placeholder": "Tìm kiếm khóa học…",
+      "no_courses_selected": "Chọn khóa học từ danh sách ở trên",
+      "success_export": "Đã xuất khóa học thành công",
+      "success_import": "Đã nhập khóa học dưới dạng bản nháp",
+      "selected_count": "{count} đã chọn",
+      "loading_courses": "Đang tải khóa học…",
+      "course_lessons": "{count} bài học",
+      "preview_description": "Mô tả",
+      "close": "Đóng"
+    },
+    "heading_import_button": "Nhập / xuất khóa học"
   },
   "ai": {
     "help_me": "Giúp tôi viết",
@@ -3047,18 +3100,6 @@
   },
   "settings": {
     "heading": "Cài đặt",
-    "billing": {
-      "sub_title": "Chi tiết thanh toán",
-      "manage": "Quản lý thanh toán của bạn",
-      "active": "Bạn không có bất kỳ thanh toán nào đang hoạt động",
-      "provider": "Chúng tôi sử dụng Polar để giúp quản lý việc thanh toán của bạn",
-      "open_billing": "Thanh toán mở",
-      "error": "Đã xảy ra lỗi khi mở thanh toán",
-      "page_subtitle": "Gói của bạn, cổng thanh toán và cách bạn thanh toán cho ClassroomIO.",
-      "ai_credits": "AI credits",
-      "ai_tokens_used": "AI credits đã dùng trong tháng này",
-      "ai_bonus_credits": "AI credits thưởng có sẵn"
-    },
     "integrations": {
       "heading": "Telegram",
       "sub_heading": "Kết nối tài khoản của bạn với điện tín để nhận thông báo về bất kỳ thay đổi nào trong ứng dụng.",
@@ -3460,13 +3501,26 @@
         "accepted": "Đã chấp nhận:",
         "validation_error": "Kích thước tệp vượt quá giới hạn tối đa:"
       },
-      "page_subtitle": "Tên, email và cách bạn xuất hiện ở mọi nơi bạn làm việc trong ClassroomIO."
+      "page_subtitle": "Tên, email và cách bạn xuất hiện ở mọi nơi bạn làm việc trong ClassroomIO.",
+      "password": {
+        "change_password": {
+          "heading": "Change Password",
+          "page_subtitle": "Update your password to keep your account secure.",
+          "current_password": "Current Password",
+          "new_password": "New Password",
+          "confirm_password": "Confirm New Password",
+          "update": "Update Password",
+          "cancel": "Cancel",
+          "change": "Change Password",
+          "success": "Your password has been updated.",
+          "confirm_mismatch": "New password and confirmation do not match."
+        }
+      }
     },
     "tabs": {
       "profile_tab": "Hồ sơ",
       "organization_tab": "Tổ chức",
       "landing_page_tab": "Trang đích",
-      "billing_tab": "Thanh toán",
       "integrations_tab": "Tích hợp",
       "language_tab": "Ngôn ngữ",
       "auth_tab": "Xác thực",
@@ -3475,7 +3529,6 @@
       "customize_lms_tab": "Tùy chỉnh LMS",
       "domains_tab": "Tên miền",
       "teams_tab": "Đội",
-      "ai_credits_tab": "Tín dụng AI",
       "ai_provider_tab": "AI Provider",
       "ai_tutor_tab": "Gia sư AI",
       "notifications_tab": "Thông báo"
@@ -3614,45 +3667,6 @@
     "teams": {
       "page_subtitle": "Mời đồng đội và kiểm soát ai giúp vận hành tổ chức này."
     },
-    "ai_credits": {
-      "sub_title": "Tín dụng AI",
-      "page_subtitle": "Theo dõi việc sử dụng trợ lý AI, mức tiêu thụ của nhóm và mua các gói AI credits.",
-      "cost_note": "Việc sử dụng tín dụng được tính theo chi phí mô hình. Gemini 3.1 Flash Lite tính 1 đơn vị tín dụng mỗi token. GPT-5.4 Mini và Kimi K2.6 tính gấp 4 lần mỗi token. Claude Sonnet 4.6 tính gấp 11 lần mỗi token, phản ánh chi phí API cao hơn.",
-      "included": {
-        "title": "Mức sử dụng được bao gồm",
-        "subtitle": "AI credits hàng tháng có trong gói của bạn.",
-        "resets_on": "Đặt lại {date}"
-      },
-      "purchased": {
-        "title": "Sử dụng đã mua",
-        "subtitle": "AI credits bổ sung bạn mua sẽ được chuyển sang cho đến khi sử dụng.",
-        "lifetime": "{tokens} credits đã mua · ${dollars} đã chi",
-        "buy_more": "Mua thêm"
-      },
-      "chart": {
-        "heading": "Sử dụng",
-        "subheading": "Mức tiêu thụ AI credits hàng ngày trong tháng này.",
-        "tokens": "Tín dụng",
-        "total_tokens": "Tổng tín dụng",
-        "total_requests": "Tổng số yêu cầu",
-        "empty": "Chưa ghi nhận mức sử dụng nào trong tháng này."
-      },
-      "leaderboard": {
-        "title": "Sử dụng của nhóm",
-        "this_month": "Tháng hiện tại",
-        "user": "Người dùng",
-        "favorite_model": "Model yêu thích",
-        "tokens": "Tín dụng",
-        "empty": "Không ai trong nhóm của bạn đã sử dụng trợ lý AI trong tháng này."
-      },
-      "buy_tokens": {
-        "title": "Mua thêm credits",
-        "description": "Mỗi gói bổ sung thêm 5,000,000 credits với giá $5 USD. Chọn số lượng gói bạn cần.",
-        "quantity_hint": "gói",
-        "preview": "{quantity} gói · {tokens} tín dụng · ${dollars}",
-        "buy_button": "Mua với ${dollars}"
-      }
-    },
     "notifications": {
       "heading": "Thông báo",
       "page_title": "Thông báo",
@@ -3723,6 +3737,41 @@
         }
       },
       "personal_page_subtitle": "Chọn thông báo email bạn nhận từ ClassroomIO."
+    },
+    "ai_provider": {
+      "heading": "AI Provider",
+      "page_subtitle": "Manage the AI providers this workspace uses. Profiles override environment variables; when a profile has no API key, the provider's environment variable is used.",
+      "loading": "Loading…",
+      "empty": "No provider profiles yet. Add one to get started.",
+      "profiles_heading": "Provider profiles",
+      "using_defaults_note": "These are the built-in defaults. Save to make them this workspace's configuration.",
+      "default_hint": "When several profiles share a provider type, the default one is used by the AI assistant.",
+      "name_label": "Name",
+      "name_placeholder": "e.g. My DeepSeek",
+      "provider_label": "AI Provider",
+      "provider_options": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "google": "Google",
+        "moonshot": "Moonshot",
+        "deepseek": "DeepSeek"
+      },
+      "api_key_label": "API Key",
+      "api_key_placeholder": "sk-...",
+      "api_key_description": "API key for this profile. Leave empty to use the {provider} environment variable.",
+      "base_url_label": "Base URL",
+      "base_url_placeholder": "https://api.example.com/v1",
+      "base_url_description": "API endpoint for this profile. Leave empty to use the provider's default.",
+      "model_label": "Model",
+      "model_placeholder": "model-id",
+      "model_description": "Model identifier. Leave empty to use the provider's default model.",
+      "is_default_label": "Default provider",
+      "add_profile": "Add provider",
+      "delete_profile": "Delete provider",
+      "save": "Save",
+      "reset_heading": "Reset",
+      "reset": "Reset to defaults",
+      "reset_description": "Discard all profiles and use the built-in defaults plus environment variables."
     }
   },
   "profileMenu": {
@@ -4118,7 +4167,6 @@
     "attach_document": "Đính kèm tài liệu (PDF, DOCX, PPTX)",
     "upgrade_to_upload": "Nâng cấp để tải lên tài liệu",
     "tokens_exhausted": "Đã đạt đến giới hạn mã thông báo AI hàng tháng.",
-    "tokens_exhausted_buy_more": "Mua thêm",
     "chat_history": "Lịch sử trò chuyện",
     "no_conversations": "Chưa có cuộc trò chuyện nào",
     "untitled": "Không có tiêu đề",
