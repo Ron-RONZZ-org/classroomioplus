@@ -323,4 +323,57 @@ test.describe('Course CRUD', () => {
     await expect(page.getByRole('dialog')).toBeHidden({ timeout: 15000 });
     await expect(page.getByRole('button', { name: new RegExp(draftTitle) }).first()).toHaveCount(0);
   });
+
+  test('TC-CRUD-12: Lesson note editor — Source/Visual toggle round-trip', async ({ page }) => {
+    test.setTimeout(180_000);
+
+    // Regression for #68: toggling Source -> Visual used to destroy the Tiptap
+    // view, so the toggle-back silently did nothing and toolbar clicks threw
+    // "[tiptap error]: The editor view is not available".
+    const lessonUrl = BASE_URL + `/courses/${MVC_COURSE_ID}/lessons/${MVC_LESSON_ID}`;
+
+    // Load the lesson page in edit mode
+    await navigateAndSettle(page, lessonUrl + '?mode=edit');
+    await page.waitForTimeout(2000);
+
+    // Video is the default material tab — activate the Note tab so the
+    // lesson note editor (and its Source/Visual toggle) renders
+    const noteTab = page.getByRole('tab', { name: /note/i });
+    await expect(noteTab).toBeVisible({ timeout: 20000 });
+    await noteTab.click();
+
+    // The Source/Visual toggle sits at the right end of the toolbar
+    // (getByLabel matches the aria-label; getByRole misses it because the
+    // lucide icon inside the button skews the accessible-name computation)
+    const sourceToggle = page.getByLabel('Switch to source mode');
+    await expect(sourceToggle).toBeVisible({ timeout: 20000 });
+
+    // Enter source mode: the WYSIWYG editor hides (stays mounted) and a
+    // monospace textarea with the current HTML appears
+    await sourceToggle.click();
+
+    const sourceTextarea = page.locator('textarea[class*="font-mono"]');
+    await expect(sourceTextarea).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('.edra-editor')).toBeHidden();
+    await expect(page.locator('.edra-toolbar')).toBeHidden();
+
+    // Type raw HTML into the source textarea
+    const marker = `Source round-trip marker ${Date.now()}`;
+    await sourceTextarea.fill(`<p>${marker}</p>`);
+
+    // Toggle back to visual mode
+    const visualToggle = page.getByLabel('Switch to visual mode');
+    await expect(visualToggle).toBeVisible();
+    await visualToggle.click();
+
+    // The edited HTML is parsed back into the Tiptap editor (regression: this
+    // used to fail because the editor was destroyed while in source mode)
+    await expect(page.locator('.edra-editor')).toBeVisible();
+    await expect(page.locator('.tiptap')).toContainText(marker, { timeout: 10000 });
+
+    // Verify the content also flowed through the update pipeline: re-entering
+    // source mode shows the edited HTML in the textarea
+    await page.getByLabel('Switch to source mode').click();
+    await expect(sourceTextarea).toHaveValue(`<p>${marker}</p>`, { timeout: 10000 });
+  });
 });
