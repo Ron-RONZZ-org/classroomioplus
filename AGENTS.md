@@ -816,3 +816,60 @@ The seed (`packages/db/src/utils/seed/organizationmember.ts`) creates **three in
 | Skillshare Test (`skillshare-test`) | `early-adopter@test.com` | `early-adopter-student@test.com` | Product Management Fundamentals |
 
 In cloud mode you can demonstrate tenant isolation on the single local instance by visiting each org's public catalog via the `?org=<siteName>` param, e.g. `http://localhost:5173/?org=coursera-test` vs `?org=udemy-test` vs `?org=skillshare-test` — each renders its own branded catalog and courses. (Note: a user enrolled in courses across orgs becomes a member of multiple tenants, so after login the dashboard may open whichever org that user most recently used.)
+
+## Local E2E Testing & Dev Server Performance
+
+### E2E runs reset the database (by design)
+
+The Playwright suite (`apps/dashboard/e2e/`) runs a `globalSetup`
+(`e2e/global-setup.ts`) that **truncates and re-seeds the database before
+every run**:
+
+```
+pnpm --filter @cio/db db:reset          # truncate + migrate
+pnpm --filter @cio/db db:setup:seed     # seed the demo tenants
+```
+
+Why: E2E runs mutate the DB (rename seeded orgs, enroll users across
+tenants, change roles). Without a reset, runs drift — `admin@test.com`
+can end up a STUDENT in Coursera Test, orgs get "`[E2E <ts>]`" suffixes,
+and later runs (and manual dev) break in confusing ways.
+
+Contract:
+- **Local runs reset the database the local API points to**
+  (`DATABASE_URL` in `packages/db/.env`). Start the dev stack first, then
+  run `pnpm --filter @cio/dashboard test:e2e` — the API keeps working
+  across the reset. Do not run E2E against a DB you need to keep.
+- **CI is unaffected**: the `ci.yml` e2e job spins up a fresh Postgres
+  service and seeds it; `globalSetup` skips because `CI` is set.
+- **Opt out** (debug against existing data): `E2E_SKIP_DB_RESET=1 pnpm --filter @cio/dashboard test:e2e`.
+
+### Vite dev server is slow on first loads — expect it, warm routes
+
+The Vite dev server compiles SvelteKit routes on demand, and the first
+request to a route takes **~30–90s** (the lesson note editor chunk is the
+worst: it pulls in Tiptap, katex, and lowlight). Symptoms you will hit:
+
+- `page.goto` / SSR first-load timeouts (~60s+ for `/login` or a lesson page).
+- The login helper's 30s `waitForURL` flakes against a cold dev server —
+  the login POST completes but the redirect page is still compiling.
+- After (re)starting `dashboard:dev`, all routes are cold again.
+
+Mitigations when testing locally:
+1. **Warm the heavy routes before Playwright**: `curl` them once with a
+   generous timeout (the lesson page needs an authenticated cookie):
+   ```bash
+   curl -s -o /dev/null -w "%{http_code}\n" --max-time 180 http://127.0.0.1:6036/login
+   ```
+2. **Re-run flaky tests**: the second run against a warm server is fast
+   (CI uses a production build, so CI E2E does not have this problem).
+3. Do not conflate cold-compile timeouts with real test failures — check
+   the page snapshot in `test-results/**/error-context.md` first.
+
+### Cookie host matters for local E2E
+
+Better Auth cookies are scoped to the API host. If the dashboard page runs
+on `127.0.0.1:<port>` but the API is configured as `localhost:<port>`
+(`PUBLIC_SERVER_URL`), the session cookie never reaches the dashboard page
+and every navigation bounces back to `/login`. Keep the hosts consistent:
+either both `localhost` or both `127.0.0.1`.

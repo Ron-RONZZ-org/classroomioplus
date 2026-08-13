@@ -216,12 +216,25 @@ pnpm --filter @cio/email test
 pnpm --filter @cio/course-app test
 ```
 
-**E2E smoke tests** (Playwright, headless Chromium) — 7 tests covering login, dashboard, course creation, settings, AI provider config, SSO, and logout:
+**E2E tests** (Playwright, headless Chromium) — 37 tests across login/auth, course CRUD (including the lesson note editor Source/Visual toggle), org admin, public course pages, smoke, and student flows:
 
 ```bash
 # Requires both dev servers running (pnpm api:dev + pnpm dashboard:dev):
 pnpm --filter @cio/dashboard test:e2e
 ```
+
+> **Local E2E runs reset the database.** The suite's `globalSetup`
+> (`apps/dashboard/e2e/global-setup.ts`) truncates and re-seeds the database
+> the local API points to before every run, so tests always start from the
+> same seeded tenants. Don't run E2E against a DB you need to keep; debug
+> against existing data with `E2E_SKIP_DB_RESET=1`. CI is unaffected (it
+> seeds its own fresh Postgres service).
+
+> **The Vite dev server is slow on first loads.** Cold routes take ~30–90s
+> to compile (the lesson note editor chunk — Tiptap/katex — is the worst),
+> which can make the first E2E run look flaky (login redirect timeouts).
+> Warm heavy routes first with `curl --max-time 180 http://localhost:6036/login`,
+> then re-run. CI uses a production build and does not have this problem.
 
 ```bash
 # Course-app template E2E (separate test suite)
@@ -229,7 +242,7 @@ cd packages/course-app/src/template
 pnpm test:e2e
 ```
 
-**Test totals (all passing):** 123 API unit + 14 API integration + 7 Playwright E2E.
+**Test totals (all passing):** 123 API unit + 14 API integration + 37 Playwright E2E.
 
 **Known limitations**: 8 bugs documented in [#34](https://github.com/Ron-RONZZ-org/classroomioplus/issues/34) (invite atomicity, case-sensitive email, stale session cache, etc.) remain unfixed.
 
