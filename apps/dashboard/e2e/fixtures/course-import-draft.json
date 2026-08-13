@@ -1,0 +1,32 @@
+{
+  "course": {
+    "title": "E2E Imported Course",
+    "description": "Course imported by the TC-CRUD-11 E2E test",
+    "type": "SELF_PACED",
+    "locale": "en"
+  },
+  "tags": [],
+  "sections": [
+    {
+      "externalId": "sec-import-1",
+      "title": "Imported Section One",
+      "order": 0
+    }
+  ],
+  "lessons": [
+    {
+      "externalId": "les-import-1",
+      "sectionExternalId": "sec-import-1",
+      "title": "Imported Lesson One",
+      "order": 0
+    }
+  ],
+  "lessonLanguages": [
+    {
+      "lessonExternalId": "les-import-1",
+      "locale": "en",
+      "content": "<p>Imported lesson content for the E2E test.</p>"
+    }
+  ],
+  "warnings": []
+}

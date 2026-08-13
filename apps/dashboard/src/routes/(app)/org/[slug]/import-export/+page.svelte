@@ -14,6 +14,8 @@
     </Page.HeaderContent>
   </Page.Header>
   <Page.Body>
-    <ImportExportPage />
+    {#snippet child()}
+      <ImportExportPage />
+    {/snippet}
   </Page.Body>
 </Page.Root>

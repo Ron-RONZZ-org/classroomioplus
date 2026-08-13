@@ -9,6 +9,9 @@
  * pointer events at a higher z-index.
  */
 import { test, expect } from '@playwright/test';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 import {
   BASE_URL,
   ORG_SLUG,
@@ -20,6 +23,9 @@ import {
   navigateAndSettle,
   type ErrorCollector
 } from './helpers';
+
+const specDir = dirname(fileURLToPath(import.meta.url));
+const IMPORT_FIXTURE = join(specDir, 'fixtures', 'course-import-draft.json');
 
 const TEST_COURSE_TITLE = `E2E Test Course ${Date.now()}`;
 const TEST_COURSE_DESC = 'Created by automated E2E test — delete me';
@@ -223,28 +229,51 @@ test.describe('Course CRUD', () => {
     await expect(page.locator('body')).not.toBeEmpty({ timeout: 15000 });
   });
 
-  test('TC-CRUD-10: Course export page renders real UI (no raw translation keys)', async ({ page }) => {
-    test.setTimeout(120_000);
+  test('TC-CRUD-10: Course export page renders real UI and downloads course JSON', async ({ page }) => {
+    test.setTimeout(180_000);
 
     // The export page is at /courses/{id}/export (course view, not org-scoped)
     await navigateAndSettle(page, BASE_URL + `/courses/${MVC_COURSE_ID}/export`);
 
     // Regression guard for issue #66: the page previously rendered raw
     // translation keys (course.navItem.export.title) because the keys were
-    // missing from every locale. Assert the translated heading and button
-    // actually render instead of the raw key strings.
+    // missing from every locale, and the body was silently dropped because
+    // it was passed as children to Page.Body (which requires {#snippet child()}).
     await expect(page.getByRole('heading', { name: 'Export Course' }).first()).toBeVisible({ timeout: 20000 });
 
     // The export button must be present (course loads via the layout store)
-    await expect(page.getByRole('button', { name: /export as json/i }).first()).toBeVisible({ timeout: 15000 });
+    const exportButton = page.getByRole('button', { name: /export as json/i }).first();
+    await expect(exportButton).toBeVisible({ timeout: 15000 });
+    await expect(exportButton).toBeEnabled({ timeout: 15000 });
 
     // Raw-key regression: the literal key text must never be visible
     await expect(page.getByText('course.navItem.export.title', { exact: true })).toHaveCount(0);
     await expect(page.getByText('course.navItem.export.description', { exact: true })).toHaveCount(0);
+
+    // Functional assertion: clicking the button must download a JSON file
+    // named after the course (title lowercased, spaces → dashes).
+    const downloadPromise = page.waitForEvent('download', { timeout: 30000 });
+    await exportButton.click();
+
+    const download = await downloadPromise;
+    const suggestedName = download.suggestedFilename();
+    expect(suggestedName).toBe('getting-started-with-mvc.json');
+
+    const downloadPath = await download.path();
+    const fileContent = readFileSync(downloadPath!, 'utf-8');
+    const exported = JSON.parse(fileContent);
+    // The exported payload is a CourseStructureSnapshot — it must contain the
+    // draft with the course title and at least one section/lesson.
+    expect(exported).toHaveProperty('courseId', MVC_COURSE_ID);
+    expect(exported).toHaveProperty('draft.course.title', 'Getting started with MVC');
+    expect(exported.draft.sections.length).toBeGreaterThanOrEqual(1);
+    expect(exported.draft.lessons.length).toBeGreaterThanOrEqual(1);
   });
 
-  test('TC-CRUD-11: Org import-export page renders export + import sections (no raw keys)', async ({ page }) => {
-    test.setTimeout(180_000);
+  test('TC-CRUD-11: Org import-export page — export sections render and course JSON imports as draft', async ({
+    page
+  }) => {
+    test.setTimeout(240_000);
 
     // Global import-export page is org-scoped under /org/{slug}/import-export
     await navigateAndSettle(page, BASE_URL + `/org/${ORG_SLUG}/import-export`);
@@ -261,8 +290,37 @@ test.describe('Course CRUD', () => {
     // Import section header
     await expect(page.getByText('Import Course', { exact: true }).first()).toBeVisible({ timeout: 15000 });
 
+    // Regression guard: the Page.Body content must actually render
+    // (previously <ImportExportPage /> was passed as children to Page.Body
+    // which requires a {#snippet child()}, so the body silently dropped).
+    await expect(page.getByText('Select all', { exact: true }).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: /export all/i }).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Import Drafts', { exact: true }).first()).toBeVisible({ timeout: 15000 });
+
     // Regression guard: raw key text must not render (issue #66)
     await expect(page.getByText('courses.import_export.page_title', { exact: true })).toHaveCount(0);
     await expect(page.getByText('courses.import_export.export_section_title', { exact: true })).toHaveCount(0);
+
+    // Functional assertion: uploading a course JSON file creates an import
+    // draft that appears in the draft list, can be previewed, and deleted.
+    const draftTitle = 'E2E Imported Course';
+    await page.locator('#import-file-input').setInputFiles(IMPORT_FIXTURE);
+
+    // Wait for the draft row to appear in the "Import Drafts" list
+    const draftRow = page.getByRole('button', { name: new RegExp(draftTitle) }).first();
+    await expect(draftRow).toBeVisible({ timeout: 20000 });
+
+    // Open the preview dialog and verify the imported structure is shown
+    await draftRow.click();
+    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText(/Preview: E2E Imported Course/).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Sections (1)', { exact: true }).first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Lessons (1)', { exact: true }).first()).toBeVisible({ timeout: 10000 });
+
+    // Accept the confirm dialog, then delete the draft to leave no residue
+    page.on('dialog', (dialog) => dialog.accept());
+    await page.getByRole('button', { name: /delete draft/i }).click();
+    await expect(page.getByRole('dialog')).toBeHidden({ timeout: 15000 });
+    await expect(page.getByRole('button', { name: new RegExp(draftTitle) }).first()).toHaveCount(0);
   });
 });

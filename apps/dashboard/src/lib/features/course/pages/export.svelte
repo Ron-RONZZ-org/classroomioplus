@@ -30,22 +30,24 @@
     </Page.HeaderContent>
   </Page.Header>
   <Page.Body>
-    {#if course}
-      <div class="space-y-6">
-        <div class="ui:border-border rounded-lg border p-4">
-          <h3 class="font-medium">{course.title}</h3>
-          {#if course.description}
-            <p class="ui:text-muted-foreground mt-1 line-clamp-2 text-sm">{course.description}</p>
-          {/if}
-        </div>
+    {#snippet child()}
+      {#if course}
+        <div class="space-y-6">
+          <div class="ui:border-border rounded-lg border p-4">
+            <h3 class="font-medium">{course.title}</h3>
+            {#if course.description}
+              <p class="ui:text-muted-foreground mt-1 line-clamp-2 text-sm">{course.description}</p>
+            {/if}
+          </div>
 
-        <Button onclick={handleExport} disabled={isLoading} loading={isLoading} class="w-fit">
-          <DownloadIcon size={16} />
-          {$t('course.navItem.export.button')}
-        </Button>
-      </div>
-    {:else}
-      <p class="ui:text-muted-foreground text-sm">{$t('course.not_permitted.body')}</p>
-    {/if}
+          <Button onclick={handleExport} disabled={isLoading} loading={isLoading} class="w-fit">
+            <DownloadIcon size={16} />
+            {$t('course.navItem.export.button')}
+          </Button>
+        </div>
+      {:else}
+        <p class="ui:text-muted-foreground text-sm">{$t('course.not_permitted.body')}</p>
+      {/if}
+    {/snippet}
   </Page.Body>
 </Page.Root>
