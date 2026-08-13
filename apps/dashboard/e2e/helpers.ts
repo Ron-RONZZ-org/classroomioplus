@@ -8,7 +8,7 @@ import type { Page, Locator } from '@playwright/test';
 import { expect } from '@playwright/test';
 
 export const BASE_URL = process.env.E2E_BASE_URL || 'http://localhost:6036';
-export const API_URL = process.env.E2E_API_URL || 'http://localhost:3002';
+export const API_URL = process.env.E2E_API_URL || 'http://localhost:6035';
 
 export const ADMIN_EMAIL = 'admin@test.com';
 export const STUDENT_EMAIL = 'student@test.com';
@@ -96,7 +96,12 @@ export async function login(page: Page, email = ADMIN_EMAIL, password = PASSWORD
   await page.goto('about:blank', { waitUntil: 'domcontentloaded', timeout: 15000 }).catch(() => {});
 
   // 1. Navigate to login (domcontentloaded is faster — doesn't wait for images etc.)
-  await page.goto(BASE_URL + '/login', { waitUntil: 'domcontentloaded', timeout: 30000 });
+  //
+  //    NOTE: the Vite dev server compiles routes on demand — the first hit
+  //    after a cold start can take 60-120s. CI runs the production build
+  //    (pre-compiled), so 30s is fine there, but local dev runs need headroom.
+  //    Keep this above the `actionTimeout` (30s) in playwright.config.ts.
+  await page.goto(BASE_URL + '/login', { waitUntil: 'domcontentloaded', timeout: 120000 });
 
   // 2. Wait for SvelteKit hydration: the app fetches /api/auth/get-session
   //    on mount.  When this response arrives, JS is running and the app
@@ -104,10 +109,10 @@ export async function login(page: Page, email = ADMIN_EMAIL, password = PASSWORD
   await Promise.race([
     page
       .waitForResponse((resp) => resp.url().includes('/api/auth/get-session') && resp.status() === 200, {
-        timeout: 45000
+        timeout: 60000
       })
       .catch(() => {}),
-    page.waitForTimeout(25000)
+    page.waitForTimeout(40000)
   ]);
 
   // Allow a brief settling window for on-submit handlers to be attached
@@ -116,15 +121,65 @@ export async function login(page: Page, email = ADMIN_EMAIL, password = PASSWORD
 
   // 3. Fill form fields
   const emailField = page.locator('#email');
-  await emailField.waitFor({ state: 'visible', timeout: 10000 });
+  await emailField.waitFor({ state: 'visible', timeout: 20000 });
   await emailField.fill(email);
   await page.locator('#password').fill(password);
 
   // 4. Submit and wait for redirect (successful login redirects to / or /org/.../dash)
-  await Promise.all([
-    page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 30000 }),
-    page.locator('button[type="submit"]').click()
-  ]);
+  //    On a cold Vite dev server the redirect target page may still be
+  //    compiling — the POST succeeds but navigation stalls for 60s+. Retry
+  //    the submit (it is idempotent) instead of failing the whole test.
+  let redirected = false;
+  for (let attempt = 0; attempt < 3 && !redirected; attempt++) {
+    await Promise.all([
+      page.waitForURL((url) => !url.pathname.includes('/login'), { timeout: 90000 }).catch(() => {}),
+      page
+        .locator('button[type="submit"]')
+        .click()
+        .catch(() => {})
+    ]);
+    await page.waitForTimeout(2000);
+    redirected = !page.url().includes('/login');
+    if (!redirected && attempt < 2) {
+      console.warn(`[e2e] login redirect stalled (attempt ${attempt + 1}) — retrying submit`);
+    }
+  }
+
+  if (!redirected) {
+    throw new Error(`login: still on /login after 3 submit attempts. URL=${page.url()}`);
+  }
+}
+
+/**
+ * Log in as an org admin and land on that org's dashboard.
+ *
+ * Prefer this over `login()` for org-scoped tests: it asserts the session
+ * actually resolved the org context, so a seeding/org-routing regression
+ * fails here with a clear message instead of cascading `ORG_ID_REQUIRED`
+ * console errors in every later assertion.
+ *
+ * After login the app redirects to the org that the session resolved
+ * (`routeUserToNextPage` → `/org/{siteName}`). Navigating directly to
+ * `{BASE_URL}/org/{orgSlug}/dash` afterwards is still needed because the
+ * login redirect target is derived from session state, not the URL we ask
+ * for here.
+ */
+export async function loginAndGotoOrgAdmin(page: Page, orgSlug = ORG_SLUG, email = ADMIN_EMAIL): Promise<void> {
+  await login(page, email, PASSWORD);
+
+  // The app picks the "current org" from the session (managed orgs first).
+  // If the seed doesn't mark this account as an org admin, the redirect
+  // lands on /lms (learner view) and every org-scoped assertion fails with
+  // `ORG_ID_REQUIRED` / missing content. Fail fast instead of cascading.
+  await page.waitForTimeout(3000);
+  if (page.url().includes('/lms')) {
+    throw new Error(
+      `loginAndGotoOrgAdmin: login as ${email} landed on /lms (learner view), not the org dashboard. ` +
+        `The seed must mark ${email} as admin of "${orgSlug}" (roleId 1 in organizationmember).`
+    );
+  }
+
+  await navigateAndSettle(page, BASE_URL + `/org/${orgSlug}/dash`);
 }
 
 /**
