@@ -191,7 +191,8 @@ jobs:
     name: E2E
     needs: [validate]
     if: contains(github.event.inputs.scope, 'e2e')
-    timeout-minutes: 30
+    # 37 tests on 1 worker with cold production servers take ~40+ min.
+    timeout-minutes: 75
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -220,6 +221,10 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      # The seed path imports @cio/utils through dist (packages/db/src/schema.ts),
+      # so it must be built before db:setup:seed can run.
+      - name: Build @cio/question-types + @cio/utils
+        run: pnpm --filter @cio/question-types build && pnpm --filter @cio/utils build
       - name: Seed database
         run: pnpm --filter @cio/db db:setup:seed
         env:
@@ -241,6 +246,9 @@ jobs:
           BETTER_AUTH_SECRET: e5afc4ba370cf45e484ea91fb554eb64a4d86294d5f771a3ef659b3ab67ba2e9
           PRIVATE_SERVER_KEY: e5afc4ba370cf45e484ea91fb554eb64a4d86294d5f771a3ef659b3ab67ba2e9
           PUBLIC_SERVER_URL: http://localhost:3081
+          # better-auth CSRF: the dashboard origin must be trusted or every
+          # sign-in POST is rejected with 403.
+          TRUSTED_ORIGINS: http://localhost:6036
           NODE_ENV: production
           SMTP_HOST: ''
           SMTP_PORT: ''
