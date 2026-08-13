@@ -3,6 +3,9 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: '.',
   testMatch: ['**/*.spec.ts'],
+  // Resets + re-seeds the DB before every run (skipped in CI, which seeds its
+  // own fresh Postgres service). Opt out with E2E_SKIP_DB_RESET=1.
+  globalSetup: './global-setup.ts',
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
